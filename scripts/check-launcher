@@ -1,0 +1,50 @@
+#!/bin/bash
+# Checks Start.command end to end in check mode: it must prepare its runtime outside the app folder,
+# print the app data paths, and keep working after the app folder is replaced by a fresh copy
+# (what happens when someone unpacks a newer download over the old one).
+set -euo pipefail
+
+root=$(cd "$(dirname "$0")/.." && pwd)
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+app="$work/app"
+home="$work/home"
+mkdir -p "$home"
+
+fail() {
+  echo "FAIL: $1" >&2
+  exit 1
+}
+
+copy_repo() {
+  rm -rf "$app"
+  mkdir -p "$app"
+  tar -C "$root" \
+    --exclude=.git --exclude=node_modules --exclude=.venv --exclude=runtime \
+    --exclude=.artifacts --exclude=.pytest_cache --exclude=.ruff_cache \
+    -cf - . | tar -C "$app" -xf -
+}
+
+launch() {
+  local out
+  # Run from another folder so the launcher has to find its own location.
+  if ! out=$(cd "$work" && JOBSCOUT_LAUNCHER_CHECK=1 JOBSCOUT_HOME="$home" "$app/Start.command" </dev/null 2>&1); then
+    echo "$out"
+    fail "the launcher exited with an error"
+  fi
+  echo "$out"
+  grep -qF "App data folder: $home" <<<"$out" || fail "output does not contain 'App data folder: $home'"
+  [ -x "$home/runtime/bin/python" ] || fail "no runtime found in $home/runtime"
+  case "$home/runtime" in "$app"/*) fail "the runtime is inside the app folder" ;; esac
+  [ ! -e "$app/.venv" ] || fail "the launcher created .venv inside the app folder"
+}
+
+echo "== first launch =="
+copy_repo
+launch
+
+echo "== launch after replacing the app folder with a fresh copy =="
+copy_repo
+launch
+
+echo "OK: Start.command passes before and after the app folder is replaced"

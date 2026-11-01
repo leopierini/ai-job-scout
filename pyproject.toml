@@ -1,0 +1,49 @@
+[project]
+name = "ai-job-scout"
+version = "0.1.0"
+description = "A local, open-source job-search engine that scrapes, scores and tracks job postings."
+readme = "README.md"
+license = "MIT"
+authors = [{name = "Leonardo Pierini"}]
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.9,<3",
+    "httpx>=0.27,<1",
+    "platformdirs>=4,<5",
+    "anthropic>=0.40,<3",
+    "openai>=1.50,<4",
+    "fastapi>=0.115,<1",
+    "uvicorn>=0.30,<1",
+    "pypdf>=5,<7",
+]
+
+[project.urls]
+Homepage = "https://github.com/leopierini/ai-job-scout"
+Issues = "https://github.com/leopierini/ai-job-scout/issues"
+
+[project.scripts]
+jobscout = "jobscout.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "respx>=0.21",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.sdist]
+exclude = ["docs/images"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/jobscout"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"THIRD_PARTY_NOTICES.md" = "jobscout/server/static/THIRD_PARTY_NOTICES.md"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = ["e2e: end-to-end smoke test in a real browser; opt in with JOBSCOUT_E2E=1 (needs node and playwright)"]

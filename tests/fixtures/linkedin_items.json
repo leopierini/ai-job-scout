@@ -1,0 +1,44 @@
+[
+  {
+    "id": "9001",
+    "title": "Product Analyst Intern",
+    "companyName": "Fjord Labs",
+    "location": "Oslo, Norway",
+    "postedAt": "2026-10-28",
+    "link": "https://www.linkedin.com/jobs/view/9001/",
+    "descriptionText": "Analyse product usage and report to the product team.",
+    "jobPosterName": "Ingrid Example",
+    "jobPosterTitle": "Talent Partner",
+    "jobPosterProfileUrl": "https://www.linkedin.com/in/ingrid-example",
+    "employmentType": "Internship"
+  },
+  {
+    "title": "Junior Product Manager",
+    "companyName": "Birch Systems",
+    "location": "Berlin, Germany",
+    "postedAt": "2026-10-30",
+    "link": "https://www.linkedin.com/jobs/view/123/?trackingId=abc",
+    "descriptionText": "Own a small feature area end to end.",
+    "employmentType": "Full-time"
+  },
+  {
+    "id": "9003",
+    "title": "Data Analyst",
+    "companyName": "Harbor Robotics",
+    "location": "Lisbon, Portugal",
+    "postedAt": "2 days ago",
+    "link": "https://www.linkedin.com/jobs/view/9003/",
+    "descriptionText": "Help prototype AI features.",
+    "employmentType": "Internship"
+  },
+  {
+    "id": "9001",
+    "title": "Product Analyst Intern",
+    "companyName": "Fjord Labs",
+    "location": "Oslo, Norway",
+    "postedAt": "2026-10-28",
+    "link": "https://www.linkedin.com/jobs/view/9001/?refId=dup",
+    "descriptionText": "Analyse product usage and report to the product team.",
+    "employmentType": "Internship"
+  }
+]

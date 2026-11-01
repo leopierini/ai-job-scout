@@ -1,0 +1,167 @@
+[
+  {
+    "name": "European Economic Area",
+    "geo_id": "91000002",
+    "verified_on": "2026-10-25"
+  },
+  {
+    "name": "United Kingdom",
+    "geo_id": "101165590",
+    "verified_on": "2026-10-25"
+  },
+  {
+    "name": "Switzerland",
+    "geo_id": "106693272",
+    "verified_on": "2026-10-25"
+  },
+  {
+    "name": "Austria",
+    "geo_id": "103883259",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Belgium",
+    "geo_id": "100565514",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Bulgaria",
+    "geo_id": "105333783",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Croatia",
+    "geo_id": "104688944",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Cyprus",
+    "geo_id": "106774002",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Czechia",
+    "geo_id": "104508036",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Denmark",
+    "geo_id": "104514075",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Estonia",
+    "geo_id": "102974008",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Finland",
+    "geo_id": "100456013",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "France",
+    "geo_id": "105015875",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Germany",
+    "geo_id": "101282230",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Greece",
+    "geo_id": "104677530",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Hungary",
+    "geo_id": "100288700",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Ireland",
+    "geo_id": "104738515",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Italy",
+    "geo_id": "103350119",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Latvia",
+    "geo_id": "104341318",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Lithuania",
+    "geo_id": "101464403",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Luxembourg",
+    "geo_id": "104042105",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Malta",
+    "geo_id": "100961908",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Netherlands",
+    "geo_id": "102890719",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Poland",
+    "geo_id": "105072130",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Portugal",
+    "geo_id": "100364837",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Romania",
+    "geo_id": "106670623",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Slovakia",
+    "geo_id": "103119917",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Slovenia",
+    "geo_id": "106137034",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Spain",
+    "geo_id": "105646813",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Sweden",
+    "geo_id": "105117694",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Norway",
+    "geo_id": "103819153",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "United States",
+    "geo_id": "103644278",
+    "verified_on": "2026-11-01"
+  },
+  {
+    "name": "Canada",
+    "geo_id": "101174742",
+    "verified_on": "2026-11-01"
+  }
+]

@@ -1,0 +1,18 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+.DS_Store
+.pytest_cache/
+dist/
+*.egg-info/
+.coverage
+frontend/node_modules/
+.artifacts/
+*.db
+secrets.json
+jobs.csv
+.privacy-markers
+* 2.*
+* 2

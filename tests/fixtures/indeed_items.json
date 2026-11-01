@@ -1,0 +1,41 @@
+[
+  {
+    "jobKey": "ind-001",
+    "title": "Product Manager Intern",
+    "companyName": "Birch Systems",
+    "location": {"formattedAddressShort": "Zurich, ZH", "city": "Zurich", "country": "Switzerland"},
+    "datePublished": "2026-10-29T08:15:00.000Z",
+    "jobUrl": "https://ch.indeed.com/viewjob?jk=ind-001",
+    "descriptionText": "Support the product team with research and roadmap work.",
+    "emails": ["talent@birch-systems.example", "other@birch-systems.example"],
+    "jobType": "internship"
+  },
+  {
+    "jobkey": "ind-002",
+    "positionName": "Junior Product Owner",
+    "company": "Fjord Labs",
+    "location": {"city": "Basel", "country": "Switzerland"},
+    "postingDateParsed": 1793232000,
+    "url": "https://ch.indeed.com/viewjob?jk=ind-002",
+    "description": "Own the backlog for a small team."
+  },
+  {
+    "id": "ind-003",
+    "title": "Warehouse Operative",
+    "companyName": "Harbor Robotics",
+    "location": "Geneva, Switzerland",
+    "datePublished": "2026-10-30",
+    "jobUrl": "https://ch.indeed.com/viewjob?jk=ind-003",
+    "descriptionText": "Pick and pack orders.",
+    "jobType": "fulltime"
+  },
+  {
+    "jobKey": "ind-001",
+    "title": "Product Manager Intern",
+    "companyName": "Birch Systems",
+    "location": "Zurich, Switzerland",
+    "datePublished": "2026-10-29",
+    "jobUrl": "https://ch.indeed.com/viewjob?jk=ind-001",
+    "descriptionText": "Duplicate sighting of the first posting."
+  }
+]

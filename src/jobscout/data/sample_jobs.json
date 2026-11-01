@@ -1,0 +1,262 @@
+[
+  {
+    "id": "eu-01",
+    "area": "Europe",
+    "keyword": "Junior software engineer",
+    "title": "Junior Software Engineer",
+    "company": "Kestrel Payments",
+    "location": "Amsterdam, North Holland, Netherlands",
+    "days_ago": 2,
+    "employment_type": "Full-time",
+    "recruiter": "Lena Voskuil",
+    "recruiter_title": "Talent Partner",
+    "description": "Join the checkout team as a junior software engineer. You will build and test payment features in Python and TypeScript, review code with your team and take part in a supported on-call rotation. 0-2 years of professional experience. English required; Dutch is a plus. Start date: January 2027.",
+    "score": 91,
+    "reason": "An entry-level role in the Python and TypeScript stack you used in your internship, with tests and a supported on-call rotation, and Dutch is a plus.",
+    "flags": [],
+    "start_date": "2027-01-01"
+  },
+  {
+    "id": "eu-02",
+    "area": "Europe",
+    "keyword": "Backend developer",
+    "title": "Backend Developer",
+    "company": "Kestrel Payments",
+    "location": "London, United Kingdom",
+    "days_ago": 3,
+    "employment_type": "Full-time",
+    "description": "Build and run the services behind our merchant dashboard in Python and Go. Experience with Kubernetes and PostgreSQL required. Hybrid, three days a week in our London office.",
+    "score": 78,
+    "reason": "Python services and tests match your internship, but it wants Kubernetes experience beyond basic Docker.",
+    "flags": [
+      "Asks for Kubernetes",
+      "3 days a week in office"
+    ],
+    "start_date": ""
+  },
+  {
+    "id": "eu-03",
+    "area": "Europe",
+    "keyword": "Junior software engineer",
+    "title": "Junior Full-Stack Developer",
+    "company": "Pedalwise Mobility",
+    "location": "Berlin, Germany",
+    "days_ago": 5,
+    "employment_type": "Full-time",
+    "description": "Work on the rider app for our bike-sharing service with a squad of six engineers and a designer. React, TypeScript and a Python API. Git and code review every day. German B2 required.",
+    "score": 74,
+    "reason": "React, TypeScript and Python in a squad of six is a good first job, and your good German may just reach the B2 they ask for.",
+    "flags": [
+      "German B2 required"
+    ],
+    "start_date": ""
+  },
+  {
+    "id": "eu-04",
+    "area": "Europe",
+    "keyword": "Backend developer",
+    "title": "Backend Developer Intern",
+    "company": "Tallis Robotics",
+    "location": "Munich, Bavaria, Germany",
+    "days_ago": 1,
+    "employment_type": "Internship",
+    "description": "Six-month internship in the software team of a warehouse robotics company. Build REST services in Python, write tests and help with deployments. You must be enrolled at a university for the whole internship.",
+    "score": 52,
+    "reason": "The backend work fits, but this internship needs you enrolled at a university and you graduate in 2026.",
+    "flags": [
+      "Must be enrolled"
+    ],
+    "start_date": ""
+  },
+  {
+    "id": "eu-05",
+    "area": "Europe",
+    "keyword": "Junior software engineer",
+    "title": "Junior Software Engineer",
+    "company": "Quillfield Media",
+    "location": "Zürich, Switzerland",
+    "days_ago": 4,
+    "employment_type": "Full-time",
+    "description": "Help build our news reader app. You will work on the TypeScript front end and the Python API behind it, and write tests. Fluent German required."
+  },
+  {
+    "id": "eu-06",
+    "area": "Europe",
+    "keyword": "Junior software engineer",
+    "title": "Senior Backend Engineer",
+    "company": "Brightmoor Health",
+    "location": "Copenhagen, Capital Region of Denmark, Denmark",
+    "days_ago": 6,
+    "employment_type": "Full-time",
+    "description": "Lead the design of our patient booking services. At least 7 years of backend experience in healthcare or B2B SaaS. You will mentor three engineers and own the on-call rotation.",
+    "score": 22,
+    "reason": "A senior role asking for at least seven years of backend experience, well past your five-year limit.",
+    "flags": [
+      "7+ years required"
+    ],
+    "start_date": ""
+  },
+  {
+    "id": "eu-07",
+    "area": "Europe",
+    "keyword": "Backend developer",
+    "title": "Junior Data Engineer",
+    "company": "Orchard & Pike",
+    "location": "Dublin, Ireland",
+    "days_ago": 8,
+    "employment_type": "Full-time",
+    "description": "Build and monitor the pipelines that feed our reporting. Python and SQL, with Airflow and Docker taught on the job. A solid first step into data engineering for developers who like SQL.",
+    "score": 72,
+    "reason": "Data engineering is your second choice, and Python, SQL and Docker pipelines are a sound first step from your internship.",
+    "flags": [],
+    "start_date": ""
+  },
+  {
+    "id": "eu-08",
+    "area": "Europe",
+    "keyword": "Junior software engineer",
+    "title": "Graduate Software Engineer Programme",
+    "company": "Lumen Freight",
+    "location": "Rotterdam, South Holland, Netherlands",
+    "days_ago": 10,
+    "employment_type": "Full-time",
+    "description": "Two-year rotational programme across our shipping, customs and billing platforms. The next intake opens in autumn.",
+    "deadline_in_days": 21,
+    "score": 88,
+    "reason": "A graduate engineer programme in Rotterdam across logistics software like your internship.",
+    "flags": [],
+    "start_date": ""
+  },
+  {
+    "id": "eu-09",
+    "area": "Europe",
+    "keyword": "Backend developer",
+    "title": "Data Scientist",
+    "company": "Harrow & Vale Insurance",
+    "location": "Madrid, Community of Madrid, Spain",
+    "days_ago": 2,
+    "employment_type": "Full-time",
+    "description": "Build pricing models and maintain our feature store. Strong machine learning and statistics required, with Python. Spanish and English.",
+    "score": 41,
+    "reason": "A data science role built on machine learning and statistics, which isn't your background, and it needs Spanish.",
+    "flags": [
+      "Machine learning required",
+      "Spanish required"
+    ],
+    "start_date": ""
+  },
+  {
+    "id": "uk-01",
+    "area": "UK",
+    "keyword": "Junior software engineer",
+    "title": "Junior Software Engineer",
+    "company": "Fernhill Bank",
+    "location": "London, England, United Kingdom",
+    "days_ago": 1,
+    "employment_type": "Full-time",
+    "recruiter": "Tom Akinde",
+    "recruiter_title": "Early Careers Recruiter",
+    "description": "Join our savings app team. You will build and test features in Python and TypeScript, review code and pair with senior engineers every week. Visa sponsorship is not available for this role.",
+    "score": 64,
+    "reason": "The stack and the pairing with senior engineers are a close match, but there is no visa sponsorship, so check your right to work in the UK.",
+    "flags": [
+      "No visa sponsorship"
+    ],
+    "start_date": ""
+  },
+  {
+    "id": "uk-02",
+    "area": "UK",
+    "keyword": "Backend developer",
+    "title": "Backend Developer",
+    "company": "Moorgate Labs",
+    "location": "Manchester, England, United Kingdom",
+    "days_ago": 3,
+    "employment_type": "Full-time",
+    "description": "Build the APIs behind our lesson-planning tool, write tests and ship with a small team. Python and basic SQL needed; some AWS experience helps and we teach the rest.",
+    "score": 83,
+    "reason": "A small team, Python APIs and tests fit your internship, and the only gap is some AWS experience.",
+    "flags": [
+      "Asks for AWS"
+    ],
+    "start_date": ""
+  },
+  {
+    "id": "uk-03",
+    "area": "UK",
+    "keyword": "Backend developer",
+    "title": "Backend Developer",
+    "company": "Kestrel Payments",
+    "location": "London, England, United Kingdom",
+    "days_ago": 3,
+    "employment_type": "Full-time",
+    "description": "Build and run the services behind our merchant dashboard in Python and Go. Experience with Kubernetes and PostgreSQL required. Hybrid, three days a week in our London office."
+  },
+  {
+    "id": "uk-04",
+    "area": "UK",
+    "keyword": "Junior software engineer",
+    "title": "Junior Full-Stack Developer",
+    "company": "Cobble & Kite",
+    "location": "Edinburgh, Scotland, United Kingdom",
+    "days_ago": 7,
+    "employment_type": "Full-time",
+    "description": "Small team building a marketplace for independent bookshops. You will own the seller onboarding flow end to end, from the React screens to the Python API. Start date: March 2027.",
+    "score": 86,
+    "reason": "A small team where you would own seller onboarding end to end in your stack, and the March 2027 start fits your plans.",
+    "flags": [],
+    "start_date": "2027-03-01"
+  },
+  {
+    "id": "uk-05",
+    "area": "UK",
+    "keyword": "Junior software engineer",
+    "title": "Embedded Software Engineer",
+    "company": "Tallis Robotics",
+    "location": "Bristol, England, United Kingdom",
+    "days_ago": 2,
+    "employment_type": "Full-time",
+    "description": "Write and maintain the control software for our picking robots in C++ and Rust. Five years of professional experience required.",
+    "score": 12,
+    "reason": "Asks for five years of C++ and Rust, which is at your five-year limit and far from your Python and TypeScript.",
+    "flags": [
+      "5+ years required",
+      "C++ and Rust required"
+    ],
+    "start_date": ""
+  },
+  {
+    "id": "uk-06",
+    "area": "UK",
+    "keyword": "Backend developer",
+    "title": "Technical Support Engineer",
+    "company": "Brightmoor Health",
+    "location": "Leeds, England, United Kingdom",
+    "days_ago": 9,
+    "employment_type": "Full-time",
+    "description": "Answer customer tickets, walk clinics through our booking software and escalate bugs to the developers. No coding is needed. Customer service experience preferred.",
+    "score": 35,
+    "reason": "Mostly answering customer tickets, which is support work you don't want, even though the title says engineer.",
+    "flags": [
+      "Support role"
+    ],
+    "start_date": ""
+  },
+  {
+    "id": "uk-07",
+    "area": "UK",
+    "keyword": "Junior software engineer",
+    "title": "Software Engineer (Internship)",
+    "company": "Pedalwise Mobility",
+    "location": "Cambridge, England, United Kingdom",
+    "days_ago": 12,
+    "employment_type": "Internship",
+    "description": "Twelve-week summer internship in our engineering team. Open to recent graduates. You will ship one feature from idea to release.",
+    "score": 68,
+    "reason": "Shipping one feature from idea to release is useful, but a twelve-week internship is a step back after your degree.",
+    "flags": [
+      "Short internship"
+    ],
+    "start_date": ""
+  }
+]

@@ -1,0 +1,141 @@
+/* Theme: every value here comes from DESIGN.md. Light theme only in v1. */
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/public-sans/wght.css";
+@import "@fontsource/ibm-plex-mono/latin-400.css";
+@import "@fontsource/ibm-plex-mono/latin-500.css";
+
+@theme inline {
+  --font-sans: "Public Sans Variable", system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* DESIGN.md tokens without a shadcn slot. */
+  --color-accent-soft: var(--accent-soft);
+  --color-neutral-soft: var(--neutral-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+
+  /* Radii: sm 4, md 6, lg 8. Larger shadcn radii are capped at lg. */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 8px;
+  --radius-2xl: 8px;
+  --radius-3xl: 8px;
+  --radius-4xl: 8px;
+
+  /* Shadows: none, except popovers and dialogs. */
+  --shadow-2xs: 0 0 #0000;
+  --shadow-xs: 0 0 #0000;
+  --shadow-sm: 0 0 #0000;
+  --shadow-md: 0 4px 16px rgb(27 31 29 / 0.08);
+  --shadow-lg: 0 4px 16px rgb(27 31 29 / 0.08);
+  --shadow-xl: 0 4px 16px rgb(27 31 29 / 0.08);
+}
+
+/* Type scale 12, 13, 14, 16, 20: text-xs, text-13, text-sm, text-base, text-xl. */
+@theme {
+  --text-13: 0.8125rem;
+  --text-13--line-height: 1.125rem;
+  --text-lg: 1rem;
+  --text-lg--line-height: 1.5rem;
+  --text-2xl: 1.25rem;
+  --text-2xl--line-height: 1.75rem;
+}
+
+:root {
+  --background: #f6f7f5; /* bg */
+  --foreground: #1b1f1d; /* text */
+  --card: #ffffff; /* surface */
+  --card-foreground: #1b1f1d;
+  --popover: #ffffff;
+  --popover-foreground: #1b1f1d;
+  --primary: #1e6a4e; /* accent */
+  --primary-foreground: #ffffff;
+  --secondary: #eef0ed; /* neutral-soft */
+  --secondary-foreground: #1b1f1d;
+  --muted: #eef0ed; /* neutral-soft */
+  --muted-foreground: #5e6762; /* text-muted */
+  --accent: #eef0ed; /* shadcn's hover surface, not the green accent */
+  --accent-foreground: #1b1f1d;
+  --destructive: #a33a2c; /* danger */
+  --border: #e2e5e1;
+  --input: #e2e5e1;
+  --ring: #1e6a4e; /* accent */
+  --radius: 6px;
+
+  --accent-soft: #e6f0eb;
+  --neutral-soft: #eef0ed;
+  --warn: #9a5b00;
+  --warn-soft: #fbf0dd;
+
+  color-scheme: light;
+}
+
+@utility num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* A sideways-scrolling strip without a visible scrollbar (it still scrolls by touch, trackpad and keyboard). */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* The right edge fades out: more of the strip is hidden there. */
+@utility fade-right {
+  mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring;
+  }
+  html {
+    @apply font-sans;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    @apply bg-background text-sm text-foreground;
+    line-height: 1.45;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
