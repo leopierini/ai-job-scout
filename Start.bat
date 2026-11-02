@@ -10,6 +10,8 @@ where uv >nul 2>nul
 if not errorlevel 1 goto :have_uv
 
 echo Installing uv, the tool that sets up Python for this app...
+rem A terminal running PowerShell 7 passes it a module path that Windows PowerShell cannot load.
+set "PSModulePath="
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 if errorlevel 1 goto :uv_install_failed
 set "PATH=%USERPROFILE%\.local\bin;%PATH%"
