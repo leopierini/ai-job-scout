@@ -1,8 +1,28 @@
-![A short demo: add your keys, press Find jobs, and a ranked list of software engineer jobs appears, each with a fit score, a one-line reason and warning flags](docs/images/demo.gif)
-
 # AI Job Scout
 
 Finds jobs on LinkedIn and Indeed, scores each one against your profile with AI, and keeps a ranked shortlist. Runs on your computer, no coding needed.
+
+![A short demo: add your keys, press Find jobs, and a ranked list of software engineer jobs appears, each with a fit score, a one-line reason and warning flags](docs/images/demo.gif)
+
+## Features
+
+### Use the AI you already have
+
+Pick Claude Code, Anthropic, OpenAI, Google Gemini, OpenRouter or Ollama. Paste a key, test it, and the app scores every job with it.
+
+<img src="docs/images/clip-ai.gif" width="640" alt="The AI tab in Settings: choose Claude Code, Anthropic, OpenAI, Google Gemini, OpenRouter or Ollama, then the model and the batch size">
+
+### Search the way you want
+
+Set your job titles, regions and Indeed countries, leave out the places you don't want, and see what a run can cost before you press Find jobs.
+
+<img src="docs/images/clip-search.gif" width="640" alt="The Search tab in Settings: software engineering keywords, regions, Indeed countries and the cost settings">
+
+### A ranked list, with reasons
+
+Every job gets a score, a one-line reason and flags such as "German B2 required". Filter by role, company or place, open the posting, and mark each job Interested, Applied, Interviewing, Offer or Rejected.
+
+<img src="docs/images/clip-list.gif" width="640" alt="The ranked list: each job with its score, reason and flags, an expanded row with the details, and the Open button taking you to the posting on LinkedIn">
 
 ## Why it exists
 
@@ -16,11 +36,7 @@ Searching LinkedIn and Indeed by hand means reading a lot of postings that don't
 4. **It scores.** The AI reads each posting against your profile and gives it a score from 0 to 100, a one-line reason, and flags such as "asks for SQL" or "German B2 required". Your dealbreakers hold a score down.
 5. **You review.** Jobs above your minimum score land in a ranked list. Mark each one Interested, Applied, Interviewing, Offer or Rejected, or dismiss it. Optionally, new jobs are also sent to Notion, a CSV file or a webhook.
 
-![The ranked list: each job with its score, reason and flags, an expanded row with the details, and the Open button taking you to the posting on LinkedIn](docs/images/clip-list.gif)
-
 ![Step 2 of the setup wizard: a drafted software engineer profile with a headline, the profile text and dealbreakers, ready to check and edit](docs/images/wizard.png)
-
-![The Search tab in Settings: software engineering keywords, regions, Indeed countries and the cost settings](docs/images/clip-search.gif)
 
 The layout also works on a phone-sized window:
 
@@ -47,8 +63,6 @@ Keep the launcher window open while you use the app. Closing it stops the app.
   - **Claude Code**: uses your Claude subscription and needs no API key. It must be installed and signed in on your computer.
   - **Anthropic**, **OpenAI**, **Google Gemini** or **OpenRouter**: each needs an API key from that company. Usage is paid per use, and Gemini has a free tier with limits.
   - **Ollama**: runs a model on your own computer. Free, but slower and less accurate than the others.
-
-![The AI tab in Settings: choose Claude Code, Anthropic, OpenAI, Google Gemini, OpenRouter or Ollama, then the model and the batch size](docs/images/clip-ai.gif)
 
 ## What it costs
 
