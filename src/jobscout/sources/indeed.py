@@ -68,13 +68,18 @@ def _posted(value: object) -> str:
     return ""
 
 
+_EMAIL = re.compile(r"[^\s@<>?&,;:\"'()\[\]]+@[^\s@<>?&,;:\"'()\[\]]+\.[^\s@<>?&,;:\"'()\[\]]+")
+
+
 def parse_item(item: dict, query: str, area: str, job_type: str) -> Job | None:
     """Turn one actor item into a Job, or None if it has no usable id."""
     job_id = _first(item, "jobKey", "jobkey", "id").strip()
     if not job_id:
         return None
     emails = item.get("emails")
-    email = emails[0] if isinstance(emails, list) and emails and isinstance(emails[0], str) else ""
+    email = emails[0].strip() if isinstance(emails, list) and emails and isinstance(emails[0], str) else ""
+    if not _EMAIL.fullmatch(email):
+        email = ""  # a link is only made from a plain address, never from whatever text the actor returned
     item_type = as_str(item.get("jobType"))
     return Job(
         source="indeed",

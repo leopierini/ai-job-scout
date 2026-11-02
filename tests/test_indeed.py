@@ -287,3 +287,12 @@ def test_countries_file():
     codes = data["countries"]
     assert {"uk", "ch", "de", "us"} <= set(codes)
     assert len(set(codes)) == len(codes) and all(c == c.lower() and len(c) == 2 for c in codes)
+
+
+@pytest.mark.parametrize(
+    "email", ["a@b.example?subject=hi&cc=x@y.example", "a b@c.example", "no-at-sign", "<a@b.example>", "a@b", "x@y.example,z@w.example", ""]
+)
+def test_an_odd_email_makes_no_contact_link(email):
+    item = {**ITEMS[0], "emails": [email]}
+    job = parse_item(item, "q", "ch", "fulltime")
+    assert job.recruiter_url == "" and job.recruiter_title == ""

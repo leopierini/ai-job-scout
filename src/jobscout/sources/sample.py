@@ -33,13 +33,22 @@ def _postings() -> list[dict]:
 ANSWER_FIELDS = ("score", "reason", "flags", "start_date")
 
 
-def sample_answers() -> dict[str, dict]:
+def sample_answers(today: date | None = None) -> dict[str, dict]:
     """What the offline scorer answers for each sample posting it scores, keyed by the job id it is shown (the
-    pk). The excluded and duplicate postings are never scored and have none."""
+    pk). The excluded and duplicate postings are never scored and have none. A start date given as
+    `start_in_days` is counted from today, like `days_ago`, so the sample never goes stale."""
+    today = today or date.today()
+
+    def answer(p: dict) -> dict:
+        out = {k: p[k] for k in ANSWER_FIELDS if k in p}
+        if "start_in_days" in p:
+            out["start_date"] = (today + timedelta(days=p["start_in_days"])).isoformat()
+        return out
+
     return {
-        f"{SampleSource.name}:{p['id']}": {k: p[k] for k in ANSWER_FIELDS}
+        f"{SampleSource.name}:{p['id']}": answer(p)
         for p in _postings()
-        if all(k in p for k in ANSWER_FIELDS)
+        if all(k in p for k in ANSWER_FIELDS if k != "start_date") and ("start_date" in p or "start_in_days" in p)
     }
 
 

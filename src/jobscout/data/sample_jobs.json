@@ -14,7 +14,7 @@
     "score": 91,
     "reason": "An entry-level role in the Python and TypeScript stack you used in your internship, with tests and a supported on-call rotation, and Dutch is a plus.",
     "flags": [],
-    "start_date": "2027-01-01"
+    "start_in_days": 60
   },
   {
     "id": "eu-02",
@@ -205,7 +205,7 @@
     "score": 86,
     "reason": "A small team where you would own seller onboarding end to end in your stack, and the March 2027 start fits your plans.",
     "flags": [],
-    "start_date": "2027-03-01"
+    "start_in_days": 119
   },
   {
     "id": "uk-05",

@@ -1,5 +1,6 @@
 import inspect
 import json
+import re
 import threading
 import time
 from datetime import date, datetime, timedelta
@@ -217,7 +218,7 @@ def test_sample_jobs_get_realistic_scores_and_reasons(db):
     assert any(r.flags for r in scored) and all(len(r.flags) <= 2 for r in scored)
     assert db.jobs_in_state(JobState.KEPT) and db.jobs_in_state(JobState.BELOW_THRESHOLD)
     first = db.get("sample:eu-01")
-    assert first.start_date == "2027-01-01" and first.score == 91
+    assert first.start_date == (date.today() + timedelta(days=60)).isoformat() and first.score == 91
 
 
 def test_every_scored_sample_posting_has_its_answer():
@@ -1084,3 +1085,13 @@ def test_sample_headline_and_no_deadline_flag_on_kept_jobs():
     for pk, answer in sample_answers().items():
         if answer["score"] >= sample_settings().scoring.min_score:
             assert "Deadline passed" not in answer["flags"], pk
+
+
+def test_sample_start_dates_count_from_today():
+    postings = {p["id"]: p for p in json.loads(SAMPLE_DATA.joinpath("sample_jobs.json").read_text(encoding="utf-8"))}
+    assert not [i for i, p in postings.items() if re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.get("start_date") or "")]
+    today = date(2031, 5, 20)  # whatever day it is, the sample's start dates move with it
+    answers = sample_answers(today)
+    assert answers["sample:eu-01"]["start_date"] == "2031-07-19"
+    assert answers["sample:uk-04"]["start_date"] == "2031-09-16"
+    assert sample_answers(date(2031, 6, 1))["sample:eu-01"]["start_date"] == "2031-07-31"
