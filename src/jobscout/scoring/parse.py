@@ -7,7 +7,7 @@ from datetime import date
 from jobscout.models import ScoreResult
 
 MAX_FLAGS = 5
-MAX_FLAG_CHARS = 40
+MAX_FLAG_CHARS = 60
 
 _FENCE = re.compile(r"```[a-zA-Z0-9_-]*")
 _ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
@@ -37,10 +37,19 @@ def _iso_date(value: object) -> str:
     return value
 
 
+def _shorten(flag: str) -> str:
+    """Cut a flag that is too long at the last whole word, ending in an ellipsis."""
+    if len(flag) <= MAX_FLAG_CHARS:
+        return flag
+    cut = flag[: MAX_FLAG_CHARS - 1]
+    head, space, _ = cut.rpartition(" ")
+    return (head if space and head else cut).rstrip(" ,;:.-") + "\u2026"
+
+
 def _flags(value: object) -> list[str]:
     if not isinstance(value, list):
         return []
-    cleaned = [f.strip()[:MAX_FLAG_CHARS] for f in value if isinstance(f, str) and f.strip()]
+    cleaned = [_shorten(f.strip()) for f in value if isinstance(f, str) and f.strip()]
     return cleaned[:MAX_FLAGS]
 
 
