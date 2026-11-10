@@ -167,8 +167,20 @@ def test_parse_non_string_dates_become_empty():
 def test_parse_caps_flags():
     flags = [f"flag {i}" for i in range(8)]
     assert _one(flags=flags)[0].flags == flags[:5]
-    long = "y" * 60
-    assert _one(flags=[long])[0].flags == ["y" * 40]
+    long = "y" * 80
+    assert _one(flags=[long])[0].flags == ["y" * 59 + "…"]
+
+
+def test_parse_shortens_long_flags_at_a_word():
+    flag = "Richiede iscrizione a un'università olandese per tutto lo stage"
+    (short,) = _one(flags=[flag])[0].flags
+    assert short == "Richiede iscrizione a un'università olandese per tutto lo…"
+    assert len(short) <= 60
+
+
+def test_parse_keeps_flags_that_fit():
+    flag = "Selezione molto competitiva con test lunghi"
+    assert _one(flags=[flag])[0].flags == [flag]
 
 
 def test_parse_flags_tolerates_bad_shapes():
