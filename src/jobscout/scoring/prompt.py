@@ -29,7 +29,8 @@ def _output_contract(cfg: ScoringSettings, today: date) -> str:
             '- "id": the job id exactly as given.',
             '- "score": an integer from 0 to 100.',
             f'- "reason": 1-2 sentences in {cfg.reasoning_language} explaining the score.',
-            '- "flags": an array of short warnings, for example "Asks for SQL". It may be empty.',
+            '- "flags": an array of short warnings of a few words each (under 60 characters), for example '
+            '"Asks for SQL". It may be empty.',
             '- "start_date": the start date as YYYY-MM-DD. If only a month is given, use the first day of that '
             f'month. If several options are given, use the latest. If the start is ASAP, use {today.isoformat()}. '
             'If it is not stated, use "".',
