@@ -174,9 +174,13 @@ export interface WindowSettings {
   overlap_minutes: number
 }
 
+export type PostingLanguage = "en" | "it" | "de" | "fr" | "nl" | "es" | "pt" | "sv" | "da" | "no" | "pl"
+
 export interface FilterSettings {
   excluded_countries: string[]
   excluded_cities: string[]
+  excluded_title_words: string[]
+  languages: PostingLanguage[]
 }
 
 export interface Dealbreaker {

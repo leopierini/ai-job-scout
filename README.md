@@ -14,7 +14,7 @@ Pick Claude Code, Anthropic, OpenAI, Google Gemini, OpenRouter or Ollama. Paste 
 
 ### Search the way you want
 
-Set your job titles, regions and Indeed countries, leave out the places you don't want, and see what a run can cost before you press Find jobs.
+Set your job titles, regions and Indeed countries, leave out the places, title words (such as Senior) and posting languages you don't want, and see what a run can cost before you press Find jobs. Jobs left out this way are dropped before scoring, so the AI never reads them.
 
 <img src="docs/images/clip-search.gif" width="640" alt="The Search tab in Settings: software engineering keywords, regions, Indeed countries and the cost settings">
 

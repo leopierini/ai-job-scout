@@ -3,7 +3,7 @@ import { ChevronRightIcon } from "lucide-react"
 import { toast } from "sonner"
 
 import { api } from "@/api/client"
-import type { IndeedJobType, LinkedInSettings, Settings } from "@/api/types"
+import type { IndeedJobType, LinkedInSettings, PostingLanguage, Settings } from "@/api/types"
 import { ChipsInput } from "@/components/ChipsInput"
 import { EstimateNote } from "@/components/EstimateNote"
 import { describedBy, Field } from "@/components/Field"
@@ -19,11 +19,14 @@ import { useLiveEstimate } from "@/lib/estimate"
 import { fieldError, mergePaths } from "@/lib/form"
 import { indeedCountryName } from "@/lib/places"
 import { useRegions } from "@/lib/regions"
-import { JOB_TYPES, LINKEDIN_SORTS } from "@/lib/search-options"
+import { JOB_TYPES, LINKEDIN_SORTS, POSTING_LANGUAGES } from "@/lib/search-options"
 import { cn } from "@/lib/utils"
 import { Loaded, NumberField, SaveBar, SwitchRow, TabBody, useTabForm, type TabProps } from "./shared"
 
 const SEARCH_PATHS = ["linkedin", "indeed", "windows", "filters"] as const
+
+/** Asks Indeed for every job type once a date window is set; see `jobscout.sources.indeed`. */
+const KAIX_INDEED_ACTOR = "kaix~indeed-scraper"
 
 const loadSettings = () => api.get<Settings>("/api/settings")
 
@@ -177,7 +180,9 @@ function SearchForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: Se
               ))}
             </div>
             <p id={`${id}-types-hint`} className="text-13 text-muted-foreground">
-              Only jobs of these types are asked for. Indeed decides which type each job is.
+              {s.indeed.actor === KAIX_INDEED_ACTOR
+                ? "The default Indeed actor can't ask for job types together with dates, so it searches every type and the AI judges the type. These apply to other actors."
+                : "Only jobs of these types are asked for. Indeed decides which type each job is."}
             </p>
             {jobTypesError && <p className="text-13 font-medium text-destructive">{jobTypesError}</p>}
           </fieldset>
@@ -246,6 +251,32 @@ function SearchForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: Se
             hint="Useful for one city in a country you otherwise search."
             error={err("filters.excluded_cities")}
             optional
+          />
+        </Section>
+
+        <Section
+          title="Jobs to leave out"
+          intro="Also dropped before scoring, so the AI only reads jobs that could fit."
+        >
+          <ChipsInput
+            label="Words in the title"
+            value={s.filters.excluded_title_words}
+            onChange={(v) => set("filters.excluded_title_words", v)}
+            placeholder="e.g. Senior"
+            hint="A job whose title has one of these as a whole word is dropped, e.g. Senior, Lead or Head."
+            error={err("filters.excluded_title_words")}
+            optional
+          />
+          <MultiSelect
+            label="Languages you work in"
+            options={POSTING_LANGUAGES}
+            value={s.filters.languages}
+            onChange={(v) => set("filters.languages", v as PostingLanguage[])}
+            addLabel="Add a language"
+            searchPlaceholder="Search languages"
+            emptyText="No language matches."
+            hint="A job clearly written in another language is dropped. Leave it empty to keep every language."
+            error={err("filters.languages")}
           />
         </Section>
 

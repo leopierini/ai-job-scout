@@ -405,6 +405,26 @@ def test_filter_drops_jobs_already_seen_and_keeps_first_in_run(db):
     assert s.counts["duplicates"] == 2 and s.counts["new"] == 1
 
 
+def test_filter_drops_excluded_titles_and_other_languages_before_scoring(db):
+    english = "We are looking for a product manager to join our team. You will work with the people who use it. " * 3
+    german = "Wir suchen eine Person für unser Team. Du arbeitest mit den Menschen, die das Produkt nutzen. " * 3
+    keep = make_job(job_id="keep", title="Product Manager", description=english)
+    senior = make_job(job_id="senior", title="Senior Product Manager", description=english)
+    other = make_job(job_id="german", title="Produktmanager (m/w/d)", description=german)
+    settings = Settings()
+    settings.filters.excluded_title_words = ["Senior", "Lead"]
+    settings.filters.languages = ["en", "it"]
+    events = []
+    src = FakeSource("linkedin", {"linkedin:UK": ok(keep, senior, other)})
+    s = make_pipeline(db, [src], settings=settings, on_event=events.append).run()
+    assert db.get(senior.pk).state == JobState.EXCLUDED and db.get(other.pk).state == JobState.EXCLUDED
+    assert db.get(keep.pk).state != JobState.EXCLUDED
+    assert s.counts["excluded"] == 2 and s.counts["new"] == 1
+    assert final_events(events)["filter"].message == (
+        "1 new · 0 duplicates · 0 excluded places · 1 excluded title · 1 in another language"
+    )
+
+
 def test_run_log_messages_pluralise(db):
     seen = make_job(job_id="old", title="Product Analyst", company="Moorgate Labs", location="Leeds, UK")
     db.insert_scraped([seen], {seen.pk: "product analyst|moorgate labs|leeds"})

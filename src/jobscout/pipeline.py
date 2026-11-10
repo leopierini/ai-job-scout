@@ -17,7 +17,7 @@ from jobscout.costs import billed_cost
 from jobscout.db import Database
 from jobscout.errors import ConfigError, NotionError
 from jobscout.models import JobRow, JobState, RunSummary, ScoreResult, StepEvent
-from jobscout.normalize import PlaceMatcher, dedup_key
+from jobscout.normalize import PlaceMatcher, TermMatcher, dedup_key
 from jobscout.outputs.notion import NotionClient
 from jobscout.outputs.webhook import WebhookOutput
 from jobscout.scoring.providers import FakeProvider, Provider, make_provider
@@ -252,9 +252,19 @@ class Pipeline(StepRunner):
 
     def _filter(self) -> StepResult:
         f = self._settings.filters
-        c = dedup.filter_scraped(self._db, PlaceMatcher(f.excluded_countries, f.excluded_cities), self._found_now)
+        c = dedup.filter_scraped(
+            self._db,
+            PlaceMatcher(f.excluded_countries, f.excluded_cities),
+            self._found_now,
+            TermMatcher(f.excluded_title_words),
+            frozenset(f.languages),
+        )
         self._counts.update(new=c.new, duplicates=c.duplicates, excluded=c.excluded)
-        message = f"{c.new} new · {plural(c.duplicates, 'duplicate')} · {plural(c.excluded, 'excluded place')}"
+        message = f"{c.new} new · {plural(c.duplicates, 'duplicate')} · {plural(c.places, 'excluded place')}"
+        if c.titles:
+            message += f" · {plural(c.titles, 'excluded title')}"
+        if c.languages:
+            message += f" · {c.languages} in another language"
         if c.waiting:
             message += f" · {c.waiting} waiting from earlier runs"
         return StepResult(message, done=c.checked, total=c.checked)

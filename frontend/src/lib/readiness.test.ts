@@ -8,7 +8,7 @@ function settings(): Settings {
     linkedin: { enabled: true, actor: "a", keywords: [], regions: [], cap_per_keyword: 25, sort_by: "DD", scrape_company: true, price_per_result: 0.002 },
     indeed: { enabled: false, actor: "b", countries: [], queries: [], job_types: ["internship"], max_rows_per_query: 20, price_per_result: 0.005 },
     windows: { default_days: 15, overlap_minutes: 60 },
-    filters: { excluded_countries: [], excluded_cities: [] },
+    filters: { excluded_countries: [], excluded_cities: [], excluded_title_words: [], languages: [] },
     scoring: { provider: "claude_code", model: "sonnet", min_score: 70, send_below_threshold: false, reasoning_language: "English", batch_size: 10, max_jobs_per_run: null, bands: "", dealbreakers: [], extra_instructions: "" },
     cleanup: { enabled: true, deadline_passed: true, start_too_early: true, too_old: true, excluded_place: true, earliest_start: null, max_age_days: 60, interested_exempt_from_age: true },
     outputs: { csv: { enabled: false, path: "", auto_export: true }, webhook: { enabled: false, url: "" }, notion: { enabled: false, parent_page_id: "", database_id: "" } },
