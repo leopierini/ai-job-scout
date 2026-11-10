@@ -61,3 +61,55 @@ def test_an_english_posting_with_a_german_title_and_footer_is_kept():
 def test_a_mostly_german_posting_with_english_terms_is_dropped():
     mixed = GERMAN + " Product Owner, Stakeholder Management, Scrum, Jira, Roadmap, OKRs."
     assert other_language(mixed, KEEP) == "de"
+
+
+ITALIAN_BULLETS = """Cosa farai:
+- Gestire i clienti e i fornitori
+- Coordinare i rilasci da qui a fine anno
+- Supporto al team commerciale a Milano o a Torino
+Requisiti:
+- Laurea in economia o ingegneria
+- Esperienza in ambito SaaS
+Cosa offriamo:
+- Contratto a tempo indeterminato
+- Sede a Bologna, raggiungibile in treno o in autobus
+- Possibilità di crescita a breve o a medio termine"""
+
+ENGLISH_BULLETS = """Responsibilities
+- Run a discovery sprint every quarter
+- Build a design system with a small team
+- Own a roadmap and report on it
+Requirements
+- A degree in a related field
+- 1-2 years in a product role
+Perks
+- Remote-first, flexible hours
+- A learning budget"""
+
+SPANISH = (
+    "Buscamos un Product Manager para unirse a nuestro equipo en Madrid. Serás responsable de definir la "
+    "estrategia del producto y de trabajar con los equipos de desarrollo y diseño. Ofrecemos un contrato "
+    "indefinido, horario flexible y la posibilidad de teletrabajo para las personas del equipo."
+)
+PORTUGUESE = (
+    "Estamos à procura de um Product Manager para a nossa equipa em Lisboa. Vais trabalhar com as equipas de "
+    "engenharia e design para definir a estratégia do produto. Oferecemos contrato sem termo, seguro de saúde e "
+    "um ambiente de trabalho flexível no centro da cidade, com mais tempo para você e para a sua família."
+)
+
+
+def test_bullet_postings_with_many_one_letter_words_are_kept():
+    # "a", "e", "i" and "o" are frequent in Italian and English bullets, and also in Portuguese and Polish.
+    assert other_language(ITALIAN_BULLETS, KEEP) is None
+    assert other_language(ENGLISH_BULLETS, KEEP) is None
+    assert other_language(ITALIAN_BULLETS, frozenset({"it"})) is None
+
+
+def test_one_letter_words_are_not_counted():
+    assert word_counts("a e i o y w z " * 20) == dict.fromkeys(LANGUAGES, 0)
+
+
+def test_spanish_and_portuguese_are_named():
+    assert other_language(SPANISH, KEEP) == "es"
+    assert other_language(PORTUGUESE, KEEP) == "pt"
+    assert other_language(SPANISH, frozenset({"en", "es"})) is None

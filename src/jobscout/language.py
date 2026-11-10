@@ -5,14 +5,15 @@ import re
 from jobscout.normalize import fold
 
 # Short, frequent words of each language, accents stripped (see `fold`). A posting often mixes in English
-# job titles, so a guess needs many words and a clear lead before anything is dropped.
+# job titles, so a guess needs many words and a clear lead before anything is dropped. One-letter words are
+# never counted: "a", "e", "i" and "o" are common in several of these languages at once, and decide nothing.
 _WORDS: dict[str, frozenset[str]] = {
     code: frozenset(words.split())
     for code, words in {
         "en": "the and of to with for you your our we are is will be this that from have an or as at by "
-        "who what about can all",
-        "it": "il la le di del della delle dei e per con che un una sono nel nella gli ai alla anche come "
-        "piu siamo nostro nostra nostri tuo tua si",
+        "who what about can all in on it",
+        "it": "il la le di del della delle dei per con che un una sono nel nella gli ai alla anche come "
+        "piu siamo nostro nostra nostri tuo tua si da al ad in dal dalla sul sulla",
         "de": "der die das und mit fur wir sie ist ein eine du dein deine unser unsere bei von zu auf den dem "
         "des im oder sind werden auch nicht ihre",
         "fr": "le la les et des du pour avec vous nous est une un dans sur au aux votre vos notre nos sont qui "
@@ -39,6 +40,8 @@ def word_counts(text: str) -> dict[str, int]:
     """How many words of the text belong to each language's list."""
     counts = dict.fromkeys(_WORDS, 0)
     for word in _WORD.findall(fold(text)):
+        if len(word) < 2:
+            continue
         for code, words in _WORDS.items():
             if word in words:
                 counts[code] += 1

@@ -256,14 +256,14 @@ function SearchForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: Se
 
         <Section
           title="Jobs to leave out"
-          intro="Also dropped before scoring, so the AI only reads jobs that could fit."
+          intro="Also dropped before scoring, so the AI only reads jobs that could fit. A job dropped here stays dropped, even if you change these later."
         >
           <ChipsInput
             label="Words in the title"
             value={s.filters.excluded_title_words}
             onChange={(v) => set("filters.excluded_title_words", v)}
             placeholder="e.g. Senior"
-            hint="A job whose title has one of these as a whole word is dropped, e.g. Senior, Lead or Head."
+            hint="A job whose title has one of these as a whole word is dropped, e.g. Senior or Head."
             error={err("filters.excluded_title_words")}
             optional
           />

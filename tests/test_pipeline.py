@@ -425,6 +425,26 @@ def test_filter_drops_excluded_titles_and_other_languages_before_scoring(db):
     )
 
 
+def test_jobs_waiting_from_an_earlier_run_meet_new_filters(db):
+    waiting = make_job(job_id="waiting", title="Head of Product")
+    db.insert_scraped([waiting], {waiting.pk: "head of product|fjord labs|oslo"})  # never scored
+    settings = Settings()
+    settings.filters.excluded_title_words = ["Head"]
+    s = make_pipeline(db, [FakeSource("linkedin", {"linkedin:UK": ok()})], settings=settings).run()
+    assert db.get(waiting.pk).state == JobState.EXCLUDED and s.counts["excluded"] == 1
+
+
+def test_a_job_in_an_excluded_place_counts_as_a_place_not_a_title(db):
+    both = make_job(job_id="both", title="Senior Product Manager", location="Basel, Switzerland")
+    settings = Settings()
+    settings.filters.excluded_countries = ["Switzerland"]
+    settings.filters.excluded_title_words = ["Senior"]
+    events = []
+    src = FakeSource("linkedin", {"linkedin:UK": ok(both)})
+    make_pipeline(db, [src], settings=settings, on_event=events.append).run()
+    assert final_events(events)["filter"].message == "0 new · 0 duplicates · 1 excluded place"
+
+
 def test_run_log_messages_pluralise(db):
     seen = make_job(job_id="old", title="Product Analyst", company="Moorgate Labs", location="Leeds, UK")
     db.insert_scraped([seen], {seen.pk: "product analyst|moorgate labs|leeds"})
