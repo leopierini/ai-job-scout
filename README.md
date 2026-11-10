@@ -68,7 +68,7 @@ Keep the launcher window open while you use the app. Closing it stops the app.
 
 The app is free. You pay Apify for the searches, and your AI provider for scoring if you use one that charges per use.
 
-Apify charges for each job it finds. The app's defaults assume about **$0.002 per LinkedIn job** and **$0.005 per Indeed job**. You can change these prices in Settings if Apify changes them.
+Apify charges for each job it finds. The app's default actors cost about **$0.0003 per LinkedIn job** and **$0.00005 per Indeed job** on Apify's free plan (checked November 2026), so a full run usually costs well under $1. You can change these prices in Settings if Apify changes them.
 
 - **The cost is shown before every run.** The top of the main screen says "Next run up to $…", worked out from your keywords, regions and results limits, next to your remaining Apify credit. It is an upper estimate: it assumes every search returns its maximum number of results.
 - **You rarely pay twice for the same posting.** Each search only looks back to your last run, and jobs the app has already seen are never scored again. Repeats can still happen in two ways: a small overlap (60 minutes by default) is added to each search so nothing is missed, and two searches (different keywords or regions) can find the same job. The app removes those repeats, but Apify still charges for them.

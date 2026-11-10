@@ -297,7 +297,7 @@ def test_apify_limit_mid_run_keeps_finished_areas(db):
     assert {db.get(j.pk).state for j in (a1, a2, a3)} <= {JobState.KEPT, JobState.BELOW_THRESHOLD}
     assert s.status == "error" and s.error == LIMIT_MESSAGE
     assert s.counts["billed_linkedin"] == 3 and s.counts["billed_indeed"] == 0
-    assert s.cost_usd == pytest.approx(3 * 0.002)
+    assert s.cost_usd == pytest.approx(3 * 0.0003)
     fin = final_events(events)
     assert fin["search"].status == "error" and fin["search"].message == LIMIT_MESSAGE
     assert [fin[step].status for step in ["filter", "score", "save"]] == ["done", "done", "done"]

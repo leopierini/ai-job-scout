@@ -8,7 +8,7 @@ import pytest
 from jobscout.settings import IndeedSettings
 from jobscout.sources import AreaResult, SearchArea
 from jobscout.sources.apify import ApifyClient
-from jobscout.sources.indeed import IndeedSource, parse_item, query_terms, title_matches
+from jobscout.sources.indeed import IndeedSource, parse_item, parse_kaix_item, query_terms, title_matches
 
 ITEMS = json.loads((Path(__file__).parent / "fixtures" / "indeed_items.json").read_text(encoding="utf-8"))
 RUN = r".*acts/borderline~indeed-scraper/run-sync-get-dataset-items.*"
@@ -16,6 +16,7 @@ RUN = r".*acts/borderline~indeed-scraper/run-sync-get-dataset-items.*"
 
 def make_source(queries=("Product Manager",), cancel=None, **kw):
     kw.setdefault("countries", ["ch", "uk"])
+    kw.setdefault("actor", "borderline~indeed-scraper")
     settings = IndeedSettings(enabled=True, queries=list(queries), **kw)
     apify = ApifyClient("tok-secret-123", httpx.Client(), sleep=lambda s: None)
     return IndeedSource(settings, apify, cancel or threading.Event())
@@ -296,3 +297,65 @@ def test_an_odd_email_makes_no_contact_link(email):
     item = {**ITEMS[0], "emails": [email]}
     job = parse_item(item, "q", "ch", "fulltime")
     assert job.recruiter_url == "" and job.recruiter_title == ""
+
+
+# --- kaix/indeed-scraper ---
+
+KAIX_RUN = r".*acts/kaix~indeed-scraper/run-sync-get-dataset-items.*"
+KAIX_ITEM = {
+    "id": "kx-001",
+    "title": {"text": "Associate Product Manager", "normalized": "associate product manager"},
+    "company": {"name": "Birch Systems", "key": "abc"},
+    "location": {"formatted": "Zurich", "formattedShort": "Zurich", "city": "Zurich", "countryName": "Switzerland"},
+    "urls": {"indeed": "https://ch.indeed.com/viewjob?jk=kx-001", "apply": "https://jobs.birch.example/1"},
+    "description": {"text": "Shape the roadmap with the team.", "html": "<p>Shape the roadmap.</p>"},
+    "dates": {"posted": "2026-11-06", "onIndeed": "2026-11-06T15:04:05.522Z", "age": "4 days ago"},
+    "classification": {"jobType": ["Full-time", "Permanent"]},
+}
+
+
+def test_kaix_runs_each_query_once_with_its_own_input(respx_mock):
+    route = respx_mock.post(url__regex=KAIX_RUN).respond(200, json=[KAIX_ITEM])
+    src = make_source(
+        queries=('title:("Product Manager")', "Product Owner"),
+        actor="kaix~indeed-scraper",
+        job_types=["internship", "fulltime"],
+        max_rows_per_query=50,
+    )
+    area = first_area(src)
+    assert area.searches == 2  # one per query: the actor ignores the job type when a date window is set
+    res = src.search_area(area, 2 * 86400, lambda *a: None)
+    assert bodies(route) == [
+        {"country": "CH", "keyword": q, "location": "", "fromDays": "3", "sort": "date", "maxItems": 50,
+         "searchMode": "detailed"}
+        for q in ('title:("Product Manager")', "Product Owner")
+    ]  # fmt: skip
+    assert [j.job_id for j in res.jobs] == ["kx-001"] and res.billed == 2
+
+
+def test_parse_kaix_item():
+    job = parse_kaix_item(KAIX_ITEM, "Product Manager", "ch", "")
+    assert job.pk == "indeed:kx-001"
+    assert (job.title, job.company, job.location) == ("Associate Product Manager", "Birch Systems", "Zurich")
+    assert job.url == "https://ch.indeed.com/viewjob?jk=kx-001"
+    assert job.description == "Shape the roadmap with the team."
+    assert job.posted == "2026-11-06"
+    assert job.employment_type == "Full-time, Permanent"
+    assert (job.recruiter, job.recruiter_title, job.recruiter_url) == ("", "", "")
+
+
+def test_parse_kaix_item_tolerates_missing_and_odd_fields():
+    assert parse_kaix_item({"title": {"text": "No id"}}, "q", "a", "t") is None
+    job = parse_kaix_item(
+        {"id": 7, "title": "flat", "company": None, "urls": {"indeed": "javascript:alert(1)"},
+         "description": {"text": "x" * 7000}, "dates": {"posted": "soon"}, "classification": {"jobType": [1]}},
+        "q", "a", "internship",
+    )  # fmt: skip
+    assert job.job_id == "7"
+    assert (job.title, job.company, job.url, job.posted) == ("", "", "", "")
+    assert len(job.description) == 6000
+    assert job.employment_type == "internship"
+
+
+def test_default_actor_is_kaix():
+    assert IndeedSettings().actor == "kaix~indeed-scraper"

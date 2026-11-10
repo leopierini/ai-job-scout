@@ -18,6 +18,39 @@ _TOKEN = re.compile(r'"([^"]+)"|([^\s()"]+)')
 _OPERATORS = frozenset({"or", "and", "not"})
 _MILLISECOND_EPOCH = 1e11  # epoch values above this are milliseconds, not seconds
 
+# kaix/indeed-scraper takes different input fields and returns nested items. When a date window is set it
+# ignores the job type (its input schema, checked 2026-11-10), so it runs each query once, for every type.
+KAIX = "kaix~indeed-scraper"
+
+
+def searches(settings: IndeedSettings) -> list[tuple[str, str]]:
+    """The (query, job type) pairs one country runs. An empty job type means every type."""
+    if settings.actor == KAIX:
+        return [(query, "") for query in settings.queries]
+    return [(query, job_type) for query in settings.queries for job_type in settings.job_types]
+
+
+def request_payload(settings: IndeedSettings, country: str, query: str, job_type: str, from_days: str) -> dict:
+    """The actor input for one search."""
+    if settings.actor == KAIX:
+        return {
+            "country": country.upper(),
+            "keyword": query,
+            "location": "",  # the actor's own default is a US city
+            "fromDays": from_days,
+            "sort": "date",
+            "maxItems": settings.max_rows_per_query,
+            "searchMode": "detailed",
+        }
+    return {
+        "country": country,
+        "query": query,
+        "jobType": job_type,
+        "fromDays": from_days,
+        "maxRows": settings.max_rows_per_query,
+        "enableUniqueJobs": True,
+    }
+
 
 def query_terms(query: str) -> list[str]:
     """Quoted phrases and bare words of a query, case-folded, without operators or `title:` prefixes."""
@@ -44,6 +77,7 @@ def _location(value: object) -> str:
     if isinstance(value, dict):
         return (
             as_str(value.get("formattedAddressShort"))
+            or as_str(value.get("formattedShort"))
             or ", ".join(x for x in (as_str(value.get("city")), as_str(value.get("country"))) if x)
             or as_str(value.get("formattedAddressLong"))
         )
@@ -98,6 +132,35 @@ def parse_item(item: dict, query: str, area: str, job_type: str) -> Job | None:
     )
 
 
+def _nested(item: dict, key: str, field: str) -> str:
+    """Text of `item[key][field]` when `item[key]` is an object, else empty."""
+    value = item.get(key)
+    return as_str(value.get(field)) if isinstance(value, dict) else ""
+
+
+def parse_kaix_item(item: dict, query: str, area: str, job_type: str) -> Job | None:
+    """Turn one kaix/indeed-scraper item into a Job, or None if it has no usable id."""
+    job_id = as_str(item.get("id")).strip()
+    if not job_id:
+        return None
+    classification = item.get("classification")
+    types = classification.get("jobType") if isinstance(classification, dict) else None
+    item_type = ", ".join(t for t in types if isinstance(t, str)) if isinstance(types, list) else ""
+    return Job(
+        source="indeed",
+        job_id=job_id,
+        title=_nested(item, "title", "text"),
+        company=_nested(item, "company", "name"),
+        location=_location(item.get("location")),
+        url=web_url(_nested(item, "urls", "indeed")),
+        description=_nested(item, "description", "text")[:DESCRIPTION_LIMIT],
+        posted=_posted(_nested(item, "dates", "posted")),
+        keyword=query,
+        area=area,
+        employment_type=item_type or job_type,
+    )
+
+
 class IndeedSource:
     name = "indeed"
 
@@ -113,7 +176,7 @@ class IndeedSource:
                 key=f"indeed:{country}",
                 label=country.upper(),
                 source=self.name,
-                searches=len(s.queries) * len(s.job_types),
+                searches=len(searches(s)),
                 params={"country": country},
             )
             for country in s.countries
@@ -129,27 +192,20 @@ class IndeedSource:
         s = self._settings
         country = area.params["country"]
         from_days = str(indeed_from_days(window_seconds))
-        searches = [(query, job_type) for query in s.queries for job_type in s.job_types]
-        total = len(searches)
+        pairs = searches(s)
+        parse = parse_kaix_item if s.actor == KAIX else parse_item
+        total = len(pairs)
         jobs: dict[str, Job] = {}
         billed = 0
         error: ApifyError | None = None
         complete = True
         progress(0, total, 0)
-        for done, (query, job_type) in enumerate(searches):
+        for done, (query, job_type) in enumerate(pairs):
             if self._cancel.is_set():
                 complete = False
                 break
-            payload = {
-                "country": country,
-                "query": query,
-                "jobType": job_type,
-                "fromDays": from_days,
-                "maxRows": s.max_rows_per_query,
-                "enableUniqueJobs": True,
-            }
             try:
-                items = self._apify.run_actor(s.actor, payload)
+                items = self._apify.run_actor(s.actor, request_payload(s, country, query, job_type, from_days))
             except ApifyError as exc:
                 error, complete = exc, False
                 break
@@ -159,7 +215,7 @@ class IndeedSource:
                 if not isinstance(item, dict):
                     continue
                 try:
-                    job = parse_item(item, query, country, job_type)
+                    job = parse(item, query, country, job_type)
                 except Exception:  # noqa: BLE001 - one malformed item must not lose the area's paid results
                     continue
                 if job is None or job.job_id in jobs:

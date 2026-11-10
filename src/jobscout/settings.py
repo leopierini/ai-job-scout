@@ -33,13 +33,13 @@ class Region(_Model):
 
 class LinkedInSettings(_Model):
     enabled: bool = True
-    actor: str = "curious_coder~linkedin-jobs-scraper"
+    actor: str = "meka.im~linkedin-jobs-scraper"
     keywords: list[str] = []
     regions: list[Region] = []
     cap_per_keyword: int = Field(default=25, ge=1, le=1000)
     sort_by: Literal["DD", "R", ""] = "DD"  # most recent, most relevant, or LinkedIn's default
     scrape_company: bool = True
-    price_per_result: float = Field(default=0.002, ge=0)
+    price_per_result: float = Field(default=0.0003, ge=0)
 
 
 # The `jobType` values the Indeed actor accepts (its input schema, checked 2026-11-01).
@@ -50,12 +50,12 @@ IndeedJobType = Literal[
 
 class IndeedSettings(_Model):
     enabled: bool = False
-    actor: str = "borderline~indeed-scraper"
+    actor: str = "kaix~indeed-scraper"
     countries: list[str] = []
     queries: list[str] = []
     job_types: list[IndeedJobType] = ["internship", "fulltime"]
     max_rows_per_query: int = Field(default=20, ge=1, le=1000)
-    price_per_result: float = Field(default=0.005, ge=0)
+    price_per_result: float = Field(default=0.00005, ge=0)
 
 
 class WindowSettings(_Model):
