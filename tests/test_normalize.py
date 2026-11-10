@@ -1,4 +1,4 @@
-from jobscout.normalize import PlaceMatcher, city_of, dedup_key, fold
+from jobscout.normalize import PlaceMatcher, TermMatcher, city_of, dedup_key, fold
 
 
 def test_fold_strips_accents_case_and_whitespace():
@@ -42,3 +42,14 @@ def test_place_matcher_is_case_insensitive_and_escapes_names():
     assert m.match("VIENNA, REPUBLIC OF AUSTRIA") == "Republic of Austria"
     assert m.match("St. Gallen") == "St. Gallen"
     assert m.match("Stx Gallen") is None
+
+
+def test_term_matcher_matches_whole_words_ignoring_case_and_accents():
+    m = TermMatcher(["Senior", "Head", "Ingénieur", "  "])
+    assert m.match("SENIOR Product Manager") == "Senior"
+    assert m.match("Head of Product") == "Head"
+    assert m.match("Ingenieur Produit") == "Ingénieur"
+    assert m.match("Seniority-free Product Manager") is None
+    assert m.match("Headquarters Product Manager") is None
+    assert m.match("") is None
+    assert TermMatcher([]).match("Senior Product Manager") is None

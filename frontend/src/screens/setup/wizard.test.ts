@@ -29,7 +29,7 @@ function settings(): Settings {
     linkedin: { enabled: true, actor: "a", keywords: [], regions: [], cap_per_keyword: 25, sort_by: "DD", scrape_company: true, price_per_result: 0.002 },
     indeed: { enabled: false, actor: "b", countries: [], queries: [], job_types: ["internship", "fulltime"], max_rows_per_query: 20, price_per_result: 0.005 },
     windows: { default_days: 15, overlap_minutes: 60 },
-    filters: { excluded_countries: [], excluded_cities: [] },
+    filters: { excluded_countries: [], excluded_cities: [], excluded_title_words: [], languages: [] },
     scoring: { provider: "anthropic", model: "claude-sonnet-5-5", min_score: 70, send_below_threshold: false, reasoning_language: "English", batch_size: 10, max_jobs_per_run: null, bands: "", dealbreakers: [], extra_instructions: "" },
     cleanup: { enabled: true, deadline_passed: true, start_too_early: true, too_old: true, excluded_place: true, earliest_start: null, max_age_days: 60, interested_exempt_from_age: true },
     outputs: { csv: { enabled: false, path: "", auto_export: true }, webhook: { enabled: false, url: "" }, notion: { enabled: false, parent_page_id: "", database_id: "" } },
@@ -89,7 +89,7 @@ describe("seedWizard", () => {
 
   test("saved places, rules and profile come back, and the review is open when there's a profile", () => {
     const s = settings()
-    s.filters = { excluded_countries: ["Switzerland"], excluded_cities: ["Paris"] }
+    s.filters = { ...s.filters, excluded_countries: ["Switzerland"], excluded_cities: ["Paris"] }
     s.scoring.dealbreakers = [{ text: "Needs a visa", consequence: "below 40" }]
     s.linkedin.keywords = ["Product Manager"]
     s.cleanup.earliest_start = "2027-01-01"
@@ -159,7 +159,12 @@ describe("the You step", () => {
       ],
     }
     const s = applyYou(settings(), you, ["Switzerland", "United Kingdom"])
-    expect(s.filters).toEqual({ excluded_countries: ["Switzerland"], excluded_cities: ["Paris"] })
+    expect(s.filters).toEqual({
+      excluded_countries: ["Switzerland"],
+      excluded_cities: ["Paris"],
+      excluded_title_words: [],
+      languages: [],
+    })
     expect(s.linkedin.regions).toEqual([{ name: "United Kingdom", geo_id: "101165590" }])
     expect(s.cleanup.earliest_start).toBe("2027-02-01")
     expect(s.ui.headline).toBe("Product Manager, early career")

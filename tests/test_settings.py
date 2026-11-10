@@ -158,3 +158,12 @@ def test_saves_are_atomic(monkeypatch):
     assert load_settings().scoring.min_score == 70
     assert load_profile() == "Old profile." and load_secrets().apify_token == "old-token"
     assert sorted(p.name for p in app_dir().iterdir()) == ["profile.md", "secrets.json", "settings.json"]
+
+
+def test_filter_languages_must_be_known_codes():
+    from jobscout.settings import FilterSettings
+
+    assert FilterSettings(languages=["en", "it"]).languages == ["en", "it"]
+    assert FilterSettings().excluded_title_words == [] and FilterSettings().languages == []
+    with pytest.raises(ValidationError):
+        FilterSettings(languages=["xx"])

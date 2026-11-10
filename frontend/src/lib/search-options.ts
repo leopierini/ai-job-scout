@@ -1,4 +1,4 @@
-import type { IndeedJobType, LinkedInSettings, TableColumn, UiSettings } from "@/api/types"
+import type { IndeedJobType, LinkedInSettings, PostingLanguage, TableColumn, UiSettings } from "@/api/types"
 
 /** Indeed's job types, as the wizard and Settings list them. */
 export const JOB_TYPES: { value: IndeedJobType; label: string }[] = [
@@ -10,6 +10,21 @@ export const JOB_TYPES: { value: IndeedJobType; label: string }[] = [
   { value: "permanent", label: "Permanent" },
   { value: "seasonal", label: "Seasonal" },
   { value: "freelance", label: "Freelance" },
+]
+
+/** The languages the app can recognise a posting in, as the language filter lists them. */
+export const POSTING_LANGUAGES: { value: PostingLanguage; label: string }[] = [
+  { value: "en", label: "English" },
+  { value: "it", label: "Italian" },
+  { value: "de", label: "German" },
+  { value: "fr", label: "French" },
+  { value: "nl", label: "Dutch" },
+  { value: "es", label: "Spanish" },
+  { value: "pt", label: "Portuguese" },
+  { value: "sv", label: "Swedish" },
+  { value: "da", label: "Danish" },
+  { value: "no", label: "Norwegian" },
+  { value: "pl", label: "Polish" },
 ]
 
 /** LinkedIn's sort orders. The empty value (LinkedIn's own default) is "default" in a select, which can't hold "". */
