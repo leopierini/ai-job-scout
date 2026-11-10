@@ -20,12 +20,12 @@ def dedup_key(title: str, company: str, location: str) -> str:
     return f"{fold(title)}|{fold(company)}|{city_of(location)}"
 
 
-class PlaceMatcher:
-    """Finds which configured place name (country or city) appears in a location."""
+class TermMatcher:
+    """Finds which configured term appears in a text as whole words, ignoring case and accents."""
 
-    def __init__(self, countries: list[str], cities: list[str]) -> None:
+    def __init__(self, terms: list[str]) -> None:
         self._originals: dict[str, str] = {}
-        for name in [*countries, *cities]:
+        for name in terms:
             folded = fold(name)
             if folded:
                 self._originals.setdefault(folded, name)
@@ -36,8 +36,15 @@ class PlaceMatcher:
             alternatives = "|".join(re.escape(n) for n in names)
             self._pattern = re.compile(rf"(?<!\w)(?:{alternatives})(?!\w)")
 
-    def match(self, location: str) -> str | None:
-        if self._pattern is None or not location:
+    def match(self, text: str) -> str | None:
+        if self._pattern is None or not text:
             return None
-        found = self._pattern.search(fold(location))
+        found = self._pattern.search(fold(text))
         return self._originals[found.group(0)] if found else None
+
+
+class PlaceMatcher(TermMatcher):
+    """Finds which configured place name (country or city) appears in a location."""
+
+    def __init__(self, countries: list[str], cities: list[str]) -> None:
+        super().__init__([*countries, *cities])

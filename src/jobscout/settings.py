@@ -63,9 +63,15 @@ class WindowSettings(_Model):
     overlap_minutes: int = Field(default=60, ge=0, le=1440)
 
 
+# Languages `jobscout.language` can recognise, as ISO 639-1 codes.
+PostingLanguage = Literal["en", "it", "de", "fr", "nl", "es", "pt", "sv", "da", "no", "pl"]
+
+
 class FilterSettings(_Model):
     excluded_countries: list[str] = []
     excluded_cities: list[str] = []
+    excluded_title_words: list[str] = []  # e.g. "Senior": a job whose title has one is dropped before scoring
+    languages: list[PostingLanguage] = []  # keep only postings written in these; empty keeps every language
 
 
 class Dealbreaker(_Model):
