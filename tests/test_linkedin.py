@@ -19,6 +19,7 @@ LIMIT_COPY = "Apify monthly limit reached. It resets on your billing day. Add cr
 
 
 def make_source(keywords=("Product Manager",), cancel=None, sleeps=None, **kw):
+    kw.setdefault("actor", "curious_coder~linkedin-jobs-scraper")
     settings = LinkedInSettings(
         keywords=list(keywords),
         regions=[Region(name="United Kingdom", geo_id="101165590"), Region(name="Switzerland", geo_id="106693272")],
@@ -334,3 +335,31 @@ def test_regions_file_entries_are_verified():
     assert all(r["verified_on"] for r in data)
     assert all(set(r) == {"name", "geo_id", "verified_on"} for r in data)
     assert len({r["geo_id"] for r in data}) == len(data)
+
+
+def test_meka_actor_gets_its_own_limit_field(respx_mock):
+    route = respx_mock.post(url__regex=r".*acts/meka.im~linkedin-jobs-scraper/run-sync-get-dataset-items.*").respond(
+        200, json=ITEMS
+    )
+    src = make_source(actor="meka.im~linkedin-jobs-scraper", cap_per_keyword=50, scrape_company=False)
+    res = src.search_area(first_area(src), 3600, lambda *a: None)
+    body = json.loads(route.calls[0].request.content)
+    assert body == {
+        "urls": [search_url("Product Manager", "101165590", 3600, "DD")],
+        "scrapeCompany": False,
+        "limitPerSource": 50,
+    }
+    assert [j.job_id for j in res.jobs] == ["9001", "123", "9003"]  # same item fields as the original actor
+
+
+def test_an_unknown_actor_gets_the_original_limit_field(respx_mock):
+    run = r".*acts/someone~other-scraper/run-sync-get-dataset-items.*"
+    route = respx_mock.post(url__regex=run).respond(200, json=[])
+    src = make_source(actor="someone~other-scraper", cap_per_keyword=5)
+    src.search_area(first_area(src), 3600, lambda *a: None)
+    body = json.loads(route.calls[0].request.content)
+    assert body["count"] == 5 and "limitPerSource" not in body
+
+
+def test_default_actor_is_meka():
+    assert LinkedInSettings().actor == "meka.im~linkedin-jobs-scraper"

@@ -50,7 +50,7 @@ def test_estimate_linkedin_only():
     s.linkedin.regions = [Region(name="UK", geo_id="1"), Region(name="CH", geo_id="2")]
     e = estimate(s)
     assert (e.linkedin_searches, e.linkedin_max_results, e.indeed_searches) == (6, 150, 0)
-    assert e.max_usd == pytest.approx(0.30)
+    assert e.max_usd == pytest.approx(150 * 0.0003)
 
 
 def test_estimate_with_indeed():
@@ -61,6 +61,20 @@ def test_estimate_with_indeed():
     s.indeed.queries = ["analyst", "marketing", "sales"]  # job_types default: 2
     e = estimate(s)
     assert (e.linkedin_searches, e.linkedin_max_results) == (0, 0)
+    # The default actor runs each query once for every job type.
+    assert (e.indeed_searches, e.indeed_max_results) == (6, 120)
+    assert e.max_usd == pytest.approx(120 * 0.00005)
+
+
+def test_estimate_with_an_indeed_actor_that_splits_job_types():
+    s = Settings()
+    s.linkedin.enabled = False
+    s.indeed.enabled = True
+    s.indeed.actor = "borderline~indeed-scraper"
+    s.indeed.price_per_result = 0.005
+    s.indeed.countries = ["gb", "ch"]
+    s.indeed.queries = ["analyst", "marketing", "sales"]  # job_types default: 2
+    e = estimate(s)
     assert (e.indeed_searches, e.indeed_max_results) == (12, 240)
     assert e.max_usd == pytest.approx(240 * 0.005)
 
@@ -71,7 +85,7 @@ def test_estimate_empty_settings_is_free():
 
 def test_billed_cost():
     s = Settings()
-    assert billed_cost({"linkedin": 100, "indeed": 10}, s) == pytest.approx(100 * 0.002 + 10 * 0.005)
+    assert billed_cost({"linkedin": 100, "indeed": 10}, s) == pytest.approx(100 * 0.0003 + 10 * 0.00005)
     assert billed_cost({}, s) == 0.0
 
 

@@ -65,7 +65,9 @@ def test_run_sample_progress_lines_are_not_repeated(capsys):
 
 
 def test_run_prints_the_most_it_can_cost_first(capsys, monkeypatch):
-    linkedin = LinkedInSettings(keywords=["a", "b"], regions=[Region(name="Norway", geo_id="1")], cap_per_keyword=10)
+    linkedin = LinkedInSettings(
+        keywords=["a", "b"], regions=[Region(name="Norway", geo_id="1")], cap_per_keyword=10, price_per_result=0.002
+    )
     real_setup(linkedin=linkedin)
     save_secrets(Secrets(apify_token="test-token-123"))
     import jobscout.pipeline
@@ -212,7 +214,9 @@ def test_paths_lists_files(capsys, jobscout_home):
 
 
 def test_estimate_without_token(capsys):
-    linkedin = LinkedInSettings(keywords=["a", "b"], regions=[Region(name="Norway", geo_id="1")], cap_per_keyword=10)
+    linkedin = LinkedInSettings(
+        keywords=["a", "b"], regions=[Region(name="Norway", geo_id="1")], cap_per_keyword=10, price_per_result=0.002
+    )
     save_settings(Settings(linkedin=linkedin))
     assert main(["estimate"]) == 0
     out = capsys.readouterr().out

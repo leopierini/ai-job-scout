@@ -16,11 +16,20 @@ DESCRIPTION_LIMIT = 6000
 _ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 _VIEW_ID = re.compile(r"/jobs/view/(\d+)")
 
+# The actors return the same item fields, but name their per-search results limit differently.
+_LIMIT_FIELD = {"meka.im~linkedin-jobs-scraper": "limitPerSource", "curious_coder~linkedin-jobs-scraper": "count"}
+
 
 def search_url(keyword: str, geo_id: str, seconds: int, sort_by: str) -> str:
     """LinkedIn search URL for a keyword in a region. Never filters by experience level."""
     url = f"https://www.linkedin.com/jobs/search/?keywords={quote(keyword)}&f_TPR=r{seconds}&geoId={geo_id}"
     return f"{url}&sortBy={sort_by}" if sort_by else url
+
+
+def request_payload(settings: LinkedInSettings, url: str) -> dict:
+    """The actor input for one search. An actor not listed above gets `count`, the original field."""
+    limit_field = _LIMIT_FIELD.get(settings.actor, "count")
+    return {"urls": [url], "scrapeCompany": settings.scrape_company, limit_field: settings.cap_per_keyword}
 
 
 def _job_id(item: dict) -> str:
@@ -105,9 +114,8 @@ class LinkedInSource:
                 complete = False
                 break
             url = search_url(keyword, area.params["geo_id"], window_seconds, s.sort_by)
-            payload = {"urls": [url], "scrapeCompany": s.scrape_company, "count": s.cap_per_keyword}
             try:
-                items = self._apify.run_actor(s.actor, payload)
+                items = self._apify.run_actor(s.actor, request_payload(s, url))
             except ApifyError as exc:
                 error, complete = exc, False
                 break

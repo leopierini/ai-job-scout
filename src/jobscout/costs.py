@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import httpx
 
 from jobscout.settings import Settings
+from jobscout.sources.indeed import searches as indeed_searches
 
 LIMITS_URL = "https://api.apify.com/v2/users/me/limits"
 
@@ -23,7 +24,7 @@ def estimate(s: Settings) -> CostEstimate:
     li, ind = s.linkedin, s.indeed
     li_searches = len(li.regions) * len(li.keywords) if li.enabled else 0
     li_results = li_searches * li.cap_per_keyword
-    ind_searches = len(ind.countries) * len(ind.queries) * len(ind.job_types) if ind.enabled else 0
+    ind_searches = len(ind.countries) * len(indeed_searches(ind)) if ind.enabled else 0
     ind_results = ind_searches * ind.max_rows_per_query
     max_usd = li_results * li.price_per_result + ind_results * ind.price_per_result
     return CostEstimate(li_searches, li_results, ind_searches, ind_results, max_usd)
