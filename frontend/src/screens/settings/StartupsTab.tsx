@@ -77,7 +77,7 @@ const APIFY_BOARDS: {
     name: "wttj",
     title: "Welcome to the Jungle",
     inSentence: "Welcome to the Jungle",
-    intro: "Startups and scale-ups across Europe, including the jobs that used to be on Otta. Searched through Apify.",
+    intro: "Startups and scale-ups across Europe, including the jobs that used to be on Otta. Searched through Apify. Its terms forbid reading the site automatically: turn it on only if you accept that.",
     locationHint: "A country code such as IT, a place such as Milan, or Remote. Each one adds one search per search above.",
     placeholder: "e.g. IT",
   },
@@ -85,7 +85,7 @@ const APIFY_BOARDS: {
     name: "wellfound",
     title: "Wellfound",
     inSentence: "Wellfound",
-    intro: "Startup jobs, most with a salary range. Mostly in the US. Searched through Apify, which also charges $0.005 for each search.",
+    intro: "Startup jobs, most with a salary range. Mostly in the US. Searched through Apify, which also charges $0.005 for each search plus its platform usage. Its terms forbid reading the site automatically: turn it on only if you accept that.",
     locationHint: "A place such as Berlin or Italy, or Remote. Each one adds one search per search above.",
     placeholder: "e.g. Italy",
   },
@@ -252,7 +252,7 @@ function StartupsForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: 
                 value={otherBoards}
                 onChange={(v) => set("vcboards.boards", [...chosenPresets, ...v])}
                 placeholder="e.g. https://jobs.example-ventures.com"
-                hint="The address of any other board on Getro or Consider."
+                hint="The address of any other board on Getro or Consider. Getro's terms apply to these too."
                 optional
               />
               <ChipsInput

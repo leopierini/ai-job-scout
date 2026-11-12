@@ -21,11 +21,11 @@ WEEK = 7 * 86400
 
 ASHBY = "https://api.ashbyhq.com/posting-api/job-board/example-labs?includeCompensation=true"
 GREENHOUSE = "https://boards-api.greenhouse.io/v1/boards/kestrelpayments/jobs?content=true&pay_transparency=true"
-LEVER = "https://api.lever.co/v0/postings/fjordline?mode=json"
-LEVER_EU = "https://api.eu.lever.co/v0/postings/fjordline?mode=json"
+LEVER = "https://api.lever.co/v0/postings/fjord-labs-example?mode=json"
+LEVER_EU = "https://api.eu.lever.co/v0/postings/fjord-labs-example?mode=json"
 RECRUITEE = "https://brightwater.recruitee.com/api/offers/"
 WORKABLE = "https://apply.workable.com/api/v1/widget/accounts/northwind-robotics?details=true"
-PERSONIO = "https://alpenglow.jobs.personio.de/xml"
+PERSONIO = "https://alpenglow-example.jobs.personio.de/xml"
 TEAMTAILOR = "https://careers.lumenhealth.example/jobs.rss"
 
 
@@ -92,11 +92,11 @@ def test_areas_one_per_page_labelled_from_the_address_without_any_request():
             "https://jobs.ashbyhq.com/example-labs",
             "https://JOBS.ashbyhq.com/example-labs/",  # the same page again
             "https://boards.greenhouse.io/kestrelpayments",
-            "https://jobs.eu.lever.co/fjordline",
+            "https://jobs.eu.lever.co/fjord-labs-example",
             "https://brightwater.recruitee.com/",
             "https://apply.workable.com/northwind-robotics/",
-            "https://alpenglow.jobs.personio.de",
-            "https://lumen-health.teamtailor.com/jobs",
+            "https://alpenglow-example.jobs.personio.de",
+            "https://lumen-health-example.teamtailor.com/jobs",
             "https://careers.kestrel-payments.example/open-roles",
         ]
     )
@@ -104,11 +104,11 @@ def test_areas_one_per_page_labelled_from_the_address_without_any_request():
     assert [a.label for a in areas] == [
         "Example Labs",
         "Kestrelpayments",
-        "Fjordline",
+        "Fjord Labs Example",
         "Brightwater",
         "Northwind Robotics",
-        "Alpenglow",
-        "Lumen Health",
+        "Alpenglow Example",
+        "Lumen Health Example",
         "Kestrel Payments",
     ]
     assert areas[0].key == "careers:https://jobs.ashbyhq.com/example-labs"
@@ -139,13 +139,13 @@ def test_company_label_keeps_mixed_case_and_strips_host_prefixes():
             "kestrelpayments",
             GREENHOUSE,
         ),
-        ("https://jobs.lever.co/fjordline", "lever", "fjordline", LEVER),
-        ("https://jobs.eu.lever.co/fjordline/a1b2", "lever", "fjordline", LEVER_EU),
+        ("https://jobs.lever.co/fjord-labs-example", "lever", "fjord-labs-example", LEVER),
+        ("https://jobs.eu.lever.co/fjord-labs-example/a1b2", "lever", "fjord-labs-example", LEVER_EU),
         ("https://brightwater.recruitee.com/o/junior", "recruitee", "brightwater", RECRUITEE),
         ("https://apply.workable.com/northwind-robotics/j/9F8E", "workable", "northwind-robotics", WORKABLE),
-        ("https://alpenglow.jobs.personio.de/", "personio", "alpenglow", PERSONIO),
-        ("https://alpenglow.jobs.personio.com", "personio", "alpenglow", "https://alpenglow.jobs.personio.com/xml"),
-        ("https://lumen.teamtailor.com/jobs", "teamtailor", "lumen", "https://lumen.teamtailor.com/jobs.rss"),
+        ("https://alpenglow-example.jobs.personio.de/", "personio", "alpenglow-example", PERSONIO),
+        ("https://alpenglow-example.jobs.personio.com", "personio", "alpenglow-example", "https://alpenglow-example.jobs.personio.com/xml"),
+        ("https://lumen-example.teamtailor.com/jobs", "teamtailor", "lumen-example", "https://lumen-example.teamtailor.com/jobs.rss"),
         ("https://careers.lumenhealth.example/jobs.rss", "teamtailor", "careers.lumenhealth.example", TEAMTAILOR),
     ],
 )
@@ -169,7 +169,7 @@ def test_find_board_in_page_html():
     assert find_board(
         '<iframe src="https://job-boards.greenhouse.io/embed/job_board?b=1&amp;for=kestrelpayments">'
     ).token == ("kestrelpayments")
-    assert find_board('<a href="https://jobs.eu.lever.co/fjordline">').feed_url == LEVER_EU
+    assert find_board('<a href="https://jobs.eu.lever.co/fjord-labs-example">').feed_url == LEVER_EU
     assert find_board('<a href="https://www.workable.com/">Powered by</a>') is None  # the system's own site
     # A site built on Teamtailor is its own board.
     page = '<link href="//assets-aws.teamtailor-cdn.com/assets/careersite.css"><a href="//app.teamtailor.com/x">'
@@ -226,25 +226,25 @@ def test_greenhouse():
 
 
 def test_lever_us_and_eu_hosts():
-    source, server, _ = make_source(["https://jobs.lever.co/fjordline"], {LEVER: fixture("careers_lever.json")})
+    source, server, _ = make_source(["https://jobs.lever.co/fjord-labs-example"], {LEVER: fixture("careers_lever.json")})
     result, _ = search(source)
     assert server.urls == [LEVER]
     jobs = by_title(result)
     growth = jobs["Growth Marketing Manager"]
-    assert growth.job_id == "lever:fjordline:a1b2c3d4-0000-4000-8000-00000000000a"
-    assert growth.company == "Fjordline"
+    assert growth.job_id == "lever:fjord-labs-example:a1b2c3d4-0000-4000-8000-00000000000a"
+    assert growth.company == "Fjord Labs Example"
     assert growth.location == "Milan, Italy; Rome, Italy"
     assert growth.posted == "2026-11-11"  # from epoch milliseconds
     assert growth.employment_type == "Full-time"
     assert growth.salary == "EUR 45,000–55,000 a year"
-    assert "Grow the Fjordline user base." in growth.description
+    assert "Grow the Fjord Labs Example user base." in growth.description
     assert "What you'll do\n- Run campaigns" in growth.description
     assert growth.description.endswith("We offer a learning budget.")
     assoc = jobs["Customer Success Associate"]
     assert assoc.location == "Anywhere (remote)"
     assert assoc.salary == "Paid internship"
 
-    source, server, _ = make_source(["https://jobs.eu.lever.co/fjordline"], {LEVER_EU: fixture("careers_lever.json")})
+    source, server, _ = make_source(["https://jobs.eu.lever.co/fjord-labs-example"], {LEVER_EU: fixture("careers_lever.json")})
     result, _ = search(source)
     assert server.urls == [LEVER_EU] and len(result.jobs) == 2
 
@@ -286,21 +286,21 @@ def test_workable():
 
 def test_personio():
     source, server, _ = make_source(
-        ["https://alpenglow.jobs.personio.de/"], {PERSONIO: fixture("careers_personio.xml")}
+        ["https://alpenglow-example.jobs.personio.de/"], {PERSONIO: fixture("careers_personio.xml")}
     )
     result, _ = search(source)
     assert server.urls == [PERSONIO]
     jobs = by_title(result)
     po = jobs["Product Owner (d/f/m)"]
-    assert po.job_id == "personio:alpenglow:3100001"
-    assert po.company == "Alpenglow Software GmbH"
+    assert po.job_id == "personio:alpenglow-example:3100001"
+    assert po.company == "Alpenglow Example Software GmbH"
     assert po.location == "Munich; Vienna"
-    assert po.url == "https://alpenglow.jobs.personio.de/job/3100001"
+    assert po.url == "https://alpenglow-example.jobs.personio.de/job/3100001"
     assert po.posted == "2026-11-10"
     assert po.employment_type == "Full-time, permanent"
     assert po.description == "Your role\nOwn the roadmap & talk to customers.\n\nYour profile\n- Curious"
     student = jobs["Working Student Marketing"]
-    assert student.company == "Alpenglow" and student.employment_type == "Part-time, working_student"
+    assert student.company == "Alpenglow Example" and student.employment_type == "Part-time, working_student"
 
 
 def test_teamtailor_feed_address():
@@ -387,7 +387,7 @@ def test_title_words_keep_whole_words_and_set_the_keyword():
 
 def test_locations_match_words_remote_and_blank():
     routes = {LEVER: fixture("careers_lever.json"), GREENHOUSE: fixture("careers_greenhouse.json")}
-    pages = ["https://jobs.lever.co/fjordline", "https://boards.greenhouse.io/kestrelpayments"]
+    pages = ["https://jobs.lever.co/fjord-labs-example", "https://boards.greenhouse.io/kestrelpayments"]
     source, _, _ = make_source(pages, routes, locations=["rome"])
     result, _ = search(source)
     assert [j.title for j in result.jobs] == ["Growth Marketing Manager"]  # "Rome, Italy" among its locations
@@ -512,7 +512,7 @@ def test_cancel_after_the_careers_page_skips_the_feed():
 
     def page_then_cancel():
         cancel.set()
-        return httpx.Response(200, content=b'<a href="https://jobs.lever.co/fjordline">Jobs</a>')
+        return httpx.Response(200, content=b'<a href="https://jobs.lever.co/fjord-labs-example">Jobs</a>')
 
     source, server, _ = make_source([page], {page: page_then_cancel}, cancel=cancel)
     result, _ = search(source)
@@ -529,7 +529,7 @@ def test_one_malformed_item_does_not_lose_the_others(monkeypatch):
         return real(job, feed)
 
     monkeypatch.setattr(careers, "_lever", fussy)
-    source, _, _ = make_source(["https://jobs.lever.co/fjordline"], {LEVER: fixture("careers_lever.json")})
+    source, _, _ = make_source(["https://jobs.lever.co/fjord-labs-example"], {LEVER: fixture("careers_lever.json")})
     result, _ = search(source)
     assert result.complete
     assert [j.title for j in result.jobs] == ["Customer Success Associate"]
@@ -544,7 +544,7 @@ def test_items_without_id_or_title_are_skipped():
 
 def test_pauses_between_areas():
     source, _, sleeps = make_source(
-        ["https://jobs.ashbyhq.com/example-labs", "https://jobs.lever.co/fjordline"],
+        ["https://jobs.ashbyhq.com/example-labs", "https://jobs.lever.co/fjord-labs-example"],
         {ASHBY: fixture("careers_ashby.json"), LEVER: fixture("careers_lever.json")},
     )
     search(source, area=0)

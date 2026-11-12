@@ -67,7 +67,7 @@ Keep the launcher window open while you use the app. Closing it stops the app.
 
 ## What you need
 
-- **An Apify account.** Apify runs the LinkedIn and Indeed searches. The free plan includes $5 of usage a month. The wizard shows where to find your token.
+- **An Apify account.** Apify runs the LinkedIn and Indeed searches, and the paid startup boards. The free plan includes $5 of usage a month. The wizard shows where to find your token. You don't need it if you only use the free startup sources.
 - **One AI to read and score the jobs.** Pick one:
   - **Claude Code**: uses your Claude subscription and needs no API key. It must be installed and signed in on your computer.
   - **Anthropic**, **OpenAI**, **Google Gemini** or **OpenRouter**: each needs an API key from that company. Usage is paid per use, and Gemini has a free tier with limits.
@@ -77,9 +77,11 @@ Keep the launcher window open while you use the app. Closing it stops the app.
 
 The app is free. You pay Apify for the searches, and your AI provider for scoring if you use one that charges per use.
 
-Apify charges for each job it finds. The app's default actors cost about **$0.0003 per LinkedIn job** and **$0.00005 per Indeed job** on Apify's free plan (checked November 2026), so a full run usually costs well under $1. You can change these prices in Settings if Apify changes them.
+Apify charges for each job it finds. The app's default actors cost about **$0.0003 per LinkedIn job** and **$0.00005 per Indeed job** on Apify's free plan (checked November 2026), so a run of those two usually costs well under $1. You can change these prices in Settings if Apify changes them.
 
-- **The cost is shown before every run.** The top of the main screen says "Next run up to $…", worked out from your keywords, regions and results limits, next to your remaining Apify credit. It is an upper estimate: it assumes every search returns its maximum number of results.
+The startup boards on Apify cost more per job: about **$0.003** for Welcome to the Jungle and Wellfound, **$0.0001** for Y Combinator and **$0.005** for company job boards. Wellfound also charges **$0.005 for each search**, which the estimate includes, plus Apify platform usage, which it doesn't. The free startup sources cost nothing.
+
+- **The cost is shown before every run.** The top of the main screen says "Next run up to $…", worked out from your keywords, regions and results limits, next to your remaining Apify credit. It is an upper estimate: it assumes every search returns its maximum number of results (only Wellfound's platform usage is left out).
 - **You rarely pay twice for the same posting.** Each search only looks back to your last run, and jobs the app has already seen are never scored again. Repeats can still happen in two ways: a small overlap (60 minutes by default) is added to each search so nothing is missed, and two searches (different keywords or regions) can find the same job. The app removes those repeats, but Apify still charges for them.
 
 ## Your data stays on your computer
@@ -102,7 +104,7 @@ Your jobs always appear in the app. Under **Settings, then Outputs** you can als
 
 - **Notion.** Create an integration at notion.so/my-integrations, add it to a Notion page, and paste its token and the page's link. The app creates the jobs database inside that page for you, then adds each new job to it. Statuses you change in Notion are read back before the next run.
 - **CSV file.** Writes your tracked jobs to a spreadsheet file you can open in Excel or Numbers. It can export after every run, and **Settings, then Data** has an Export to CSV button.
-- **Webhook.** The app sends one JSON POST per job at or above your minimum score. Jobs below the minimum are sent too if you turn on **Also send jobs below the minimum to your outputs** (under **Settings, then Profile & rules**). After a re-score, jobs that still qualify are sent again with the same `id`, so your automation can update the existing row instead of adding a new one. The body has these fields: `id`, `source`, `job_id`, `title`, `company`, `location`, `url`, `score`, `reason`, `flags`, `status`, `start_date`, `deadline`, `posted`, `recruiter`, `recruiter_title`, `recruiter_url` and `keyword`. Use the **Send a test job** button in the app to send a sample job while you set up the receiving end.
+- **Webhook.** The app sends one JSON POST per job at or above your minimum score. Jobs below the minimum are sent too if you turn on **Also send jobs below the minimum to your outputs** (under **Settings, then Profile & rules**). After a re-score, jobs that still qualify are sent again with the same `id`, so your automation can update the existing row instead of adding a new one. The body has these fields: `id`, `source`, `job_id`, `title`, `company`, `location`, `salary`, `url`, `score`, `reason`, `flags`, `status`, `start_date`, `deadline`, `posted`, `recruiter`, `recruiter_title`, `recruiter_url` and `keyword`. Use the **Send a test job** button in the app to send a sample job while you set up the receiving end.
 
 Webhook recipes, to reach Google Sheets, Airtable, Slack, email and more:
 
@@ -188,7 +190,7 @@ Each scheduled run spends Apify credit, so check `jobscout estimate` first. Only
 
 ## Disclaimer
 
-Most searches go through third-party Apify actors, not through this project; the free startup sources are read from public job feeds. You are responsible for following each site's terms of service and Apify's terms (Getro's terms, for example, forbid reading its boards automatically). This project is not affiliated with, endorsed by or sponsored by LinkedIn, Indeed, Apify, Notion, any job board, venture capital firm or AI provider.
+Most searches go through third-party Apify actors, not through this project. The free startup sources are read from the sites' public job feeds or through the same search APIs their own pages use. You are responsible for following each site's terms of service and Apify's terms: Getro, Welcome to the Jungle and Wellfound, for example, forbid reading their sites automatically. This project is not affiliated with, endorsed by or sponsored by LinkedIn, Indeed, Apify, Notion, any job board, venture capital firm or AI provider.
 
 ## License
 
