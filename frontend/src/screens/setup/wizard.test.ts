@@ -23,11 +23,13 @@ import {
   wizardHref,
 } from "./wizard"
 import { readiness } from "@/lib/readiness"
+import { OFF_STARTUP_SOURCES } from "@/lib/test-settings"
 
 function settings(): Settings {
   return {
     linkedin: { enabled: true, actor: "a", keywords: [], regions: [], cap_per_keyword: 25, sort_by: "DD", scrape_company: true, price_per_result: 0.002 },
     indeed: { enabled: false, actor: "b", countries: [], queries: [], job_types: ["internship", "fulltime"], max_rows_per_query: 20, price_per_result: 0.005 },
+    ...OFF_STARTUP_SOURCES,
     windows: { default_days: 15, overlap_minutes: 60 },
     filters: { excluded_countries: [], excluded_cities: [], excluded_title_words: [], languages: [] },
     scoring: { provider: "anthropic", model: "claude-sonnet-5-5", min_score: 70, send_below_threshold: false, reasoning_language: "English", batch_size: 10, max_jobs_per_run: null, bands: "", dealbreakers: [], extra_instructions: "" },

@@ -19,7 +19,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { relativeDay, STATUS_LABELS } from "@/lib/format"
-import { filterJobs, fullDay, monthYear, sortJobs, sourceLabel, type SortDir, type SortKey } from "@/lib/jobs"
+import { filterJobs, fullDay, monthYear, SOURCE_LABELS, sortJobs, sourceLabel, type SortDir, type SortKey } from "@/lib/jobs"
 import { TABLE_COLUMNS } from "@/lib/search-options"
 import { cn } from "@/lib/utils"
 import { JobRowDetails } from "./JobRowDetails"
@@ -410,8 +410,13 @@ export function ResultsTable(props: ResultsTableProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
-              <SelectItem value="linkedin">LinkedIn</SelectItem>
-              <SelectItem value="indeed">Indeed</SelectItem>
+              {Object.entries(SOURCE_LABELS)
+                .filter(([value]) => value !== "sample")
+                .map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
           <Input

@@ -57,7 +57,20 @@ export function fullDay(iso: string): string {
   return match && month ? `${Number(match[3])} ${month} ${match[1]}` : ""
 }
 
-const SOURCE_LABELS: Record<string, string> = { linkedin: "LinkedIn", indeed: "Indeed", sample: "Sample" }
+/** How each job source is named; the same names as `SOURCE_LABELS` in jobscout/models.py. */
+export const SOURCE_LABELS: Record<string, string> = {
+  linkedin: "LinkedIn",
+  indeed: "Indeed",
+  builtineurope: "Built in Europe",
+  jobgether: "Jobgether",
+  vcboards: "VC job boards",
+  careers: "Career pages",
+  wttj: "Welcome to the Jungle",
+  wellfound: "Wellfound",
+  yc: "Y Combinator",
+  atsindex: "Company job boards",
+  sample: "Sample",
+}
 
 export function sourceLabel(source: string): string {
   return SOURCE_LABELS[source] ?? source
