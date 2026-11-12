@@ -281,6 +281,18 @@ class Settings(_Model):
     # Where the startup sources search, as keys of data/startup_places.json ("it", "europe", "remote").
     # A source whose own places are empty uses these, in its own format (jobscout.startup_places).
     startup_places: list[str] = []
+
+    @field_validator("startup_places")
+    @classmethod
+    def _startup_places(cls, v: list[str]) -> list[str]:
+        from jobscout.startup_places import catalog  # imported here: that module reads these settings
+
+        known = catalog()
+        keys = list(dict.fromkeys(k.strip().lower() for k in v if k.strip()))
+        unknown = [k for k in keys if k not in known]
+        if unknown:
+            raise ValueError(f"Unknown place: {', '.join(unknown)}")
+        return keys
     windows: WindowSettings = WindowSettings()
     filters: FilterSettings = FilterSettings()
     scoring: ScoringSettings = ScoringSettings()

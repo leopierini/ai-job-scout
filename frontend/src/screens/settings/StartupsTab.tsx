@@ -139,7 +139,7 @@ function StartupsForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: 
           so they keep only jobs that match your searches, and only recent ones, except career pages.
         </p>
 
-        <Section title="Where to search" intro="Every source below searches these places, each in its own format.">
+        <Section title="Where to search" intro="Every source below searches these places, each in its own format. Career pages are the exception: they keep every place unless you set their own.">
           <MultiSelect
             label="Places"
             options={(places ?? []).map((p) => ({ value: p.key, label: p.name }))}
@@ -148,7 +148,7 @@ function StartupsForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: 
             addLabel="Add a place"
             searchPlaceholder="Search places"
             emptyText={places ? "No place matches." : "Loading places…"}
-            hint="Europe searches all of Europe; Remote adds remote jobs. On the boards searched through Apify, each place adds one search."
+            hint="Pick countries, Europe for all of Europe, and Remote for remote jobs anywhere. On the boards searched through Apify, each place adds one search."
             error={err("startup_places")}
           />
         </Section>
@@ -334,11 +334,11 @@ function StartupsForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: 
                 optional
               />
               <ChipsInput
-                label="Places for this source"
+                label="Places"
                 value={s.careers.locations}
                 onChange={(v) => set("careers.locations", v)}
                 placeholder="e.g. Italy"
-                hint={`Only jobs in one of these places, or remote, are kept. ${OWN_PLACES}`}
+                hint="Only jobs whose location names one of these, e.g. Milan or Remote, are kept. Leave it empty to keep every place."
                 error={err("careers.locations")}
                 optional
               />

@@ -11,135 +11,168 @@
     },
     {
       "key": "at",
-      "name": "Austria"
+      "name": "Austria",
+      "europe": true
     },
     {
       "key": "be",
-      "name": "Belgium"
+      "name": "Belgium",
+      "europe": true
     },
     {
       "key": "bg",
-      "name": "Bulgaria"
+      "name": "Bulgaria",
+      "europe": true
     },
     {
       "key": "ca",
-      "name": "Canada"
+      "name": "Canada",
+      "europe": false
     },
     {
       "key": "hr",
-      "name": "Croatia"
+      "name": "Croatia",
+      "europe": true
     },
     {
       "key": "cy",
-      "name": "Cyprus"
+      "name": "Cyprus",
+      "europe": true
     },
     {
       "key": "cz",
-      "name": "Czechia"
+      "name": "Czechia",
+      "europe": true
     },
     {
       "key": "dk",
-      "name": "Denmark"
+      "name": "Denmark",
+      "europe": true
     },
     {
       "key": "ee",
-      "name": "Estonia"
+      "name": "Estonia",
+      "europe": true
     },
     {
       "key": "fi",
-      "name": "Finland"
+      "name": "Finland",
+      "europe": true
     },
     {
       "key": "fr",
-      "name": "France"
+      "name": "France",
+      "europe": true
     },
     {
       "key": "de",
-      "name": "Germany"
+      "name": "Germany",
+      "europe": true
     },
     {
       "key": "gr",
-      "name": "Greece"
+      "name": "Greece",
+      "europe": true
     },
     {
       "key": "hu",
-      "name": "Hungary"
+      "name": "Hungary",
+      "europe": true
     },
     {
       "key": "is",
-      "name": "Iceland"
+      "name": "Iceland",
+      "europe": true
     },
     {
       "key": "ie",
-      "name": "Ireland"
+      "name": "Ireland",
+      "europe": true
     },
     {
       "key": "it",
-      "name": "Italy"
+      "name": "Italy",
+      "europe": true
     },
     {
       "key": "lv",
-      "name": "Latvia"
+      "name": "Latvia",
+      "europe": true
     },
     {
       "key": "lt",
-      "name": "Lithuania"
+      "name": "Lithuania",
+      "europe": true
     },
     {
       "key": "lu",
-      "name": "Luxembourg"
+      "name": "Luxembourg",
+      "europe": true
     },
     {
       "key": "mt",
-      "name": "Malta"
+      "name": "Malta",
+      "europe": true
     },
     {
       "key": "nl",
-      "name": "Netherlands"
+      "name": "Netherlands",
+      "europe": true
     },
     {
       "key": "no",
-      "name": "Norway"
+      "name": "Norway",
+      "europe": true
     },
     {
       "key": "pl",
-      "name": "Poland"
+      "name": "Poland",
+      "europe": true
     },
     {
       "key": "pt",
-      "name": "Portugal"
+      "name": "Portugal",
+      "europe": true
     },
     {
       "key": "ro",
-      "name": "Romania"
+      "name": "Romania",
+      "europe": true
     },
     {
       "key": "sk",
-      "name": "Slovakia"
+      "name": "Slovakia",
+      "europe": true
     },
     {
       "key": "si",
-      "name": "Slovenia"
+      "name": "Slovenia",
+      "europe": true
     },
     {
       "key": "es",
-      "name": "Spain"
+      "name": "Spain",
+      "europe": true
     },
     {
       "key": "se",
-      "name": "Sweden"
+      "name": "Sweden",
+      "europe": true
     },
     {
       "key": "ch",
-      "name": "Switzerland"
+      "name": "Switzerland",
+      "europe": true
     },
     {
       "key": "gb",
-      "name": "United Kingdom"
+      "name": "United Kingdom",
+      "europe": true
     },
     {
       "key": "us",
-      "name": "United States"
+      "name": "United States",
+      "europe": false
     }
   ]
 }

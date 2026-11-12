@@ -915,7 +915,7 @@ def test_where_to_search_reaches_each_source_in_its_own_format(db):
     s.wttj.queries = ["AI engineer"]
     with build_pipeline(s, Secrets(apify_token="t"), db, "p") as p:
         by_name = {src.name: src for src in p._sources}
-        assert by_name["careers"]._settings.locations == ["Italy", "Remote"]
+        assert by_name["careers"]._settings.locations == []  # career pages filter by their own places only
         assert [a.label for a in by_name["wttj"].areas()] == ["IT", "Remote"]
 
 
