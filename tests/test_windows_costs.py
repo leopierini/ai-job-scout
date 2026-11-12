@@ -100,6 +100,9 @@ def test_estimate_with_apify_boards_and_free_sources():
     assert (e.board_searches, e.board_max_results) == (7, 175)
     assert (e.searches, e.max_results) == (7, 175)
     assert e.max_usd == pytest.approx(150 * 0.001 + 25 * 0.0001)
+    s.wellfound.enabled = True  # a start fee for each search
+    s.wellfound.price_per_result = 0.0
+    assert estimate(s).max_usd == pytest.approx(e.max_usd + 0.005)
 
 
 def test_billed_cost():

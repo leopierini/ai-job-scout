@@ -6,13 +6,13 @@
     "country": "IT",
     "workplaceType": "hybrid",
     "createdAt": 1794387600000,
-    "descriptionPlain": "Grow the Fjordline user base.",
-    "description": "<div>Grow the Fjordline user base.</div>",
+    "descriptionPlain": "Grow the Fjord Labs Example user base.",
+    "description": "<div>Grow the Fjord Labs Example user base.</div>",
     "lists": [{"text": "What you'll do", "content": "<li>Run campaigns</li><li>Measure them</li>"}],
     "additionalPlain": "We offer a learning budget.",
     "salaryRange": {"currency": "EUR", "interval": "per-year-salary", "min": 45000, "max": 55000},
-    "hostedUrl": "https://jobs.lever.co/fjordline/a1b2c3d4-0000-4000-8000-00000000000a",
-    "applyUrl": "https://jobs.lever.co/fjordline/a1b2c3d4-0000-4000-8000-00000000000a/apply"
+    "hostedUrl": "https://jobs.lever.co/fjord-labs-example/a1b2c3d4-0000-4000-8000-00000000000a",
+    "applyUrl": "https://jobs.lever.co/fjord-labs-example/a1b2c3d4-0000-4000-8000-00000000000a/apply"
   },
   {
     "id": "a1b2c3d4-0000-4000-8000-00000000000b",
@@ -22,6 +22,6 @@
     "createdAt": 1794474000000,
     "descriptionPlain": "Keep customers happy.",
     "salaryDescriptionPlain": "Paid internship",
-    "hostedUrl": "https://jobs.lever.co/fjordline/a1b2c3d4-0000-4000-8000-00000000000b"
+    "hostedUrl": "https://jobs.lever.co/fjord-labs-example/a1b2c3d4-0000-4000-8000-00000000000b"
   }
 ]

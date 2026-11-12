@@ -12,6 +12,8 @@ LIMITS_URL = "https://api.apify.com/v2/users/me/limits"
 # Job boards searched through an Apify actor with ApifyBoardSettings; each bills per result.
 APIFY_BOARDS = ("wttj", "wellfound", "yc", "atsindex")
 PAID_SOURCES = ("linkedin", "indeed", *APIFY_BOARDS)
+# What an actor charges each time it starts, on top of its results (Wellfound's default actor, checked 2026-11-12).
+START_FEES_USD = {"wellfound": 0.005}
 
 
 def board_searches(b: ApifyBoardSettings) -> int:
@@ -53,7 +55,7 @@ def estimate(s: Settings) -> CostEstimate:
         n = board_searches(board)
         other_searches += n
         other_results += n * board.max_results_per_search
-        max_usd += n * board.max_results_per_search * board.price_per_result
+        max_usd += n * (board.max_results_per_search * board.price_per_result + START_FEES_USD.get(name, 0.0))
     return CostEstimate(li_searches, li_results, ind_searches, ind_results, max_usd, other_searches, other_results)
 
 
