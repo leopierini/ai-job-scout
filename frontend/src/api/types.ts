@@ -230,7 +230,7 @@ export interface ApifyBoardSettings {
 
 export type ApifyBoardName = "wttj" | "wellfound" | "yc" | "atsindex"
 
-/** GET /api/startup-places: what "Where to search" offers. Key: a country code, "europe" or "remote". */
+/** GET /api/startup-places: what "Places" at the top of the Startups tab offers. Key: a country code, "europe" or "remote". */
 export interface StartupPlace {
   key: string
   name: string
@@ -335,8 +335,10 @@ export interface Settings {
   wellfound: ApifyBoardSettings
   yc: ApifyBoardSettings
   atsindex: ApifyBoardSettings
-  /** "Where to search" on the Startups tab: keys from GET /api/startup-places. */
+  /** "Places" at the top of the Startups tab: keys from GET /api/startup-places. */
   startup_places: string[]
+  /** "Searches" at the top of the Startups tab: every startup source but career pages uses them when its own are empty. */
+  startup_queries: string[]
   windows: WindowSettings
   filters: FilterSettings
   scoring: ScoringSettings

@@ -2,7 +2,9 @@ import { describe, expect, test } from "vitest"
 
 import type { Keys, Settings } from "@/api/types"
 import { OFF_STARTUP_SOURCES } from "@/lib/test-settings"
+import { headlineFor } from "@/screens/main/TopBar"
 import { profileHasText, readiness } from "./readiness"
+import { queriesFor, sourcesInUse, usesApify } from "./sources"
 
 function settings(): Settings {
   return {
@@ -110,6 +112,43 @@ describe("readiness", () => {
       { id: "ai_key", what: "Add your Google Gemini API key", tab: "keys" },
     ])
     expect(readiness(gemini, keys({ apify_token: true, gemini_api_key: true }), "Text", "real")).toEqual([])
+  })
+})
+
+describe("the shared startup searches", () => {
+  function startups(change: (s: Settings) => Settings): Settings {
+    const s = settings()
+    return change({ ...s, linkedin: { ...s.linkedin, enabled: false }, startup_queries: ["AI engineer"] })
+  }
+
+  test("a source that is on with no searches of its own uses the shared ones", () => {
+    const s = startups((s) => ({ ...s, jobgether: { ...s.jobgether, enabled: true } }))
+    expect(queriesFor(s, "jobgether")).toEqual(["AI engineer"])
+    expect(sourcesInUse(s)).toEqual(["jobgether"])
+    expect(usesApify(s)).toBe(false)
+    expect(readiness(s, keys(), "Some text", "real")).toEqual([])
+  })
+
+  test("a source's own searches win over the shared ones", () => {
+    const s = startups((s) => ({ ...s, yc: { ...s.yc, enabled: true, queries: ["founding engineer"] } }))
+    expect(queriesFor(s, "yc")).toEqual(["founding engineer"])
+    expect(headlineFor(s)).toBe("founding engineer")
+  })
+
+  test("an Apify board with only the shared searches needs the Apify token", () => {
+    const s = startups((s) => ({ ...s, wttj: { ...s.wttj, enabled: true } }))
+    expect(sourcesInUse(s)).toEqual(["wttj"])
+    expect(usesApify(s)).toBe(true)
+    expect(readiness(s, keys(), "Some text", "real").map((m) => m.id)).toEqual(["apify_token"])
+    expect(headlineFor(s)).toBe("AI engineer")
+  })
+
+  test("a source that is off, or no shared searches, searches nothing", () => {
+    const off = startups((s) => s)
+    expect(sourcesInUse(off)).toEqual([])
+    const none = startups((s) => ({ ...s, startup_queries: [], wttj: { ...s.wttj, enabled: true } }))
+    expect(sourcesInUse(none)).toEqual([])
+    expect(usesApify(none)).toBe(false)
   })
 })
 

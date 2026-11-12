@@ -12,9 +12,10 @@ const board = (actor: string): ApifyBoardSettings => ({
 /** The startup sources, all off: spread into a test's Settings. */
 export const OFF_STARTUP_SOURCES: Pick<
   Settings,
-  "builtineurope" | "jobgether" | "vcboards" | "careers" | "wttj" | "wellfound" | "yc" | "atsindex" | "startup_places"
+  "builtineurope" | "jobgether" | "vcboards" | "careers" | "wttj" | "wellfound" | "yc" | "atsindex" | "startup_places" | "startup_queries"
 > = {
   startup_places: [],
+  startup_queries: [],
   builtineurope: { enabled: false, queries: [], countries: [], max_results_per_query: 50 },
   jobgether: { enabled: false, queries: [], locations: [], experience: [], max_results_per_query: 50 },
   vcboards: { enabled: false, boards: [], queries: [], locations: [], max_results_per_board: 100 },

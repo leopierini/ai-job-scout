@@ -932,6 +932,30 @@ def test_apify_boards_need_the_apify_token(db):
         assert [src.name for src in p._sources] == ["wttj"]
 
 
+def test_sources_with_only_the_shared_searches_run(db):
+    s = Settings(startup_queries=["AI engineer"])
+    s.linkedin.enabled = False
+    s.scoring.provider = "ollama"
+    s.builtineurope.enabled = True
+    s.jobgether.enabled = True
+    s.careers.enabled = True  # no pages: skipped, and never given the shared searches
+    with build_pipeline(s, Secrets(), db, "p") as p:
+        by_name = {src.name: src for src in p._sources}
+        assert list(by_name) == ["builtineurope", "jobgether"]
+        assert by_name["jobgether"]._settings.queries == ["AI engineer"]
+
+
+def test_an_apify_board_with_only_the_shared_searches_needs_the_token(db):
+    s = Settings(startup_queries=["AI engineer"])
+    s.linkedin.enabled = False
+    s.scoring.provider = "ollama"
+    s.yc.enabled = True
+    with pytest.raises(ConfigError, match="Apify"):
+        build_pipeline(s, Secrets(), db, "p")
+    with build_pipeline(s, Secrets(apify_token="t"), db, "p") as p:
+        assert [src.name for src in p._sources] == ["yc"]
+
+
 def test_enabled_source_with_nothing_to_search_is_skipped(db):
     s = Settings()  # LinkedIn on by default, with no keywords or regions
     s.scoring.provider = "ollama"  # needs no key; nothing is scored

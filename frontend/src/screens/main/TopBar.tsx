@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { EstimateLoad } from "@/lib/estimate"
 import { money } from "@/lib/format"
 import type { Missing } from "@/lib/readiness"
+import { queriesFor } from "@/lib/sources"
 
 /** The window select's values: "last" is "since the last run" (window_days null). */
 export const WINDOWS = [
@@ -24,12 +25,14 @@ export type WindowValue = (typeof WINDOWS)[number]["value"]
 export function headlineFor(settings: Settings): string {
   if (settings.ui.headline.trim()) return settings.ui.headline.trim()
   const { linkedin, indeed } = settings
-  const others = [settings.builtineurope, settings.jobgether, settings.wttj, settings.wellfound, settings.yc, settings.atsindex]
+  const others = (["builtineurope", "jobgether", "wttj", "wellfound", "yc", "atsindex"] as const)
+    .filter((name) => settings[name].enabled)
+    .map((name) => queriesFor(settings, name))
   const keywords = linkedin.enabled
     ? linkedin.keywords
     : indeed.enabled
       ? indeed.queries
-      : (others.find((o) => o.enabled && o.queries.length > 0)?.queries ?? [])
+      : (others.find((q) => q.length > 0) ?? [])
   const places = [
     ...(linkedin.enabled ? linkedin.regions.map((r) => r.name) : []),
     ...(indeed.enabled ? indeed.countries.map((c) => c.toUpperCase()) : []),

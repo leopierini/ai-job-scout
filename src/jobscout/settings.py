@@ -281,6 +281,14 @@ class Settings(_Model):
     # Where the startup sources search, as keys of data/startup_places.json ("it", "europe", "remote").
     # A source whose own places are empty uses these, in its own format (jobscout.startup_places).
     startup_places: list[str] = []
+    # What the startup sources search for ("AI engineer"). A source whose own searches are empty uses these.
+    # Career pages never do: they filter titles by whole words, and a phrase would drop most of their jobs.
+    startup_queries: list[str] = []
+
+    @field_validator("startup_queries")
+    @classmethod
+    def _startup_queries(cls, v: list[str]) -> list[str]:
+        return list(dict.fromkeys(q.strip() for q in v if q.strip()))
 
     @field_validator("startup_places")
     @classmethod

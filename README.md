@@ -38,7 +38,7 @@ Searching LinkedIn and Indeed by hand means reading a lot of postings that don't
 
 ## Jobs at startups
 
-Settings → Startups adds sources that LinkedIn and Indeed often miss. All are off until you turn them on.
+Settings → Startups adds sources that LinkedIn and Indeed often miss. All are off until you turn them on. The searches and places at the top of the Startups tab apply to every startup source except career pages, which filter by their own title words and places; any source can still have searches or places of its own.
 
 - **Free, read from public job feeds:** Built in Europe (jobs at venture-backed European startups), Jobgether (remote jobs), the job boards venture capital firms run for the startups they back (on Getro or Consider), and the career pages of companies you follow (Ashby, Greenhouse, Lever, Recruitee, Workable, Personio and Teamtailor). They cost nothing to search, and keep only jobs that match your searches so the AI reads as few as possible: recent ones, except career pages, where every open job is read once.
 - **Through Apify, paid per job like LinkedIn:** Welcome to the Jungle (including what was Otta), Wellfound, Y Combinator's Work at a Startup, and an index of many companies' own job boards.

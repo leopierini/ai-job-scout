@@ -3,7 +3,7 @@ from pydantic import ValidationError
 
 from jobscout.costs import estimate
 from jobscout.settings import Settings
-from jobscout.startup_places import apply_places, catalog, european, formats
+from jobscout.startup_places import apply_shared, catalog, european, formats
 
 
 def test_catalog_starts_with_europe_and_remote_then_countries():
@@ -25,7 +25,7 @@ def test_each_source_gets_its_own_format():
 
 def test_career_pages_are_not_given_places():
     assert "careers" not in formats(["it"])
-    s = apply_places(Settings(startup_places=["it"]))
+    s = apply_shared(Settings(startup_places=["it"]))
     assert s.careers.locations == []
 
 
@@ -60,7 +60,7 @@ def test_saved_places_are_normalised_and_checked():
 def test_a_source_with_its_own_places_keeps_them():
     s = Settings(startup_places=["it"])
     s.wttj.locations = ["FR"]
-    out = apply_places(s)
+    out = apply_shared(s)
     assert out.wttj.locations == ["FR"] and out.yc.locations == ["Italy"]
     assert out.builtineurope.countries == ["italy"]
     assert s.yc.locations == []  # the saved settings are not changed
@@ -68,7 +68,7 @@ def test_a_source_with_its_own_places_keeps_them():
 
 def test_no_shared_places_changes_nothing():
     s = Settings()
-    assert apply_places(s) is s
+    assert apply_shared(s) is s
 
 
 def test_estimate_counts_one_search_per_shared_place():
@@ -82,3 +82,45 @@ def test_estimate_counts_one_search_per_shared_place():
 def test_api_lists_the_places(client):
     places = client.get("/api/startup-places").json()
     assert places[0] == {"key": "europe", "name": "Europe"} and {"key": "it", "name": "Italy"} in places
+
+
+def test_shared_searches_fill_each_search_based_source():
+    s = apply_shared(Settings(startup_queries=["AI engineer", "ML engineer"]))
+    for name in ("builtineurope", "jobgether", "vcboards", "wttj", "wellfound", "yc", "atsindex"):
+        assert getattr(s, name).queries == ["AI engineer", "ML engineer"], name
+    assert s.yc.locations == [] and s.builtineurope.countries == []  # no shared places: places untouched
+
+
+def test_a_source_with_its_own_searches_keeps_them():
+    s = Settings(startup_queries=["AI engineer"])
+    s.wellfound.queries = ["founding engineer"]
+    out = apply_shared(s)
+    assert out.wellfound.queries == ["founding engineer"] and out.jobgether.queries == ["AI engineer"]
+    assert s.jobgether.queries == []  # the saved settings are not changed
+
+
+def test_career_pages_are_not_given_searches():
+    s = apply_shared(Settings(startup_queries=["AI engineer"], startup_places=["it"]))
+    assert s.careers.title_words == [] and s.careers.locations == []
+
+
+def test_saved_searches_are_trimmed_and_deduplicated():
+    s = Settings(startup_queries=[" AI engineer ", "AI engineer", "", "  ", "ML engineer"])
+    assert s.startup_queries == ["AI engineer", "ML engineer"]
+
+
+def test_estimate_counts_the_shared_searches():
+    s = Settings(startup_queries=["AI engineer", "ML engineer"], startup_places=["it", "remote"])
+    s.linkedin.enabled = False
+    s.yc.enabled = True
+    s.wttj.enabled = True
+    s.wttj.queries = ["data engineer"]  # its own: one query
+    assert estimate(s).board_searches == 2 * 2 + 1 * 2
+
+
+def test_shared_searches_round_trip_through_the_api(client):
+    headers = {"X-Requested-By": "ai-job-scout"}
+    body = client.get("/api/settings").json()
+    body["startup_queries"] = [" AI engineer", "AI engineer", "ML engineer"]
+    assert client.put("/api/settings", json=body, headers=headers).status_code == 200
+    assert client.get("/api/settings").json()["startup_queries"] == ["AI engineer", "ML engineer"]
