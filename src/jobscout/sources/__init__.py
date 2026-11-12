@@ -1,13 +1,14 @@
 """Job sources: what they search and what they return, plus helpers the sources share."""
 
 import html
+import ipaddress
 import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timedelta
 from html.parser import HTMLParser
 from typing import Any, Protocol
-from urllib.parse import urlsplit
+from urllib.parse import urljoin, urlsplit
 
 import httpx
 
@@ -180,6 +181,51 @@ def html_to_text(markup: object) -> str:
         return re.sub(r"<[^>]+>", " ", html.unescape(text)).strip()
     lines = [re.sub(r"[ \t\u00a0]+", " ", line).strip() for line in "".join(parser.parts).splitlines()]
     return re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip()
+
+
+_LOCAL_SUFFIXES = (".localhost", ".local", ".internal", ".lan", ".home", ".arpa")
+MAX_REDIRECTS = 5
+NOT_PUBLIC = "points to an address on your own computer or network, so it wasn't read."
+
+
+def is_public_web_url(url: str) -> bool:
+    """True for an http(s) address whose host isn't this computer or a private network.
+
+    Only the address is checked, not what its name resolves to: enough to stop a public page from
+    redirecting the app to a router or a local service.
+    """
+    try:
+        parts = urlsplit(url)
+        host = (parts.hostname or "").rstrip(".").lower()
+    except ValueError:
+        return False
+    if parts.scheme.lower() not in ("http", "https") or not host:
+        return False
+    if host == "localhost" or host.endswith(_LOCAL_SUFFIXES) or "." not in host and ":" not in host:
+        return False
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return True  # a name, not a literal address
+    return ip.is_global
+
+
+def get_public(
+    client: httpx.Client, url: str, label: str, *, headers: dict[str, str], timeout: float = 30
+) -> httpx.Response:
+    """GET `url`, following redirects only between public addresses (see is_public_web_url).
+
+    Raises SearchError naming `label` when an address is local or private; transport errors are left to
+    the caller, which already turns them into readable messages.
+    """
+    for _ in range(MAX_REDIRECTS + 1):
+        if not is_public_web_url(url):
+            raise SearchError(f"{label} {NOT_PUBLIC}")
+        response = client.get(url, headers=headers, timeout=timeout, follow_redirects=False)
+        if not response.is_redirect:
+            return response
+        url = urljoin(str(response.url), response.headers.get("location", ""))
+    raise SearchError(f"{label} redirected too many times.")
 
 
 def fetch_json(

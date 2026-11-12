@@ -245,7 +245,6 @@ function StartupsForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: 
                 searchPlaceholder="Search firms"
                 emptyText={presets ? "No firm matches." : "Loading boards…"}
                 hint="Boards on Getro's platform say in their terms that they may not be read automatically. Choose them only if you accept that."
-                error={err("vcboards.boards")}
               />
               <ChipsInput
                 label="Other boards"
@@ -253,6 +252,7 @@ function StartupsForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: 
                 onChange={(v) => set("vcboards.boards", [...chosenPresets, ...v])}
                 placeholder="e.g. https://jobs.example-ventures.com"
                 hint="The address of any other board on Getro or Consider. Getro's terms apply to these too."
+                error={err("vcboards.boards")}
                 optional
               />
               <ChipsInput

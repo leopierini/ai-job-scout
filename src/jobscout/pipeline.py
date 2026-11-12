@@ -13,7 +13,7 @@ from jobscout import _search as search
 from jobscout._steps import STEPS, UNEXPECTED, StepResult, StepRunner, ignore  # noqa: F401 - STEPS is public here
 from jobscout._text import plural
 from jobscout.cleanup import run_cleanup
-from jobscout.costs import APIFY_BOARDS, billed_cost
+from jobscout.costs import APIFY_BOARDS, PAID_SOURCES, billed_cost
 from jobscout.db import Database
 from jobscout.errors import ConfigError, NotionError
 from jobscout.models import JobRow, JobState, RunSummary, ScoreResult, StepEvent
@@ -193,13 +193,16 @@ class Pipeline(StepRunner):
         searches_done = postings = 0
         incomplete: list[str] = []
         areas: list[dict] = []
-        stop: str | None = None  # a limit or a rejected token: no further area can succeed
+        stop: str | None = None  # an Apify limit or a rejected token: no further Apify search can succeed
+        free_done = False  # a free source (no Apify) completed an area
 
         def summary() -> str:
             return f"{searches_done} of {plural(total, 'search', 'searches')} · {plural(postings, 'posting')}"
 
         for source, area in plan:
             self._check_cancel(summary())
+            if stop is not None and source.name in PAID_SOURCES:
+                continue  # the free sources still run
             area_done = 0
 
             def progress(done: int, area_total: int, found: int) -> None:
@@ -236,20 +239,22 @@ class Pipeline(StepRunner):
                 }
             )  # fmt: skip
             if complete:
+                free_done = free_done or source.name not in PAID_SOURCES
                 if may_commit:
                     self._db.commit_window(area.key, self._start_time)
             elif error is not None and error.kind in search.STOP_ALL:
                 stop = str(error)
-                break
             elif error is not None:
                 incomplete.append(f"{area.label} ({error})")
             else:
                 self._check_cancel(summary())  # the source stopped early because of a cancel
 
         data = {"areas": areas}
-        if stop is not None:
+        if stop is not None and not free_done:
             return StepResult(stop, status="error", done=searches_done, total=total, data=data)
         message = summary()
+        if stop is not None:
+            message += f" · Apify searches stopped: {stop}"
         if incomplete:
             message += f" · incomplete, retried next run: {'; '.join(incomplete)}"
         if not any(a["complete"] for a in areas):

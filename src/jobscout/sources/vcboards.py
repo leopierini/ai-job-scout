@@ -43,6 +43,7 @@ from jobscout.sources import (
     SearchArea,
     as_str,
     fetch_json,
+    get_public,
     html_to_text,
     posted_date,
     salary_text,
@@ -394,12 +395,11 @@ class VcBoardsSource:
             self._pause()
             last = attempt == attempts - 1
             try:
-                response = self._client.request(
-                    "GET",
+                response = get_public(
+                    self._client,
                     url,
+                    label,
                     headers={"User-Agent": USER_AGENT, "Accept": "text/html,application/xhtml+xml"},
-                    timeout=30,
-                    follow_redirects=True,
                 )
             except httpx.TimeoutException:
                 if last:

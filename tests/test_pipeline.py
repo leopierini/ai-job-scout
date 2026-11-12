@@ -19,7 +19,12 @@ from jobscout.settings import Secrets, Settings
 from jobscout.sources import AreaResult, SearchArea
 from jobscout.sources.apify import AUTH_MESSAGE, LIMIT_MESSAGE
 from jobscout.sources.sample import _DATA as SAMPLE_DATA
-from jobscout.sources.sample import SAMPLE_PROFILE, SampleSource, sample_answers, sample_settings
+from jobscout.sources.sample import (
+    SAMPLE_PROFILE,
+    SampleSource,
+    sample_answers,
+    sample_settings,
+)
 
 STEPS = ["cleanup", "search", "filter", "score", "save"]
 NOTION_API = "https://api.notion.com/v1"
@@ -332,6 +337,19 @@ def test_rejected_apify_token_stops_every_area_and_fails_the_search(db):
     fin = final_events(events)
     assert fin["search"].status == "error" and fin["search"].message == AUTH_MESSAGE
     assert [fin[step].status for step in ["filter", "score", "save"]] == ["done"] * 3
+
+
+def test_an_apify_stop_skips_only_apify_sources(db):
+    events = []
+    limit = ApifyError("Apify monthly limit reached.", kind="limit")
+    linkedin = FakeSource("linkedin", {"linkedin:A": AreaResult([], 0, False, limit)})
+    wttj = FakeSource("wttj", {"wttj:IT": ok(make_job(source="wttj", job_id="w"))})
+    careers = FakeSource("careers", {"careers:x": ok(make_job(source="careers", job_id="c"))})
+    s = make_pipeline(db, [linkedin, wttj, careers], on_event=events.append).run()
+    assert wttj.calls == [] and [k for k, _ in careers.calls] == ["careers:x"]
+    search = final_events(events)["search"]
+    assert search.status == "done" and search.message.endswith("Apify searches stopped: Apify monthly limit reached.")
+    assert s.status == "done" and db.get("careers:c") is not None
 
 
 def test_search_fails_when_no_area_completes(db):

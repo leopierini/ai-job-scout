@@ -4,7 +4,15 @@ import httpx
 import pytest
 
 from jobscout.errors import SearchError
-from jobscout.sources import fetch_json, html_to_text, posted_date, salary_text, within_window
+from jobscout.sources import (
+    fetch_json,
+    get_public,
+    html_to_text,
+    is_public_web_url,
+    posted_date,
+    salary_text,
+    within_window,
+)
 
 TODAY = date(2026, 11, 12)
 DAY = 86400
@@ -58,3 +66,49 @@ def test_fetch_json_errors_never_name_the_address():
         with pytest.raises(SearchError) as caught:
             fetch_json(answer(status), "GET", url, "Example Board", sleep=lambda _s: None)
         assert words in str(caught.value) and "example-board.com" not in str(caught.value)
+
+
+@pytest.mark.parametrize(
+    ("url", "public"),
+    [
+        ("https://jobs.example-board.com/jobs", True),
+        ("http://203.0.113.9/jobs", False),  # documentation range: not global
+        ("https://8.8.8.8/", True),
+        ("http://localhost:8765/api", False),
+        ("http://127.0.0.1/", False),
+        ("http://192.168.1.1/admin", False),
+        ("http://10.0.0.5/", False),
+        ("http://169.254.169.254/latest", False),
+        ("http://[::1]/", False),
+        ("http://router.local/", False),
+        ("http://intranet/", False),
+        ("ftp://jobs.example-board.com/", False),
+    ],
+)
+def test_is_public_web_url(url, public):
+    assert is_public_web_url(url) is public
+
+
+def test_get_public_refuses_a_redirect_to_a_private_address():
+    seen = []
+
+    def handler(request):
+        seen.append(str(request.url))
+        return httpx.Response(302, headers={"location": "http://192.168.1.1/admin"})
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    with pytest.raises(SearchError) as caught:
+        get_public(client, "https://careers.example-labs.com/", "The careers page of Example Labs", headers={})
+    assert seen == ["https://careers.example-labs.com/"]  # the private address is never requested
+    assert "192.168" not in str(caught.value) and "own computer or network" in str(caught.value)
+
+
+def test_get_public_follows_public_redirects():
+    def handler(request):
+        if request.url.path == "/old":
+            return httpx.Response(301, headers={"location": "/new"})
+        return httpx.Response(200, text="ok")
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    response = get_public(client, "https://careers.example-labs.com/old", "Example Labs", headers={})
+    assert response.text == "ok" and str(response.url) == "https://careers.example-labs.com/new"

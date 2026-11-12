@@ -77,6 +77,22 @@ describe("readiness", () => {
     expect(readiness(careersOnly, keys({ apify_token: false }), "Some text", "real")).toEqual([])
   })
 
+  test("LinkedIn left on with nothing to search doesn't ask for the Apify token", () => {
+    const s = settings() // LinkedIn on, no keywords or regions
+    const careers: Settings = { ...s, careers: { ...s.careers, enabled: true, pages: ["https://jobs.ashbyhq.com/example-labs"] } }
+    expect(readiness(careers, keys({ apify_token: false }), "Some text", "real")).toEqual([])
+  })
+
+  test("LinkedIn keywords without a region still ask for one when another source runs", () => {
+    const s = settings()
+    const both: Settings = {
+      ...s,
+      linkedin: { ...s.linkedin, keywords: ["AI engineer"] },
+      careers: { ...s.careers, enabled: true, pages: ["https://jobs.ashbyhq.com/example-labs"] },
+    }
+    expect(readiness(both, keys({ apify_token: true }), "Some text", "real").map((m) => m.id)).toEqual(["region"])
+  })
+
   test("an Apify board needs the Apify token", () => {
     const s = settings()
     const wttj: Settings = {
