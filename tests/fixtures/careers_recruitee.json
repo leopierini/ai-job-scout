@@ -1,0 +1,40 @@
+{
+  "offers": [
+    {
+      "id": 7700001,
+      "guid": "abc12",
+      "title": "Junior Data Scientist",
+      "company_name": "Brightwater Analytics",
+      "location": "Utrecht, Netherlands",
+      "city": "Utrecht",
+      "country": "Netherlands",
+      "country_code": "NL",
+      "remote": false,
+      "hybrid": true,
+      "on_site": false,
+      "locations": [{"id": 1, "name": "Utrecht", "city": "Utrecht", "country": "Netherlands", "country_code": "NL"}],
+      "employment_type_code": "fulltime_permanent",
+      "salary": {"min": "3,200", "max": "4,000", "period": "month", "currency": "EUR"},
+      "published_at": "2026-11-09 07:45:05 UTC",
+      "created_at": "2026-11-09 07:31:31 UTC",
+      "careers_url": "https://careers.brightwater.example/o/junior-data-scientist",
+      "description": "<p>Model things.</p>",
+      "requirements": "<ul><li>Python</li></ul>"
+    },
+    {
+      "id": 7700002,
+      "title": "Content Writer",
+      "company_name": "Brightwater Analytics",
+      "location": "Remote job",
+      "city": null,
+      "country": null,
+      "remote": true,
+      "locations": [],
+      "employment_type_code": "parttime_fixed_term",
+      "salary": {"min": null, "max": null, "period": null, "currency": null},
+      "published_at": "2026-11-10 07:45:05 UTC",
+      "careers_url": "https://careers.brightwater.example/o/content-writer",
+      "description": "<p>Write things.</p>"
+    }
+  ]
+}

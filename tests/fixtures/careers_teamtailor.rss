@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:tt="https://teamtailor.com/locations">
+  <channel>
+    <title>Lumen Health</title>
+    <description>Open positions</description>
+    <link>https://careers.lumenhealth.example/jobs</link>
+    <item>
+      <title>Frontend Developer</title>
+      <description>&lt;p&gt;Build the &lt;strong&gt;patient app&lt;/strong&gt;.&lt;/p&gt;</description>
+      <pubDate>Tue, 10 Nov 2026 22:37:11 +0200</pubDate>
+      <link>https://careers.lumenhealth.example/jobs/5550001-frontend-developer</link>
+      <remoteStatus>fully</remoteStatus>
+      <guid>6f0c1d2e-0000-4000-8000-000000000001</guid>
+      <tt:locations>
+        <tt:location>
+          <tt:name>Turin office</tt:name>
+          <tt:city>Turin</tt:city>
+          <tt:country>Italy</tt:country>
+        </tt:location>
+      </tt:locations>
+      <tt:department>Engineering</tt:department>
+    </item>
+    <item>
+      <title>Clinical Operations Lead</title>
+      <description>&lt;p&gt;Run the clinics.&lt;/p&gt;</description>
+      <pubDate>Wed, 11 Nov 2026 01:30:00 +0200</pubDate>
+      <link>https://careers.lumenhealth.example/jobs/5550002-clinical-operations-lead</link>
+      <remoteStatus>none</remoteStatus>
+      <guid>6f0c1d2e-0000-4000-8000-000000000002</guid>
+      <tt:locations>
+        <tt:location>
+          <tt:name>Bologna</tt:name>
+          <tt:city>Bologna</tt:city>
+          <tt:country>Italy</tt:country>
+        </tt:location>
+      </tt:locations>
+    </item>
+  </channel>
+</rss>

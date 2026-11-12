@@ -16,6 +16,8 @@ from jobscout.http import request_json
 from jobscout.models import Job
 
 DESCRIPTION_LIMIT = 6000
+# Sent to the free sources: names the app, never the person running it.
+USER_AGENT = "ai-job-scout/1.0 (open-source job search app)"
 _MILLISECOND_EPOCH = 1e11  # epoch values above this are milliseconds, not seconds
 
 

@@ -82,14 +82,20 @@ class BuiltInEuropeSettings(_Model):
     max_results_per_query: int = Field(default=50, ge=1, le=500)
 
 
+# Jobgether's experience levels (its API docs, checked 2026-11-12).
+JobgetherExperience = Literal[
+    "entry-level-graduate", "junior-1-2-years", "mid-level-2-5-years", "senior-5-10-years", "expert-10-years"
+]
+
+
 class JobgetherSettings(_Model):
     """Jobgether's public job API (remote-first). Free."""
 
     enabled: bool = False
     queries: list[str] = []
     locations: list[str] = []  # Jobgether location slugs, e.g. "italy", "europe"; empty: anywhere
-    experience: list[str] = []  # Jobgether experience slugs, e.g. "entry-level-graduate"; empty: any level
-    max_results_per_query: int = Field(default=50, ge=1, le=500)
+    experience: list[JobgetherExperience] = []  # empty: any level
+    max_results_per_query: int = Field(default=50, ge=1, le=250)  # Jobgether gives at most 10 pages of 25
 
 
 class VcBoardsSettings(_Model):
@@ -133,29 +139,54 @@ class ApifyBoardSettings(_Model):
 
 
 class WttjSettings(ApifyBoardSettings):
-    """Welcome to the Jungle (which now includes Otta)."""
+    """Welcome to the Jungle (which now includes Otta).
 
-    actor: str = "blackfalcondata~wttj-scraper"
-    price_per_result: float = Field(default=0.00045, ge=0)
+    Locations: a two-letter country code ("IT") or a city, region or country name ("Milan", "Italy"), or "Remote".
+    Price (Apify pricing, checked 2026-11-12): $0.00299 a job plus $0.00001 a dataset item, and a negligible
+    $0.00005 for each run's start.
+    """
+
+    actor: str = "clearpath~welcome-to-the-jungle-jobs-api"
+    price_per_result: float = Field(default=0.003, ge=0)
 
 
 class WellfoundSettings(ApifyBoardSettings):
+    """Wellfound (formerly AngelList Talent), the startup job board.
+
+    Locations: Wellfound places as in wellfound.com/location/<place> ("Berlin", "London", "Italy"), or "Remote".
+    Price (Apify pricing, checked 2026-11-12): $0.003 a job, plus $0.005 for each run's start (one run per
+    query and location, not counted in the estimate), plus Apify platform usage (compute and residential proxy),
+    which this actor bills separately.
+    """
+
     actor: str = "blackfalcondata~wellfound-scraper"
     price_per_result: float = Field(default=0.003, ge=0)
 
 
 class YcSettings(ApifyBoardSettings):
-    """Y Combinator's Work at a Startup."""
+    """Y Combinator's Work at a Startup.
+
+    Locations: a city, region or country name or a two-letter country code ("Milan", "Italy", "IT"), "Europe",
+    or "Remote". The actor returns at most 200 jobs a search.
+    Price (Apify pricing, checked 2026-11-12): $0.0001 a job on the Free and Starter plans, no start fee.
+    """
 
     actor: str = "nomad-agent~ycombinator-was-scraper"
     price_per_result: float = Field(default=0.0001, ge=0)
 
 
 class AtsIndexSettings(ApifyBoardSettings):
-    """An index of many companies' own job boards, searched at once."""
+    """An index of many companies' own job boards (Greenhouse, Ashby, Lever, Personio, Teamtailor, ...).
 
-    actor: str = "fantastic-jobs~career-site-job-listing-api"
-    price_per_result: float = Field(default=0.012, ge=0)
+    Locations: a two-letter country code ("IT") or a place, region or work policy as job boards write it
+    ("Milan", "Italy", "Europe", "Remote").
+    Price (Apify pricing, checked 2026-11-12): $0.003 a job on the Free plan; from 2026-11-20 $0.005 on Starter,
+    $0.004 on Scale and $0.0035 on Business. The default is the highest, so the estimate stays an upper bound.
+    Jobs dropped by the actor's own filters are free; each run's start costs a negligible $0.00005.
+    """
+
+    actor: str = "jtpalms~ats-jobs-index"
+    price_per_result: float = Field(default=0.005, ge=0)
 
 
 class WindowSettings(_Model):
