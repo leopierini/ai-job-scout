@@ -305,7 +305,7 @@ def test_database_persists_and_sets_pragmas(jobscout_home):
     d = Database(path)
     j = make_job(job_id="1")
     d.insert_scraped([j], {j.pk: "k"})
-    assert d._conn.execute("PRAGMA user_version").fetchone()[0] == 2
+    assert d._conn.execute("PRAGMA user_version").fetchone()[0] == 3
     assert d._conn.execute("PRAGMA journal_mode").fetchone()[0] == "wal"
     d.close()
     d2 = Database(path)
@@ -333,9 +333,10 @@ def test_older_database_gains_new_columns(jobscout_home):
     old.commit()
     old.close()
     d = Database(path)
-    j = make_job(job_id="1")
+    j = make_job(job_id="1", salary="EUR 30,000–36,000 a year")
     d.insert_scraped([j], {j.pk: "k"})
-    assert d.get(j.pk).restored is False
+    row = d.get(j.pk)
+    assert row.restored is False and row.salary == "EUR 30,000–36,000 a year"
     d.close()
 
 

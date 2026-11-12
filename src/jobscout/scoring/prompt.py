@@ -10,15 +10,18 @@ MAX_DESCRIPTION_CHARS = 6000
 
 
 def _job_payload(job: Job) -> dict:
-    return {
+    payload = {
         "id": job.pk,
         "title": job.title,
         "company": job.company,
         "location": job.location,
         "posted": job.posted,
         "employment_type": job.employment_type,
-        "description": job.description[:MAX_DESCRIPTION_CHARS],
     }
+    if job.salary:
+        payload["salary"] = job.salary
+    payload["description"] = job.description[:MAX_DESCRIPTION_CHARS]
+    return payload
 
 
 def _output_contract(cfg: ScoringSettings, today: date) -> str:

@@ -36,7 +36,8 @@ def test_create_database_schema_has_status_options(respx_mock):
     props = sent["properties"]
     assert props == PROPERTIES
     assert [o["name"] for o in props["Status"]["select"]["options"]] == list(STATUS_LABELS.values())
-    assert [o["name"] for o in props["Source"]["select"]["options"]] == ["LinkedIn", "Indeed"]
+    sources = [o["name"] for o in props["Source"]["select"]["options"]]
+    assert sources[:2] == ["LinkedIn", "Indeed"] and "Built in Europe" in sources and "Sample" not in sources
     assert "title" in props["Title"] and "number" in props["Fit Score"] and "multi_select" in props["Flags"]
     for name in ["Company", "Location", "Reason", "Keyword", "Recruiter", "Recruiter Title", "Job ID"]:
         assert "rich_text" in props[name]

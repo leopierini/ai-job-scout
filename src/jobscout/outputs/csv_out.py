@@ -7,7 +7,7 @@ from pathlib import Path
 from jobscout.models import STATUS_LABELS, JobRow
 
 CSV_COLUMNS = [
-    "Fit score", "Title", "Company", "Location", "Status", "Reason", "Flags", "Starts", "Deadline",
+    "Fit score", "Title", "Company", "Location", "Salary", "Status", "Reason", "Flags", "Starts", "Deadline",
     "Posted", "Source", "Job URL", "Recruiter", "Recruiter title", "Recruiter contact", "Keyword", "Job ID",
 ]  # fmt: skip
 
@@ -27,6 +27,7 @@ def _text_cells(row: JobRow) -> list[str]:
         row.title,
         row.company,
         row.location,
+        row.salary,
         STATUS_LABELS[row.status],
         row.reason,
         "; ".join(row.flags),

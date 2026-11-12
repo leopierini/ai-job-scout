@@ -10,7 +10,7 @@ import httpx
 
 from jobscout.errors import ConfigError, NotionError
 from jobscout.http import request_json
-from jobscout.models import STATUS_LABELS, JobRow, Status
+from jobscout.models import SOURCE_LABELS, STATUS_LABELS, JobRow, Status
 
 API = "https://api.notion.com/v1"
 NOTION_VERSION = "2022-06-28"
@@ -26,7 +26,7 @@ PROPERTIES: dict = {
     "Fit Score": {"number": {"format": "number"}},
     "Flags": {"multi_select": {"options": []}},
     "Status": {"select": {"options": [{"name": label} for label in STATUS_LABELS.values()]}},
-    "Source": {"select": {"options": [{"name": "LinkedIn"}, {"name": "Indeed"}]}},
+    "Source": {"select": {"options": [{"name": label} for key, label in SOURCE_LABELS.items() if key != "sample"]}},
     "Posted": {"date": {}},
     "Starts": {"date": {}},
     "Deadline": {"date": {}},
@@ -34,7 +34,6 @@ PROPERTIES: dict = {
     "Recruiter Contact": {"url": {}},
 }
 
-_SOURCE_NAMES = {"linkedin": "LinkedIn", "indeed": "Indeed"}
 _STATUS_BY_LABEL = {label: status for status, label in STATUS_LABELS.items()}
 _ID_IN_SEGMENT = re.compile(r"(?:^|-)([0-9a-f]{32})$", re.IGNORECASE)
 _RAW_ID = re.compile(r"[0-9a-f]{32}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", re.IGNORECASE)
@@ -96,7 +95,7 @@ def _page_properties(row: JobRow) -> dict:
         "Job ID": _rich_text(row.pk),
         "Flags": {"multi_select": [{"name": name} for name in _flag_names(row.flags)]},
         "Status": {"select": {"name": STATUS_LABELS[row.status]}},
-        "Source": {"select": {"name": _SOURCE_NAMES.get(row.source, row.source.capitalize())}},
+        "Source": {"select": {"name": SOURCE_LABELS.get(row.source, row.source.capitalize())}},
     }
     if row.score is not None:
         props["Fit Score"] = {"number": row.score}

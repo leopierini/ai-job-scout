@@ -130,8 +130,8 @@ def post_estimate(body: EstimateBody, request: Request) -> dict:
     token = ws.secrets().apify_token  # always the saved token: never taken from the request
     credit = request.app.state.credit.get(token, _fetch_credit) if token and ws.mode == "real" else None
     return {
-        "searches": est.linkedin_searches + est.indeed_searches,
-        "max_results": est.linkedin_max_results + est.indeed_max_results,
+        "searches": est.searches,
+        "max_results": est.max_results,
         "max_usd": est.max_usd,
         "credit_usd": credit,
     }

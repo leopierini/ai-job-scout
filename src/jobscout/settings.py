@@ -5,8 +5,9 @@ import os
 from datetime import date
 from pathlib import Path
 from typing import Literal
+from urllib.parse import urlsplit
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
 from jobscout.errors import ConfigError
 from jobscout.paths import profile_path, secrets_path, settings_path
@@ -56,6 +57,105 @@ class IndeedSettings(_Model):
     job_types: list[IndeedJobType] = ["internship", "fulltime"]
     max_rows_per_query: int = Field(default=20, ge=1, le=1000)
     price_per_result: float = Field(default=0.00005, ge=0)
+
+
+def _web_urls(urls: list[str]) -> list[str]:
+    """Trimmed http(s) addresses without duplicates; anything else is refused."""
+    out: list[str] = []
+    for raw in urls:
+        url = raw.strip()
+        if not url:
+            continue
+        if urlsplit(url).scheme.lower() not in ("http", "https") or not urlsplit(url).netloc:
+            raise ValueError(f"Not a web address: {url}")
+        if url not in out:
+            out.append(url)
+    return out
+
+
+class BuiltInEuropeSettings(_Model):
+    """Built in Europe (builtineurope.com), Balderton's board of VC-backed European startups. Free."""
+
+    enabled: bool = False
+    queries: list[str] = []
+    countries: list[str] = []  # lower-case English names as the site writes them, e.g. "italy"; empty: all of Europe
+    max_results_per_query: int = Field(default=50, ge=1, le=500)
+
+
+class JobgetherSettings(_Model):
+    """Jobgether's public job API (remote-first). Free."""
+
+    enabled: bool = False
+    queries: list[str] = []
+    locations: list[str] = []  # Jobgether location slugs, e.g. "italy", "europe"; empty: anywhere
+    experience: list[str] = []  # Jobgether experience slugs, e.g. "entry-level-graduate"; empty: any level
+    max_results_per_query: int = Field(default=50, ge=1, le=500)
+
+
+class VcBoardsSettings(_Model):
+    """Portfolio job boards run by venture capital firms on Getro or Consider. Free."""
+
+    enabled: bool = False
+    boards: list[str] = []  # the boards' web addresses, e.g. "https://jobs.example-ventures.com"
+    queries: list[str] = []  # empty: every job on the board in the locations below
+    locations: list[str] = []  # as the boards write them, e.g. "Italy" or "Remote"; empty: anywhere
+    max_results_per_board: int = Field(default=100, ge=1, le=1000)
+
+    @field_validator("boards")
+    @classmethod
+    def _boards(cls, v: list[str]) -> list[str]:
+        return _web_urls(v)
+
+
+class CareerPagesSettings(_Model):
+    """Companies' own job boards (Ashby, Greenhouse, Lever, Recruitee, Workable, Personio, Teamtailor). Free."""
+
+    enabled: bool = False
+    pages: list[str] = []  # careers page addresses, e.g. "https://jobs.ashbyhq.com/example-labs"
+    title_words: list[str] = []  # keep only jobs whose title has one of these; empty keeps every title
+    locations: list[str] = []  # keep only jobs whose location names one of these (or is blank); empty keeps all
+
+    @field_validator("pages")
+    @classmethod
+    def _pages(cls, v: list[str]) -> list[str]:
+        return _web_urls(v)
+
+
+class ApifyBoardSettings(_Model):
+    """A job board searched through an Apify actor: each query is run once in each location."""
+
+    enabled: bool = False
+    actor: str
+    queries: list[str] = []
+    locations: list[str] = []  # empty: one search with no location
+    max_results_per_search: int = Field(default=25, ge=1, le=1000)
+    price_per_result: float = Field(default=0.0, ge=0)
+
+
+class WttjSettings(ApifyBoardSettings):
+    """Welcome to the Jungle (which now includes Otta)."""
+
+    actor: str = "blackfalcondata~wttj-scraper"
+    price_per_result: float = Field(default=0.00045, ge=0)
+
+
+class WellfoundSettings(ApifyBoardSettings):
+    actor: str = "blackfalcondata~wellfound-scraper"
+    price_per_result: float = Field(default=0.003, ge=0)
+
+
+class YcSettings(ApifyBoardSettings):
+    """Y Combinator's Work at a Startup."""
+
+    actor: str = "nomad-agent~ycombinator-was-scraper"
+    price_per_result: float = Field(default=0.0001, ge=0)
+
+
+class AtsIndexSettings(ApifyBoardSettings):
+    """An index of many companies' own job boards, searched at once."""
+
+    actor: str = "fantastic-jobs~career-site-job-listing-api"
+    price_per_result: float = Field(default=0.012, ge=0)
 
 
 class WindowSettings(_Model):
@@ -139,6 +239,14 @@ class UiSettings(_Model):
 class Settings(_Model):
     linkedin: LinkedInSettings = LinkedInSettings()
     indeed: IndeedSettings = IndeedSettings()
+    builtineurope: BuiltInEuropeSettings = BuiltInEuropeSettings()
+    jobgether: JobgetherSettings = JobgetherSettings()
+    vcboards: VcBoardsSettings = VcBoardsSettings()
+    careers: CareerPagesSettings = CareerPagesSettings()
+    wttj: WttjSettings = WttjSettings()
+    wellfound: WellfoundSettings = WellfoundSettings()
+    yc: YcSettings = YcSettings()
+    atsindex: AtsIndexSettings = AtsIndexSettings()
     windows: WindowSettings = WindowSettings()
     filters: FilterSettings = FilterSettings()
     scoring: ScoringSettings = ScoringSettings()
