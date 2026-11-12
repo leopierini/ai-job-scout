@@ -17,9 +17,14 @@ export function sourcesInUse(s: Settings): string[] {
   return on
 }
 
-/** True when a run would use Apify, so the token is needed. */
+/** True when a run would use Apify, so the token is needed: the same checks as `build_pipeline`. */
 export function usesApify(s: Settings): boolean {
-  return s.linkedin.enabled || s.indeed.enabled || APIFY_BOARDS.some((name) => s[name].enabled)
+  const { linkedin, indeed } = s
+  return (
+    (linkedin.enabled && linkedin.keywords.length > 0 && linkedin.regions.length > 0) ||
+    (indeed.enabled && indeed.queries.length > 0 && indeed.countries.length > 0 && indeed.job_types.length > 0) ||
+    APIFY_BOARDS.some((name) => s[name].enabled && s[name].queries.length > 0)
+  )
 }
 
 /** "LinkedIn", "LinkedIn and Indeed", "LinkedIn, Indeed and 2 more": the sources a run searches. */

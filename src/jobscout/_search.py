@@ -13,7 +13,7 @@ from jobscout.sources import AreaResult, SearchArea, Source
 from jobscout.windows import window_seconds
 
 SEARCH_FAILED = "The search failed unexpectedly."
-STOP_ALL = ("limit", "auth")  # Apify errors that stop every remaining area, on every source
+STOP_ALL = ("limit", "auth")  # Apify errors that stop every remaining Apify search; free sources still run
 
 
 def area_window(

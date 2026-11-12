@@ -31,6 +31,7 @@ from jobscout.sources import (
     AreaResult,
     SearchArea,
     as_str,
+    get_public,
     html_to_text,
     posted_date,
     salary_text,
@@ -43,7 +44,7 @@ _ATTEMPTS = 3
 
 UNKNOWN_SYSTEM = (
     "Couldn't tell which job system this careers page uses. "
-    "Paste the address of the job board itself (e.g. jobs.ashbyhq.com/…)."
+    "Paste the address of the job board itself (e.g. https://jobs.ashbyhq.com/…)."
 )
 
 
@@ -563,7 +564,7 @@ class CareerPagesSource:
         for attempt in range(_ATTEMPTS):
             last = attempt == _ATTEMPTS - 1
             try:
-                response = self._client.get(url, headers=headers, timeout=30, follow_redirects=True)
+                response = get_public(self._client, url, name, headers=headers)
             except httpx.TimeoutException:
                 if last:
                     raise SearchError(f"{name} took too long to answer. It will be retried next run.") from None

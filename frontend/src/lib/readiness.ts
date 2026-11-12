@@ -31,10 +31,12 @@ export function readiness(settings: Settings, keys: Keys, profile: string, mode:
   const others = sourcesInUse(settings).filter((key) => key !== "linkedin" && key !== "indeed")
   if (linkedin.keywords.length === 0 && indeed.queries.length === 0 && others.length === 0)
     out.push({ id: "keyword", what: "Add a keyword to search for", tab: "search" })
-  if (linkedin.enabled && linkedin.regions.length === 0 && others.length === 0)
+  // LinkedIn's keywords are ignored without a region, even when another source runs.
+  if (linkedin.enabled && linkedin.regions.length === 0 && (linkedin.keywords.length > 0 || others.length === 0))
     out.push({ id: "region", what: "Choose where to search", tab: "search" })
-  // Free sources alone need no Apify token.
-  if (!keys.apify_token.set && (usesApify(settings) || others.length === 0))
+  // Free sources alone need no Apify token; LinkedIn with keywords but no region will, once it has one.
+  const linkedinPending = linkedin.enabled && linkedin.keywords.length > 0
+  if (!keys.apify_token.set && (usesApify(settings) || linkedinPending || others.length === 0))
     out.push({ id: "apify_token", what: "Add your Apify token", tab: "keys" })
   const provider = PROVIDERS.find((p) => p.id === scoring.provider)
   if (provider?.needsKey && provider.keyField && !keys[provider.keyField].set)
