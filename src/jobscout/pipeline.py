@@ -13,7 +13,7 @@ from jobscout import _search as search
 from jobscout._steps import STEPS, UNEXPECTED, StepResult, StepRunner, ignore  # noqa: F401 - STEPS is public here
 from jobscout._text import plural
 from jobscout.cleanup import run_cleanup
-from jobscout.costs import billed_cost
+from jobscout.costs import APIFY_BOARDS, PAID_SOURCES, billed_cost
 from jobscout.db import Database
 from jobscout.errors import ConfigError, NotionError
 from jobscout.models import JobRow, JobState, RunSummary, ScoreResult, StepEvent
@@ -26,14 +26,24 @@ from jobscout.settings import OutputSettings, Secrets, Settings
 from jobscout.sources import Source
 from jobscout.sources import sample as sample_mode
 from jobscout.sources.apify import ApifyClient
+from jobscout.sources.atsindex import AtsIndexSource
+from jobscout.sources.builtineurope import BuiltInEuropeSource
+from jobscout.sources.careers import CareerPagesSource
 from jobscout.sources.indeed import IndeedSource
+from jobscout.sources.jobgether import JobgetherSource
 from jobscout.sources.linkedin import LinkedInSource
 from jobscout.sources.sample import SampleSource, sample_answers
+from jobscout.sources.vcboards import VcBoardsSource
+from jobscout.sources.wellfound import WellfoundSource
+from jobscout.sources.wttj import WttjSource
+from jobscout.sources.yc import YcSource
 
 COUNT_KEYS = (
-    "archived", "searched", "billed_linkedin", "billed_indeed", "new", "duplicates", "excluded",
-    "scored", "kept", "below", "failed_scoring", "delivered", "delivery_failed",
+    "archived", "searched", "billed_linkedin", "billed_indeed", *(f"billed_{name}" for name in APIFY_BOARDS),
+    "new", "duplicates", "excluded", "scored", "kept", "below", "failed_scoring", "delivered", "delivery_failed",
 )  # fmt: skip
+
+_APIFY_BOARD_SOURCES = {"wttj": WttjSource, "wellfound": WellfoundSource, "yc": YcSource, "atsindex": AtsIndexSource}
 
 
 class _Heartbeat:
@@ -183,13 +193,16 @@ class Pipeline(StepRunner):
         searches_done = postings = 0
         incomplete: list[str] = []
         areas: list[dict] = []
-        stop: str | None = None  # a limit or a rejected token: no further area can succeed
+        stop: str | None = None  # an Apify limit or a rejected token: no further Apify search can succeed
+        free_done = False  # a free source (no Apify) completed an area
 
         def summary() -> str:
             return f"{searches_done} of {plural(total, 'search', 'searches')} · {plural(postings, 'posting')}"
 
         for source, area in plan:
             self._check_cancel(summary())
+            if stop is not None and source.name in PAID_SOURCES:
+                continue  # the free sources still run
             area_done = 0
 
             def progress(done: int, area_total: int, found: int) -> None:
@@ -226,20 +239,22 @@ class Pipeline(StepRunner):
                 }
             )  # fmt: skip
             if complete:
+                free_done = free_done or source.name not in PAID_SOURCES
                 if may_commit:
                     self._db.commit_window(area.key, self._start_time)
             elif error is not None and error.kind in search.STOP_ALL:
                 stop = str(error)
-                break
             elif error is not None:
                 incomplete.append(f"{area.label} ({error})")
             else:
                 self._check_cancel(summary())  # the source stopped early because of a cancel
 
         data = {"areas": areas}
-        if stop is not None:
+        if stop is not None and not free_done:
             return StepResult(stop, status="error", done=searches_done, total=total, data=data)
         message = summary()
+        if stop is not None:
+            message += f" · Apify searches stopped: {stop}"
         if incomplete:
             message += f" · incomplete, retried next run: {'; '.join(incomplete)}"
         if not any(a["complete"] for a in areas):
@@ -418,7 +433,10 @@ def build_pipeline(
     # An enabled source with nothing to search is skipped, not an error.
     use_linkedin = not for_rescore and li.enabled and bool(li.keywords) and bool(li.regions)
     use_indeed = not for_rescore and ind.enabled and bool(ind.queries) and bool(ind.countries) and bool(ind.job_types)
-    if (use_linkedin or use_indeed) and not secrets.apify_token:
+    boards = [] if for_rescore else [n for n in APIFY_BOARDS if getattr(settings, n).enabled and getattr(settings, n).queries]
+    free = [] if for_rescore else _free_sources_in_use(settings)
+    uses_apify = use_linkedin or use_indeed or bool(boards)
+    if uses_apify and not secrets.apify_token:
         raise ConfigError("Add your Apify token first.")
     provider = make_provider(settings.scoring, secrets)
     notion_cfg, hook_cfg = settings.outputs.notion, settings.outputs.webhook
@@ -429,21 +447,38 @@ def build_pipeline(
     if hook_cfg.enabled and not hook_cfg.url.strip():
         raise ConfigError("The webhook is on but has no URL. Add one, or turn the webhook off.")
 
-    needs_http = use_linkedin or use_indeed or notion_cfg.enabled or hook_cfg.enabled
+    needs_http = uses_apify or bool(free) or notion_cfg.enabled or hook_cfg.enabled
     client = httpx.Client() if needs_http else None
     sources: list[Source] = []
-    if client is not None and (use_linkedin or use_indeed):
+    if client is not None and uses_apify:
         apify = ApifyClient(secrets.apify_token or "", client)
         if use_linkedin:
             sources.append(LinkedInSource(li, apify, cancel))
         if use_indeed:
             sources.append(IndeedSource(ind, apify, cancel))
+        sources += [_APIFY_BOARD_SOURCES[n](getattr(settings, n), apify, cancel) for n in boards]
+    if client is not None:
+        sources += [make(client, cancel) for make in free]
     notion = NotionClient(secrets.notion_token or "", client) if client and notion_cfg.enabled else None
     webhook = WebhookOutput(hook_cfg.url.strip(), client) if client and hook_cfg.enabled else None
     return Pipeline(
         settings, secrets, db, profile_md, sources, provider,
         notion=notion, webhook=webhook, on_event=on_event, cancel=cancel, client=client,
     )  # fmt: skip
+
+
+def _free_sources_in_use(s: Settings) -> list[Callable[[httpx.Client, threading.Event], Source]]:
+    """Makers for the free sources that are on and have something to search."""
+    makers: list[Callable[[httpx.Client, threading.Event], Source]] = []
+    if s.builtineurope.enabled and s.builtineurope.queries:
+        makers.append(lambda client, cancel: BuiltInEuropeSource(s.builtineurope, client, cancel))
+    if s.jobgether.enabled and s.jobgether.queries:
+        makers.append(lambda client, cancel: JobgetherSource(s.jobgether, client, cancel))
+    if s.vcboards.enabled and s.vcboards.boards:
+        makers.append(lambda client, cancel: VcBoardsSource(s.vcboards, client, cancel))
+    if s.careers.enabled and s.careers.pages:
+        makers.append(lambda client, cancel: CareerPagesSource(s.careers, client, cancel))
+    return makers
 
 
 def build_app_pipeline(*args, **kwargs) -> Pipeline:

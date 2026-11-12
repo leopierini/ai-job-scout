@@ -64,7 +64,7 @@ def make_row(**kw):
 
 _JOB_FIELDS = {
     "source", "job_id", "title", "company", "location", "url", "description", "posted",
-    "keyword", "area", "recruiter", "recruiter_title", "recruiter_url", "employment_type",
+    "keyword", "area", "recruiter", "recruiter_title", "recruiter_url", "employment_type", "salary",
 }
 
 

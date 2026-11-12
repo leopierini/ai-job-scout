@@ -62,6 +62,12 @@ def test_regions_lists_bundled_data(client):
     assert {"uk", "ch", "de"} <= set(body["indeed"])  # the actor's codes: "uk", not "gb"
 
 
+def test_vc_boards_lists_bundled_presets(client):
+    boards = client.get("/api/vc-boards").json()
+    assert boards and all(set(b) == {"name", "url", "platform", "country"} for b in boards)
+    assert all(b["url"].startswith("https://") and b["platform"] in ("getro", "consider") for b in boards)
+
+
 def test_regions_work_in_sample_mode(sample_client):
     assert sample_client.get("/api/regions").status_code == 200
 

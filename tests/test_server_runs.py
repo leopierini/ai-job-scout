@@ -285,7 +285,7 @@ def test_job_out_shape(client, db):
     job = client.get("/api/jobs?view=to_review").json()[0]
     assert set(job) == {
         "pk", "source", "job_id", "title", "company", "location", "url", "posted", "keyword", "area",
-        "recruiter", "recruiter_title", "recruiter_url", "employment_type", "state", "status", "score",
+        "recruiter", "recruiter_title", "recruiter_url", "employment_type", "salary", "state", "status", "score",
         "reason", "flags", "start_date", "deadline", "archived_reason", "first_seen_at", "status_updated_at",
         "restored",
     }  # fmt: skip

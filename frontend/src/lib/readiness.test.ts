@@ -1,12 +1,14 @@
 import { describe, expect, test } from "vitest"
 
 import type { Keys, Settings } from "@/api/types"
+import { OFF_STARTUP_SOURCES } from "@/lib/test-settings"
 import { profileHasText, readiness } from "./readiness"
 
 function settings(): Settings {
   return {
     linkedin: { enabled: true, actor: "a", keywords: [], regions: [], cap_per_keyword: 25, sort_by: "DD", scrape_company: true, price_per_result: 0.002 },
     indeed: { enabled: false, actor: "b", countries: [], queries: [], job_types: ["internship"], max_rows_per_query: 20, price_per_result: 0.005 },
+    ...OFF_STARTUP_SOURCES,
     windows: { default_days: 15, overlap_minutes: 60 },
     filters: { excluded_countries: [], excluded_cities: [], excluded_title_words: [], languages: [] },
     scoring: { provider: "claude_code", model: "sonnet", min_score: 70, send_below_threshold: false, reasoning_language: "English", batch_size: 10, max_jobs_per_run: null, bands: "", dealbreakers: [], extra_instructions: "" },
@@ -63,6 +65,42 @@ describe("readiness", () => {
       indeed: { ...s.indeed, enabled: true, queries: ["software engineer"] },
     }
     expect(readiness(indeedOnly, keys({ apify_token: true }), "Some text", "real")).toEqual([])
+  })
+
+  test("free sources alone need no keyword, region or Apify token", () => {
+    const s = settings()
+    const careersOnly: Settings = {
+      ...s,
+      linkedin: { ...s.linkedin, enabled: false },
+      careers: { ...s.careers, enabled: true, pages: ["https://jobs.ashbyhq.com/example-labs"] },
+    }
+    expect(readiness(careersOnly, keys({ apify_token: false }), "Some text", "real")).toEqual([])
+  })
+
+  test("LinkedIn left on with nothing to search doesn't ask for the Apify token", () => {
+    const s = settings() // LinkedIn on, no keywords or regions
+    const careers: Settings = { ...s, careers: { ...s.careers, enabled: true, pages: ["https://jobs.ashbyhq.com/example-labs"] } }
+    expect(readiness(careers, keys({ apify_token: false }), "Some text", "real")).toEqual([])
+  })
+
+  test("LinkedIn keywords without a region still ask for one when another source runs", () => {
+    const s = settings()
+    const both: Settings = {
+      ...s,
+      linkedin: { ...s.linkedin, keywords: ["AI engineer"] },
+      careers: { ...s.careers, enabled: true, pages: ["https://jobs.ashbyhq.com/example-labs"] },
+    }
+    expect(readiness(both, keys({ apify_token: true }), "Some text", "real").map((m) => m.id)).toEqual(["region"])
+  })
+
+  test("an Apify board needs the Apify token", () => {
+    const s = settings()
+    const wttj: Settings = {
+      ...s,
+      linkedin: { ...s.linkedin, enabled: false },
+      wttj: { ...s.wttj, enabled: true, queries: ["AI engineer"] },
+    }
+    expect(readiness(wttj, keys({ apify_token: false }), "Some text", "real").map((m) => m.id)).toEqual(["apify_token"])
   })
 
   test("a provider that needs a key asks for it by name", () => {

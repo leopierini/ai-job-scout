@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Junior Product Manager",
+    "companyName": "Fjord Labs",
+    "company": "fjord labs",
+    "board": "fjord labs",
+    "ats": "personio",
+    "source": "personio",
+    "jobId": "88001",
+    "indexId": "personio:fjord labs:88001",
+    "department": "Product",
+    "seniority": "entry",
+    "employmentType": "full_time",
+    "location": "Milan",
+    "locations": ["Milan"],
+    "countries": ["IT"],
+    "regions": ["Europe"],
+    "workplaceType": "hybrid",
+    "isRemote": false,
+    "compensation": {"min": 35000, "max": 42000, "currency": "EUR", "interval": "year", "summary": "€35K - €42K", "source": "job board"},
+    "hasSalary": true,
+    "salaryYearlyMin": 35000,
+    "postedAt": "2026-11-09T07:00:00.000Z",
+    "firstSeenAt": "2026-11-09T09:10:00.000Z",
+    "jobUrl": "https://fjord-labs.jobs.personio.de/job/88001",
+    "applyUrl": "https://fjord-labs.jobs.personio.de/job/88001#apply",
+    "descriptionText": "Shape the roadmap of our planning tools. R&D budget included."
+  },
+  {
+    "title": "Product Owner",
+    "companyName": null,
+    "company": "example robotics",
+    "ats": "teamtailor",
+    "jobId": "tt-77",
+    "employmentType": null,
+    "location": "Remote",
+    "workplaceType": "remote",
+    "isRemote": true,
+    "compensation": {"min": null, "max": null, "currency": null, "interval": null, "summary": "Competitive pay plus stock options", "source": "description"},
+    "postedAt": null,
+    "firstSeenAt": "2026-11-11T09:00:00.000Z",
+    "jobUrl": "https://example-robotics.teamtailor.com/jobs/tt-77",
+    "descriptionText": null
+  },
+  {
+    "title": "Product Analyst",
+    "companyName": "Birch Systems",
+    "jobId": "lone-1",
+    "location": "Turin, Italy",
+    "isRemote": true,
+    "compensation": "not an object",
+    "jobUrl": "ftp://example.com/x"
+  },
+  {
+    "title": "No id",
+    "companyName": "Nowhere Ltd"
+  }
+]

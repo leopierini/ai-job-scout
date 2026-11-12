@@ -19,7 +19,12 @@ from jobscout.settings import Secrets, Settings
 from jobscout.sources import AreaResult, SearchArea
 from jobscout.sources.apify import AUTH_MESSAGE, LIMIT_MESSAGE
 from jobscout.sources.sample import _DATA as SAMPLE_DATA
-from jobscout.sources.sample import SAMPLE_PROFILE, SampleSource, sample_answers, sample_settings
+from jobscout.sources.sample import (
+    SAMPLE_PROFILE,
+    SampleSource,
+    sample_answers,
+    sample_settings,
+)
 
 STEPS = ["cleanup", "search", "filter", "score", "save"]
 NOTION_API = "https://api.notion.com/v1"
@@ -332,6 +337,19 @@ def test_rejected_apify_token_stops_every_area_and_fails_the_search(db):
     fin = final_events(events)
     assert fin["search"].status == "error" and fin["search"].message == AUTH_MESSAGE
     assert [fin[step].status for step in ["filter", "score", "save"]] == ["done"] * 3
+
+
+def test_an_apify_stop_skips_only_apify_sources(db):
+    events = []
+    limit = ApifyError("Apify monthly limit reached.", kind="limit")
+    linkedin = FakeSource("linkedin", {"linkedin:A": AreaResult([], 0, False, limit)})
+    wttj = FakeSource("wttj", {"wttj:IT": ok(make_job(source="wttj", job_id="w"))})
+    careers = FakeSource("careers", {"careers:x": ok(make_job(source="careers", job_id="c"))})
+    s = make_pipeline(db, [linkedin, wttj, careers], on_event=events.append).run()
+    assert wttj.calls == [] and [k for k, _ in careers.calls] == ["careers:x"]
+    search = final_events(events)["search"]
+    assert search.status == "done" and search.message.endswith("Apify searches stopped: Apify monthly limit reached.")
+    assert s.status == "done" and db.get("careers:c") is not None
 
 
 def test_search_fails_when_no_area_completes(db):
@@ -872,6 +890,32 @@ def test_rescore_pipeline_needs_no_apify_token(db):
         build_pipeline(s, Secrets(), db, "p")
     with build_pipeline(s, Secrets(), db, "p", for_rescore=True) as p:
         assert p._sources == []
+
+
+def test_free_sources_need_no_apify_token(db):
+    s = Settings()
+    s.linkedin.enabled = False
+    s.scoring.provider = "ollama"
+    s.careers.enabled = True
+    s.careers.pages = ["https://jobs.ashbyhq.com/example-labs"]
+    s.builtineurope.enabled = True
+    s.builtineurope.queries = ["AI engineer"]
+    s.vcboards.enabled = True  # no boards: skipped
+    with build_pipeline(s, Secrets(), db, "p") as p:
+        assert [src.name for src in p._sources] == ["builtineurope", "careers"]
+
+
+def test_apify_boards_need_the_apify_token(db):
+    s = Settings()
+    s.linkedin.enabled = False
+    s.scoring.provider = "ollama"
+    s.wttj.enabled = True
+    s.wttj.queries = ["AI engineer"]
+    s.yc.enabled = True  # no queries: skipped
+    with pytest.raises(ConfigError, match="Apify"):
+        build_pipeline(s, Secrets(), db, "p")
+    with build_pipeline(s, Secrets(apify_token="t"), db, "p") as p:
+        assert [src.name for src in p._sources] == ["wttj"]
 
 
 def test_enabled_source_with_nothing_to_search_is_skipped(db):

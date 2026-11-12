@@ -27,6 +27,21 @@ STATUS_LABELS: dict[Status, str] = {
 
 ACTIVE_STATUSES = {Status.APPLIED, Status.INTERVIEWING, Status.OFFER}
 
+# How each job source is named to people (a job's `source` field is the key).
+SOURCE_LABELS: dict[str, str] = {
+    "linkedin": "LinkedIn",
+    "indeed": "Indeed",
+    "builtineurope": "Built in Europe",
+    "jobgether": "Jobgether",
+    "vcboards": "VC job boards",
+    "careers": "Career pages",
+    "wttj": "Welcome to the Jungle",
+    "wellfound": "Wellfound",
+    "yc": "Y Combinator",
+    "atsindex": "Company job boards",
+    "sample": "Sample",
+}
+
 
 class JobState(StrEnum):
     SCRAPED = "scraped"
@@ -52,6 +67,7 @@ class Job:
     recruiter_title: str = ""
     recruiter_url: str = ""
     employment_type: str = ""
+    salary: str = ""  # as the source states it, e.g. "EUR 38,000–45,000 a year"; empty when not stated
 
     @property
     def pk(self) -> str:

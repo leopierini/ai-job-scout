@@ -1,0 +1,56 @@
+[
+  {
+    "id": "5550001",
+    "title": "Founding Product Manager",
+    "slug": "founding-product-manager",
+    "portalUrl": "https://wellfound.com/jobs/5550001-founding-product-manager",
+    "detailUrl": "https://wellfound.com/jobs/5550001-founding-product-manager",
+    "compensation": "€55k – €70k • 0.1% – 0.5%",
+    "salaryMin": 55000,
+    "salaryMax": 70000,
+    "salaryCurrency": null,
+    "salaryPeriod": null,
+    "description": "## Founding PM\n\nOwn the product from zero to one.",
+    "descriptionHtml": "<h3>Founding PM</h3><p>Own the product from zero to one.</p>",
+    "jobType": "full-time",
+    "postedAt": "2026-11-10T08:30:00Z",
+    "locationNames": ["Berlin", "Munich"],
+    "remote": false,
+    "remoteKind": "HYBRID",
+    "companyName": "Example Robotics"
+  },
+  {
+    "id": "5550002",
+    "title": "Product Analyst Intern",
+    "portalUrl": "https://wellfound.com/jobs/5550002-product-analyst-intern",
+    "compensation": null,
+    "salaryMin": 1500,
+    "salaryMax": 2000,
+    "salaryCurrency": "EUR",
+    "salaryPeriod": "MONTH",
+    "description": "Analyse funnels and build dashboards.",
+    "descriptionHtml": null,
+    "jobType": "internship",
+    "datePosted": "2026-11-09T12:00:00Z",
+    "locationNames": [],
+    "remote": true,
+    "companyName": "Birch Systems"
+  },
+  {
+    "title": "Growth Lead",
+    "portalUrl": "https://wellfound.com/jobs/5550003-growth-lead",
+    "companyName": "Fjord Labs",
+    "locationNames": "London",
+    "remote": "yes"
+  },
+  {
+    "id": "5550001",
+    "title": "Founding Product Manager",
+    "companyName": "Example Robotics"
+  },
+  {
+    "title": "No id anywhere",
+    "companyName": "Nowhere Ltd"
+  },
+  42
+]

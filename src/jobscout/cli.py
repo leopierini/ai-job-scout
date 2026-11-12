@@ -144,8 +144,8 @@ def _execute(
 
 def _cost_line(settings: Settings) -> str:
     est = estimate(settings)
-    searches = est.linkedin_searches + est.indeed_searches
-    results = est.linkedin_max_results + est.indeed_max_results
+    searches = est.searches
+    results = est.max_results
     return f"This run can cost up to ${est.max_usd:.2f} on Apify ({plural(searches, 'search', 'searches')}, at most {plural(results, 'result')})."
 
 
@@ -178,8 +178,8 @@ def _confirm(prompt: str) -> bool:
 def _cmd_estimate(_args: argparse.Namespace) -> int:
     settings, secrets = load_settings(), load_secrets()
     est = estimate(settings)
-    print(f"Searches: {est.linkedin_searches + est.indeed_searches}")
-    print(f"Max results: {est.linkedin_max_results + est.indeed_max_results}")
+    print(f"Searches: {est.searches}")
+    print(f"Max results: {est.max_results}")
     print(f"Max cost: ${est.max_usd:.2f}")
     if secrets.apify_token:
         with httpx.Client(timeout=15) as client:

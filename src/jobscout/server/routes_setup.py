@@ -95,6 +95,16 @@ def regions() -> dict:
     }
 
 
+@router.get("/vc-boards")
+def vc_boards() -> list[dict]:
+    """The venture capital firms' job boards the app knows, for the Startups settings."""
+    data = json.loads(_DATA.joinpath("vc_boards.json").read_text(encoding="utf-8"))
+    return [
+        {"name": b["name"], "url": b["url"], "platform": b["platform"], "country": b.get("country", "")}
+        for b in data["boards"]
+    ]
+
+
 @router.post("/test/ai")
 def test_ai(body: AiTestBody, request: Request) -> dict:
     ws = _real_workspace(request)

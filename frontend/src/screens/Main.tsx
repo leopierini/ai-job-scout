@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { canFindJobs, useSavedEstimate } from "@/lib/estimate"
 import { money } from "@/lib/format"
 import { readiness, type Missing } from "@/lib/readiness"
+import { sourcesText } from "@/lib/sources"
 import { ResultsTable } from "./main/ResultsTable"
 import { RunPanel } from "./main/RunPanel"
 import { TopBar, WINDOWS, type WindowValue } from "./main/TopBar"
@@ -59,11 +60,6 @@ function useReadiness(sample: boolean) {
   return { missing, reload }
 }
 
-/** "LinkedIn", "Indeed" or "LinkedIn and Indeed". */
-function sourcesText(settings: Settings): string {
-  const names = [settings.linkedin.enabled && "LinkedIn", settings.indeed.enabled && "Indeed"].filter(Boolean)
-  return names.length ? names.join(" and ") : "LinkedIn"
-}
 
 /** The main screen (layout A): the run on the left, the results table as the main area. */
 export function Main({ state }: ScreenProps) {

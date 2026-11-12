@@ -24,7 +24,12 @@ export type WindowValue = (typeof WINDOWS)[number]["value"]
 export function headlineFor(settings: Settings): string {
   if (settings.ui.headline.trim()) return settings.ui.headline.trim()
   const { linkedin, indeed } = settings
-  const keywords = linkedin.enabled ? linkedin.keywords : indeed.queries
+  const others = [settings.builtineurope, settings.jobgether, settings.wttj, settings.wellfound, settings.yc, settings.atsindex]
+  const keywords = linkedin.enabled
+    ? linkedin.keywords
+    : indeed.enabled
+      ? indeed.queries
+      : (others.find((o) => o.enabled && o.queries.length > 0)?.queries ?? [])
   const places = [
     ...(linkedin.enabled ? linkedin.regions.map((r) => r.name) : []),
     ...(indeed.enabled ? indeed.countries.map((c) => c.toUpperCase()) : []),

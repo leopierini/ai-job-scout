@@ -21,7 +21,7 @@ from jobscout.models import (
     StepEvent,
 )
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 STALE_RUN_AFTER = timedelta(minutes=20)  # a running run with no sign of life for this long has crashed
 INTERRUPTED = "Interrupted"  # the error of a run whose process died before it finished
 
@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS jobs (
     recruiter_title TEXT NOT NULL DEFAULT '',
     recruiter_url TEXT NOT NULL DEFAULT '',
     employment_type TEXT NOT NULL DEFAULT '',
+    salary TEXT NOT NULL DEFAULT '',
     state TEXT NOT NULL,
     status TEXT NOT NULL,
     score INTEGER,
@@ -92,13 +93,13 @@ CREATE TABLE IF NOT EXISTS run_events (
 
 # Columns added after version 1, with their definitions: older databases gain them on open.
 _ADDED_COLUMNS = {
-    "jobs": {"restored": "INTEGER NOT NULL DEFAULT 0"},
+    "jobs": {"restored": "INTEGER NOT NULL DEFAULT 0", "salary": "TEXT NOT NULL DEFAULT ''"},
     "runs": {"heartbeat_at": "TEXT"},
 }
 
 _JOB_COLUMNS = (
     "source", "job_id", "title", "company", "location", "url", "description", "posted",
-    "keyword", "area", "recruiter", "recruiter_title", "recruiter_url", "employment_type",
+    "keyword", "area", "recruiter", "recruiter_title", "recruiter_url", "employment_type", "salary",
 )  # fmt: skip
 
 

@@ -13,9 +13,9 @@ export function triggerLabel(trigger: string): string {
   return kind === "rescore" ? `${who} re-score` : who
 }
 
-/** Searches billed across both sources. */
+/** Results billed across every Apify source (each count key starting with "billed_"). */
 export function billedCount(counts: RunOut["counts"]): number {
-  return (counts.billed_linkedin ?? 0) + (counts.billed_indeed ?? 0)
+  return Object.entries(counts).reduce((sum, [key, n]) => (key.startsWith("billed_") ? sum + (n ?? 0) : sum), 0)
 }
 
 /** Whole seconds from start to finish (both are local timestamps); null for a run that hasn't finished. */

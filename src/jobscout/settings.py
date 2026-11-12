@@ -5,8 +5,9 @@ import os
 from datetime import date
 from pathlib import Path
 from typing import Literal
+from urllib.parse import urlsplit
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
 from jobscout.errors import ConfigError
 from jobscout.paths import profile_path, secrets_path, settings_path
@@ -56,6 +57,136 @@ class IndeedSettings(_Model):
     job_types: list[IndeedJobType] = ["internship", "fulltime"]
     max_rows_per_query: int = Field(default=20, ge=1, le=1000)
     price_per_result: float = Field(default=0.00005, ge=0)
+
+
+def _web_urls(urls: list[str]) -> list[str]:
+    """Trimmed http(s) addresses without duplicates; anything else is refused."""
+    out: list[str] = []
+    for raw in urls:
+        url = raw.strip()
+        if not url:
+            continue
+        if urlsplit(url).scheme.lower() not in ("http", "https") or not urlsplit(url).netloc:
+            raise ValueError(f"Not a web address: {url}")
+        if url not in out:
+            out.append(url)
+    return out
+
+
+class BuiltInEuropeSettings(_Model):
+    """Built in Europe (builtineurope.com), Balderton's board of VC-backed European startups. Free."""
+
+    enabled: bool = False
+    queries: list[str] = []
+    countries: list[str] = []  # lower-case English names as the site writes them, e.g. "italy"; empty: all of Europe
+    max_results_per_query: int = Field(default=50, ge=1, le=500)
+
+
+# Jobgether's experience levels (its API docs, checked 2026-11-12).
+JobgetherExperience = Literal[
+    "entry-level-graduate", "junior-1-2-years", "mid-level-2-5-years", "senior-5-10-years", "expert-10-years"
+]
+
+
+class JobgetherSettings(_Model):
+    """Jobgether's public job API (remote-first). Free."""
+
+    enabled: bool = False
+    queries: list[str] = []
+    locations: list[str] = []  # Jobgether location slugs, e.g. "italy", "europe"; empty: anywhere
+    experience: list[JobgetherExperience] = []  # empty: any level
+    max_results_per_query: int = Field(default=50, ge=1, le=250)  # Jobgether gives at most 10 pages of 25
+
+
+class VcBoardsSettings(_Model):
+    """Portfolio job boards run by venture capital firms on Getro or Consider. Free."""
+
+    enabled: bool = False
+    boards: list[str] = []  # the boards' web addresses, e.g. "https://jobs.example-ventures.com"
+    queries: list[str] = []  # empty: every job on the board in the locations below
+    locations: list[str] = []  # as the boards write them, e.g. "Italy" or "Remote"; empty: anywhere
+    max_results_per_board: int = Field(default=100, ge=1, le=1000)
+
+    @field_validator("boards")
+    @classmethod
+    def _boards(cls, v: list[str]) -> list[str]:
+        return _web_urls(v)
+
+
+class CareerPagesSettings(_Model):
+    """Companies' own job boards (Ashby, Greenhouse, Lever, Recruitee, Workable, Personio, Teamtailor). Free."""
+
+    enabled: bool = False
+    pages: list[str] = []  # careers page addresses, e.g. "https://jobs.ashbyhq.com/example-labs"
+    title_words: list[str] = []  # keep only jobs whose title has one of these; empty keeps every title
+    locations: list[str] = []  # keep only jobs whose location names one of these (or is blank); empty keeps all
+
+    @field_validator("pages")
+    @classmethod
+    def _pages(cls, v: list[str]) -> list[str]:
+        return _web_urls(v)
+
+
+class ApifyBoardSettings(_Model):
+    """A job board searched through an Apify actor: each query is run once in each location."""
+
+    enabled: bool = False
+    actor: str
+    queries: list[str] = []
+    locations: list[str] = []  # empty: one search with no location
+    max_results_per_search: int = Field(default=25, ge=1, le=1000)
+    price_per_result: float = Field(default=0.0, ge=0)
+
+
+class WttjSettings(ApifyBoardSettings):
+    """Welcome to the Jungle (which now includes Otta).
+
+    Locations: a two-letter country code ("IT") or a city, region or country name ("Milan", "Italy"), or "Remote".
+    Price (Apify pricing, checked 2026-11-12): $0.00299 a job plus $0.00001 a dataset item, and a negligible
+    $0.00005 for each run's start.
+    """
+
+    actor: str = "clearpath~welcome-to-the-jungle-jobs-api"
+    price_per_result: float = Field(default=0.003, ge=0)
+
+
+class WellfoundSettings(ApifyBoardSettings):
+    """Wellfound (formerly AngelList Talent), the startup job board.
+
+    Locations: Wellfound places as in wellfound.com/location/<place> ("Berlin", "London", "Italy"), or "Remote".
+    Price (Apify pricing, checked 2026-11-12): $0.003 a job, plus $0.005 for each run's start (one run per
+    query and location, not counted in the estimate), plus Apify platform usage (compute and residential proxy),
+    which this actor bills separately.
+    """
+
+    actor: str = "blackfalcondata~wellfound-scraper"
+    price_per_result: float = Field(default=0.003, ge=0)
+
+
+class YcSettings(ApifyBoardSettings):
+    """Y Combinator's Work at a Startup.
+
+    Locations: a city, region or country name or a two-letter country code ("Milan", "Italy", "IT"), "Europe",
+    or "Remote". The actor returns at most 200 jobs a search.
+    Price (Apify pricing, checked 2026-11-12): $0.0001 a job on the Free and Starter plans, no start fee.
+    """
+
+    actor: str = "nomad-agent~ycombinator-was-scraper"
+    price_per_result: float = Field(default=0.0001, ge=0)
+
+
+class AtsIndexSettings(ApifyBoardSettings):
+    """An index of many companies' own job boards (Greenhouse, Ashby, Lever, Personio, Teamtailor, ...).
+
+    Locations: a two-letter country code ("IT") or a place, region or work policy as job boards write it
+    ("Milan", "Italy", "Europe", "Remote").
+    Price (Apify pricing, checked 2026-11-12): $0.003 a job on the Free plan; from 2026-11-20 $0.005 on Starter,
+    $0.004 on Scale and $0.0035 on Business. The default is the highest, so the estimate stays an upper bound.
+    Jobs dropped by the actor's own filters are free; each run's start costs a negligible $0.00005.
+    """
+
+    actor: str = "jtpalms~ats-jobs-index"
+    price_per_result: float = Field(default=0.005, ge=0)
 
 
 class WindowSettings(_Model):
@@ -139,6 +270,14 @@ class UiSettings(_Model):
 class Settings(_Model):
     linkedin: LinkedInSettings = LinkedInSettings()
     indeed: IndeedSettings = IndeedSettings()
+    builtineurope: BuiltInEuropeSettings = BuiltInEuropeSettings()
+    jobgether: JobgetherSettings = JobgetherSettings()
+    vcboards: VcBoardsSettings = VcBoardsSettings()
+    careers: CareerPagesSettings = CareerPagesSettings()
+    wttj: WttjSettings = WttjSettings()
+    wellfound: WellfoundSettings = WellfoundSettings()
+    yc: YcSettings = YcSettings()
+    atsindex: AtsIndexSettings = AtsIndexSettings()
     windows: WindowSettings = WindowSettings()
     filters: FilterSettings = FilterSettings()
     scoring: ScoringSettings = ScoringSettings()

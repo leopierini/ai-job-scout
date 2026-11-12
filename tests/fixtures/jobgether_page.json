@@ -1,0 +1,56 @@
+{
+  "jobs": [
+    {
+      "id": "6b0000000000000000000001",
+      "title": "Junior Data Analyst",
+      "company": "Kestrel Payments",
+      "url": "https://jobgether.com/offer/6b0000000000000000000001-junior-data-analyst",
+      "location": "Italy, Spain",
+      "remote": "Full Remote",
+      "contractType": "Full time",
+      "experience": "Junior (1-2 years)",
+      "salaryRange": "38000-45000 EUR",
+      "jobFunctions": ["Data Analyst", "Business Analyst"],
+      "postedAt": "2026-11-11T08:30:00.000Z"
+    },
+    {
+      "id": "6b0000000000000000000002",
+      "title": "Product Analyst Intern",
+      "company": "Fjord Labs",
+      "url": "https://jobgether.com/offer/6b0000000000000000000002-product-analyst-intern",
+      "location": "Europe",
+      "remote": "Remote First",
+      "contractType": "Internships",
+      "experience": "Entry-level / graduate",
+      "salaryRange": "Competitive",
+      "jobFunctions": ["Product Analyst"],
+      "postedAt": "2026-11-05T10:00:00.000Z"
+    },
+    {
+      "title": "Posting Without An Id",
+      "company": "Nobody Ltd"
+    },
+    42,
+    {
+      "id": "6b0000000000000000000001",
+      "title": "Junior Data Analyst (repeated)",
+      "company": "Kestrel Payments",
+      "postedAt": "2026-11-11T08:30:00.000Z"
+    },
+    {
+      "id": "6b0000000000000000000003",
+      "title": "Growth Marketing Associate",
+      "company": "Heron Robotics",
+      "url": "https://jobgether.com/offer/6b0000000000000000000003-growth-marketing-associate",
+      "location": "Anywhere",
+      "remote": "Full Remote",
+      "contractType": "Freelance",
+      "experience": "",
+      "jobFunctions": ["Growth Marketer"],
+      "postedAt": "2026-08-01T10:00:00.000Z"
+    }
+  ],
+  "pagination": {"page": 1, "limit": 25, "hasMore": false},
+  "browseOnSiteUrl": "https://jobgether.com/search-offers?keyword=data+analyst",
+  "docs": "/astroapi/ai/jobs/docs"
+}

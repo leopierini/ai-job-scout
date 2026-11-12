@@ -66,7 +66,7 @@ def test_job_payload_uses_status_label():
     assert payload["id"] == row.pk and payload["job_id"] == row.job_id and payload["source"] == "linkedin"
     assert payload["score"] == 80 and payload["flags"] == ["x"]
     assert set(payload) == {
-        "id", "source", "job_id", "title", "company", "location", "url", "score", "reason", "flags",
+        "id", "source", "job_id", "title", "company", "location", "salary", "url", "score", "reason", "flags",
         "status", "start_date", "deadline", "posted", "recruiter", "recruiter_title", "recruiter_url",
         "keyword",
     }
