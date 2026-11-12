@@ -42,6 +42,7 @@ export function JobRowDetails({ job, id, showReason }: { job: JobOut; id: string
             )}
           </Item>
         )}
+        {job.salary && <Item term="Salary">{job.salary}</Item>}
         <Item term="Keyword">{job.keyword || "Not given"}</Item>
         <Item term="Source">{sourceLabel(job.source)}</Item>
         <Item term="Area">{job.area || "Not given"}</Item>

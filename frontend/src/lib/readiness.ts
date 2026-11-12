@@ -1,5 +1,6 @@
 import type { Keys, Mode, Settings } from "@/api/types"
 import { PROVIDERS } from "@/lib/providers"
+import { sourcesInUse, usesApify } from "@/lib/sources"
 
 /** A Settings tab, by its id in the address (#/settings/<tab>). Settings.tsx checks these ids exist there. */
 export type SettingsTab = "profile" | "search" | "ai" | "keys"
@@ -27,11 +28,14 @@ export function readiness(settings: Settings, keys: Keys, profile: string, mode:
   const out: Missing[] = []
   const { linkedin, indeed, scoring } = settings
   if (!profileHasText(profile)) out.push({ id: "profile", what: "Write your profile", tab: "profile" })
-  if (linkedin.keywords.length === 0 && indeed.queries.length === 0)
+  const others = sourcesInUse(settings).filter((key) => key !== "linkedin" && key !== "indeed")
+  if (linkedin.keywords.length === 0 && indeed.queries.length === 0 && others.length === 0)
     out.push({ id: "keyword", what: "Add a keyword to search for", tab: "search" })
-  if (linkedin.enabled && linkedin.regions.length === 0)
+  if (linkedin.enabled && linkedin.regions.length === 0 && others.length === 0)
     out.push({ id: "region", what: "Choose where to search", tab: "search" })
-  if (!keys.apify_token.set) out.push({ id: "apify_token", what: "Add your Apify token", tab: "keys" })
+  // Free sources alone need no Apify token.
+  if (!keys.apify_token.set && (usesApify(settings) || others.length === 0))
+    out.push({ id: "apify_token", what: "Add your Apify token", tab: "keys" })
   const provider = PROVIDERS.find((p) => p.id === scoring.provider)
   if (provider?.needsKey && provider.keyField && !keys[provider.keyField].set)
     out.push({ id: "ai_key", what: `Add your ${provider.label} API key`, tab: "keys" })

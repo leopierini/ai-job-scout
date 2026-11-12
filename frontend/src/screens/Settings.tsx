@@ -24,11 +24,13 @@ import { KeysTab } from "./settings/KeysTab"
 import { OutputsTab } from "./settings/OutputsTab"
 import { ProfileTab } from "./settings/ProfileTab"
 import { SearchTab } from "./settings/SearchTab"
+import { StartupsTab } from "./settings/StartupsTab"
 import type { TabProps } from "./settings/shared"
 
 const SETTINGS_TABS = [
   { id: "profile", label: "Profile & rules", Tab: ProfileTab },
   { id: "search", label: "Search", Tab: SearchTab },
+  { id: "startups", label: "Startups", Tab: StartupsTab },
   { id: "ai", label: "AI", Tab: AITab },
   { id: "outputs", label: "Outputs", Tab: OutputsTab },
   { id: "keys", label: "Keys", Tab: KeysTab },

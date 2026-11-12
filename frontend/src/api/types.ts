@@ -34,6 +34,8 @@ export interface JobOut {
   recruiter_title: string
   recruiter_url: string
   employment_type: string
+  /** As the source states it, e.g. "EUR 38,000–45,000 a year"; "" when not stated. */
+  salary: string
   state: JobState
   status: Status
   score: number | null
@@ -61,6 +63,10 @@ export type CountKey =
   | "searched"
   | "billed_linkedin"
   | "billed_indeed"
+  | "billed_wttj"
+  | "billed_wellfound"
+  | "billed_yc"
+  | "billed_atsindex"
   | "new"
   | "duplicates"
   | "excluded"
@@ -169,6 +175,69 @@ export interface IndeedSettings {
   price_per_result: number
 }
 
+/** Built in Europe (Balderton's board of VC-backed European startups). Free. */
+export interface BuiltInEuropeSettings {
+  enabled: boolean
+  queries: string[]
+  /** Lower-case English names, e.g. "italy"; empty: all of Europe. */
+  countries: string[]
+  max_results_per_query: number
+}
+
+export type JobgetherExperience =
+  | "entry-level-graduate"
+  | "junior-1-2-years"
+  | "mid-level-2-5-years"
+  | "senior-5-10-years"
+  | "expert-10-years"
+
+/** Jobgether's public job API. Free. */
+export interface JobgetherSettings {
+  enabled: boolean
+  queries: string[]
+  /** Jobgether location slugs, e.g. "italy", "europe". */
+  locations: string[]
+  experience: JobgetherExperience[]
+  max_results_per_query: number
+}
+
+/** Venture capital firms' portfolio job boards (Getro or Consider). Free. */
+export interface VcBoardsSettings {
+  enabled: boolean
+  boards: string[]
+  queries: string[]
+  locations: string[]
+  max_results_per_board: number
+}
+
+/** Companies' own job boards (Ashby, Greenhouse, Lever, …). Free. */
+export interface CareerPagesSettings {
+  enabled: boolean
+  pages: string[]
+  title_words: string[]
+  locations: string[]
+}
+
+/** A job board searched through an Apify actor: each query once in each location. */
+export interface ApifyBoardSettings {
+  enabled: boolean
+  actor: string
+  queries: string[]
+  locations: string[]
+  max_results_per_search: number
+  price_per_result: number
+}
+
+export type ApifyBoardName = "wttj" | "wellfound" | "yc" | "atsindex"
+
+/** GET /api/vc-boards: the portfolio boards the app knows. */
+export interface VcBoardPreset {
+  name: string
+  url: string
+  platform: "getro" | "consider"
+  country: string
+}
+
 export interface WindowSettings {
   default_days: number
   overlap_minutes: number
@@ -252,6 +321,14 @@ export interface UiSettings {
 export interface Settings {
   linkedin: LinkedInSettings
   indeed: IndeedSettings
+  builtineurope: BuiltInEuropeSettings
+  jobgether: JobgetherSettings
+  vcboards: VcBoardsSettings
+  careers: CareerPagesSettings
+  wttj: ApifyBoardSettings
+  wellfound: ApifyBoardSettings
+  yc: ApifyBoardSettings
+  atsindex: ApifyBoardSettings
   windows: WindowSettings
   filters: FilterSettings
   scoring: ScoringSettings

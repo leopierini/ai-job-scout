@@ -31,10 +31,19 @@ Searching LinkedIn and Indeed by hand means reading a lot of postings that don't
 ## What it does
 
 1. **You describe yourself.** Upload your CV and answer a few questions. The AI drafts a profile, and you check and edit it.
-2. **You choose what to search.** Job titles and regions for LinkedIn, plus Indeed if you want it.
+2. **You choose what to search.** Job titles and regions for LinkedIn, plus Indeed if you want it. The Startups tab in Settings adds more places to look for jobs at startups (see below).
 3. **It searches.** Press "Find jobs". Apify, a service that runs web scrapers, collects new postings from LinkedIn and Indeed.
 4. **It scores.** The AI reads each posting against your profile and gives it a score from 0 to 100, a one-line reason, and flags such as "asks for SQL" or "German B2 required". Your dealbreakers hold a score down.
 5. **You review.** Jobs above your minimum score land in a ranked list. Mark each one Interested, Applied, Interviewing, Offer or Rejected, or dismiss it. Optionally, new jobs are also sent to Notion, a CSV file or a webhook.
+
+## Jobs at startups
+
+Settings → Startups adds sources that LinkedIn and Indeed often miss. All are off until you turn them on.
+
+- **Free, read from public job feeds:** Built in Europe (jobs at venture-backed European startups), Jobgether (remote jobs), the job boards venture capital firms run for the startups they back (on Getro or Consider), and the career pages of companies you follow (Ashby, Greenhouse, Lever, Recruitee, Workable, Personio and Teamtailor). They cost nothing to search; each keeps only recent jobs that match your searches, so the AI reads as few as possible.
+- **Through Apify, paid per job like LinkedIn:** Welcome to the Jungle (including what was Otta), Wellfound, Y Combinator's Work at a Startup, and an index of many companies' own job boards.
+
+When a source states the salary, it is shown with the job and given to the AI.
 
 ![Step 2 of the setup wizard: a drafted software engineer profile with a headline, the profile text and dealbreakers, ready to check and edit](docs/images/wizard.png)
 
@@ -179,7 +188,7 @@ Each scheduled run spends Apify credit, so check `jobscout estimate` first. Only
 
 ## Disclaimer
 
-Searches go through third-party Apify actors, not through this project. You are responsible for following each site's terms of service and Apify's terms. This project is not affiliated with, endorsed by or sponsored by LinkedIn, Indeed, Apify, Notion or any AI provider.
+Most searches go through third-party Apify actors, not through this project; the free startup sources are read from public job feeds. You are responsible for following each site's terms of service and Apify's terms (Getro's terms, for example, forbid reading its boards automatically). This project is not affiliated with, endorsed by or sponsored by LinkedIn, Indeed, Apify, Notion, any job board, venture capital firm or AI provider.
 
 ## License
 

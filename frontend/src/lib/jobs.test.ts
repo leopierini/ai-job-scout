@@ -19,6 +19,7 @@ function job(pk: string, extra: Partial<JobOut> = {}): JobOut {
     recruiter_title: "",
     recruiter_url: "",
     employment_type: "",
+    salary: "",
     state: "kept",
     status: "to_review",
     score: null,
