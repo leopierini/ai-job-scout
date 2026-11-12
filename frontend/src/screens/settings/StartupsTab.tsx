@@ -132,7 +132,7 @@ function StartupsForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: 
       <TabBody readOnly={readOnly} root={root}>
         <p className="text-muted-foreground">
           More places to find jobs at startups. The first four are free: they only cost the AI's reading of each new job,
-          so each one keeps only recent jobs that match your searches.
+          so they keep only jobs that match your searches, and only recent ones, except career pages.
         </p>
 
         <Section title="Built in Europe" intro="Free. Jobs at venture-backed European startups, many with a salary.">
@@ -292,7 +292,7 @@ function StartupsForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: 
         >
           <SwitchRow
             label="Read career pages"
-            hint="Works with Ashby, Greenhouse, Lever, Recruitee, Workable, Personio and Teamtailor."
+            hint="Every open job is read once, however old; later runs bring only new ones. Works with Ashby, Greenhouse, Lever, Recruitee, Workable, Personio and Teamtailor."
             checked={s.careers.enabled}
             onCheckedChange={(on) => set("careers.enabled", on)}
           />
