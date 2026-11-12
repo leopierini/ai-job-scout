@@ -1,0 +1,63 @@
+[
+  {
+    "id": "6f1c2a90-0000-4000-8000-000000000001",
+    "reference": "FJORD_x1",
+    "name": "Junior Product Manager",
+    "url": "https://www.welcometothejungle.com/en/companies/fjord-labs/jobs/junior-product-manager_milan_FJORD_x1",
+    "contractType": "full_time",
+    "remote": "partial",
+    "salaryMin": 32000.0,
+    "salaryMax": 38000.0,
+    "salaryCurrency": "EUR",
+    "salaryPeriod": "yearly",
+    "publishedAt": "2026-11-08T09:00:00Z",
+    "summary": "Fjord Labs builds planning tools for small factories.",
+    "offices": [
+      {"city": "Milan", "country_code": "IT", "district": "Lombardy", "address": "Milan, Lombardy, Italy", "zip_code": "20100"},
+      {"city": "Turin", "country_code": "IT", "district": "Piedmont", "address": "Turin, Piedmont, Italy", "zip_code": "10100"}
+    ],
+    "organizationName": "Fjord Labs",
+    "description": "<p>Shape the roadmap with our users &amp; engineers.</p><ul><li>Run discovery interviews</li><li>Write specs</li></ul>",
+    "profile": "<p>One year of product experience.</p>",
+    "applyUrl": "https://apply.example.com/fjord-labs/123"
+  },
+  {
+    "name": "Product Owner Intern",
+    "url": "https://www.welcometothejungle.com/en/companies/birch-systems/jobs/product-owner-intern_paris_BIRCH_y2",
+    "contractType": "internship",
+    "remote": "fulltime",
+    "salaryMin": null,
+    "salaryMax": null,
+    "salaryCurrency": null,
+    "salaryPeriod": null,
+    "publishedAt": null,
+    "summary": "Help the team ship a better onboarding.",
+    "offices": [],
+    "organizationName": "Birch Systems",
+    "description": null,
+    "profile": null
+  },
+  {
+    "id": "6f1c2a90-0000-4000-8000-000000000001",
+    "name": "Junior Product Manager",
+    "organizationName": "Fjord Labs"
+  },
+  {
+    "name": "A job with no id and no link",
+    "organizationName": "Nowhere Ltd"
+  },
+  "not an item",
+  {
+    "id": "6f1c2a90-0000-4000-8000-000000000003",
+    "name": "Product Analyst",
+    "url": "javascript:alert(1)",
+    "offices": "unexpected",
+    "contractType": 7,
+    "salaryMin": "45,000",
+    "salaryMax": "abc",
+    "salaryCurrency": "eur",
+    "salaryPeriod": "monthly",
+    "publishedAt": "2026-13-45",
+    "organizationName": ["not", "text"]
+  }
+]

@@ -1,0 +1,61 @@
+{
+  "apiVersion": "1",
+  "jobs": [
+    {
+      "id": "0f1e2d3c-0000-4000-8000-000000000001",
+      "title": "Product Manager, Payments ",
+      "department": "Product",
+      "team": "Payments",
+      "employmentType": "FullTime",
+      "location": "Berlin",
+      "secondaryLocations": [{"location": "Lisbon", "address": {"postalAddress": {"addressCountry": "Portugal"}}}],
+      "publishedAt": "2026-11-10T09:30:00.000+00:00",
+      "isListed": true,
+      "isRemote": false,
+      "workplaceType": "Hybrid",
+      "jobUrl": "https://jobs.ashbyhq.com/example-labs/0f1e2d3c-0000-4000-8000-000000000001",
+      "applyUrl": "https://jobs.ashbyhq.com/example-labs/0f1e2d3c-0000-4000-8000-000000000001/application",
+      "descriptionHtml": "<h2>About the role</h2><p>Own the checkout of Example Labs.</p><ul><li>Ship things</li></ul>",
+      "descriptionPlain": "ABOUT THE ROLE\n\nOwn the checkout of Example Labs.",
+      "compensation": {
+        "compensationTierSummary": "€60K – €75K • Offers Equity",
+        "scrapeableCompensationSalarySummary": "€60K - €75K",
+        "compensationTiers": [],
+        "summaryComponents": [
+          {"compensationType": "Salary", "interval": "1 YEAR", "currencyCode": "EUR", "minValue": 60000, "maxValue": 75000},
+          {"compensationType": "EquityCashValue", "interval": "1 YEAR", "currencyCode": "EUR", "minValue": null, "maxValue": null}
+        ]
+      }
+    },
+    {
+      "id": "0f1e2d3c-0000-4000-8000-000000000002",
+      "title": "Data Analyst Intern",
+      "employmentType": "Intern",
+      "location": "Remote",
+      "secondaryLocations": [],
+      "publishedAt": "2026-11-11T08:00:00.000+00:00",
+      "isListed": true,
+      "isRemote": true,
+      "workplaceType": "Remote",
+      "jobUrl": "https://jobs.ashbyhq.com/example-labs/0f1e2d3c-0000-4000-8000-000000000002",
+      "descriptionHtml": "",
+      "descriptionPlain": "Analyse product data.",
+      "compensation": {
+        "compensationTierSummary": "€1.5K per month",
+        "scrapeableCompensationSalarySummary": null,
+        "compensationTiers": [],
+        "summaryComponents": []
+      }
+    },
+    {
+      "id": "0f1e2d3c-0000-4000-8000-000000000003",
+      "title": "Office Manager",
+      "employmentType": "PartTime",
+      "location": "Munich",
+      "publishedAt": "2026-11-09T08:00:00.000+00:00",
+      "isListed": false,
+      "jobUrl": "https://jobs.ashbyhq.com/example-labs/0f1e2d3c-0000-4000-8000-000000000003"
+    },
+    "not a job"
+  ]
+}

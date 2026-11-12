@@ -1,0 +1,48 @@
+{
+  "results": {
+    "count": 3,
+    "jobs": [
+      {
+        "id": 5001,
+        "title": "Machine Learning Engineer",
+        "url": "https://jobs.ashbyhq.com/kestrel-payments/ml-engineer",
+        "slug": "5001-machine-learning-engineer",
+        "created_at": 1794268800,
+        "locations": ["Milan, Italy", "Remote"],
+        "work_mode": "hybrid",
+        "seniority": "entry_level",
+        "skills": ["Python", "PyTorch"],
+        "compensation_amount_min_cents": 4420000,
+        "compensation_amount_max_cents": 6640000,
+        "compensation_currency": "EUR",
+        "compensation_period": "year",
+        "compensation_public": true,
+        "organization": {"id": 11, "name": "Kestrel Payments", "slug": "kestrel-payments", "stage": "series_b", "industry_tags": ["Fintech", "Payments"]}
+      },
+      {
+        "id": 5002,
+        "title": "Data Analyst",
+        "url": null,
+        "slug": "5002-data-analyst",
+        "created_at": 1794182400,
+        "locations": [],
+        "location_details": [{"name": "Oslo, Norway", "area_type": "city"}],
+        "work_mode": "on_site",
+        "compensation_amount_min_cents": null,
+        "compensation_amount_max_cents": null,
+        "compensation_currency": null,
+        "compensation_period": "period_not_defined",
+        "organization": {"id": 12, "name": "Fjord Labs", "slug": "fjord-labs", "stage": "other", "industry_tags": []}
+      },
+      {
+        "id": 5003,
+        "title": "Backend Engineer",
+        "url": "https://boards.greenhouse.io/fjordlabs/jobs/77",
+        "slug": "5003-backend-engineer",
+        "created_at": 1767225600,
+        "locations": ["Berlin, Germany"],
+        "organization": {"id": 12, "name": "Fjord Labs", "slug": "fjord-labs"}
+      }
+    ]
+  }
+}

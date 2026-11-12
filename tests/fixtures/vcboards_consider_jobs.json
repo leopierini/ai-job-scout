@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "jobs": [
+    {
+      "jobId": "c-101",
+      "title": "AI Engineer",
+      "url": "https://jobs.example-capital.com/companies/kestrel-payments/jobs/c-101",
+      "applyUrl": "https://kestrel-payments.example.com/careers/ai-engineer",
+      "timeStamp": "2026-11-10T09:30:00Z",
+      "companyName": "Kestrel Payments",
+      "companyStaffCount": 40,
+      "markets": [{"id": "Fintech", "label": "Fintech", "value": "Fintech"}],
+      "locations": ["Turin, IT"],
+      "remote": true,
+      "hybrid": false,
+      "salary": {"minValue": 38000, "maxValue": 45000, "currency": {"label": "EUR", "value": "EUR"}, "period": {"label": "Year", "value": "year"}, "isOriginal": true},
+      "jobFunctions": [{"id": "Engineering", "label": "Engineering", "value": "Engineering"}],
+      "jobSeniorities": [{"id": "junior", "label": "Junior", "value": "junior"}],
+      "minYearsExp": 1,
+      "skills": [{"id": "resume:Python", "label": "Python", "value": "resume:Python"}]
+    },
+    {
+      "jobId": "c-102",
+      "title": "Product Designer",
+      "url": "https://fjord-labs.example.com/jobs/designer",
+      "applyUrl": null,
+      "timeStamp": "2026-11-08T12:00:00Z",
+      "companyName": "Fjord Labs",
+      "locations": ["Oslo, NO"],
+      "salary": null
+    },
+    {
+      "jobId": "c-103",
+      "title": "Sales Lead",
+      "url": "https://fjord-labs.example.com/jobs/sales",
+      "timeStamp": "2025-12-01T08:00:00Z",
+      "companyName": "Fjord Labs",
+      "locations": ["Oslo, NO"]
+    }
+  ],
+  "meta": {"size": 100, "sequence": null},
+  "availableFilters": [],
+  "total": 3,
+  "errors": [],
+  "debug": []
+}

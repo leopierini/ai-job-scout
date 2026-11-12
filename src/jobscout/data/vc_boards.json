@@ -1,0 +1,31 @@
+{
+  "boards": [
+    {"name": "Index Ventures", "url": "https://indexventures.getro.com/jobs", "platform": "getro", "country": "UK"},
+    {"name": "Atomico", "url": "https://careers.atomico.com/jobs", "platform": "getro", "country": "UK"},
+    {"name": "Accel", "url": "https://jobs.accel.com/jobs", "platform": "getro", "country": "US"},
+    {"name": "Northzone", "url": "https://portfolio.northzone.com/jobs", "platform": "getro", "country": "SE"},
+    {"name": "Creandum", "url": "https://careers.creandum.com/jobs", "platform": "getro", "country": "SE"},
+    {"name": "Point Nine", "url": "https://jobs.pointnine.com/jobs", "platform": "getro", "country": "DE"},
+    {"name": "Seedcamp", "url": "https://talent.seedcamp.com/jobs", "platform": "getro", "country": "UK"},
+    {"name": "Speedinvest", "url": "https://careers.speedinvest.com/jobs", "platform": "getro", "country": "AT"},
+    {"name": "HV Capital", "url": "https://jobs.hvcapital.com/jobs", "platform": "getro", "country": "DE"},
+    {"name": "Earlybird", "url": "https://jobs.earlybird.com/jobs", "platform": "getro", "country": "DE"},
+    {"name": "Cherry Ventures", "url": "https://talent.cherry.vc/jobs", "platform": "getro", "country": "DE"},
+    {"name": "Partech", "url": "https://portfoliojobs.partechpartners.com/jobs", "platform": "getro", "country": "FR"},
+    {"name": "Octopus Ventures", "url": "https://talent.octopusventures.com/jobs", "platform": "getro", "country": "UK"},
+    {"name": "Entrepreneur First", "url": "https://portfolio.joinef.com/jobs", "platform": "getro", "country": "UK"},
+    {"name": "General Catalyst", "url": "https://jobs.generalcatalyst.com/jobs", "platform": "getro", "country": "US"},
+    {"name": "Headline", "url": "https://jobs.headline.com/jobs", "platform": "getro", "country": "DE"},
+    {"name": "Moonfire", "url": "https://positions.moonfire.com/jobs", "platform": "getro", "country": "UK"},
+    {"name": "Firstminute Capital", "url": "https://jobs.firstminute.capital/jobs", "platform": "getro", "country": "UK"},
+    {"name": "BACKED", "url": "https://talent.backed.vc/jobs", "platform": "getro", "country": "UK"},
+    {"name": "Dawn Capital", "url": "https://jobs.dawncapital.com/jobs", "platform": "getro", "country": "UK"},
+    {"name": "Plug and Play", "url": "https://jobs.pnptc.com/jobs", "platform": "getro", "country": "US"},
+    {"name": "Techstars", "url": "https://jobs.techstars.com/jobs", "platform": "getro", "country": "US"},
+    {"name": "Getro Community", "url": "https://community.getro.com/jobs", "platform": "getro", "country": "US"},
+    {"name": "Notion Capital", "url": "https://jobs.notion.vc/jobs", "platform": "consider", "country": "UK"},
+    {"name": "LocalGlobe and Latitude", "url": "https://jobs.phoenixcourt.vc/jobs", "platform": "consider", "country": "UK"},
+    {"name": "360 Capital", "url": "https://jobs.360cap.vc/jobs", "platform": "consider", "country": "IT"},
+    {"name": "Lightspeed", "url": "https://jobs.lsvp.com/jobs", "platform": "consider", "country": "US"}
+  ]
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "schemaVersion": "nomad-agent-job-row-v5",
+    "source": "ycombinator_was",
+    "id": "120001",
+    "url": "https://www.workatastartup.com/jobs/120001",
+    "title": "Product Manager",
+    "company": "Example Robotics",
+    "locations": ["Amsterdam, North Holland, Netherlands"],
+    "countryCodes": ["NL"],
+    "applicantLocations": null,
+    "postedAt": "2026-11-07T16:00:00Z",
+    "deadline": null,
+    "description": "Own the planning product.",
+    "descriptionHtml": "<p>Own the <strong>planning</strong> product.</p>",
+    "workType": "hybrid",
+    "salary": "€60K - €80K",
+    "employmentTypes": ["Full-time"],
+    "hiringContacts": []
+  },
+  {
+    "schemaVersion": "nomad-agent-job-row-v5",
+    "source": "ycombinator_was",
+    "id": "120002",
+    "url": "https://www.workatastartup.com/jobs/120002",
+    "title": "Founding Engineer",
+    "company": "Fjord Labs",
+    "locations": [],
+    "countryCodes": null,
+    "applicantLocations": ["Europe"],
+    "postedAt": "2026-11-06T10:00:00Z",
+    "description": "Work closely with our product manager to ship fast.",
+    "descriptionHtml": "<p>Work closely with our product manager to ship fast.</p>",
+    "workType": "remote",
+    "salary": null,
+    "employmentTypes": ["Full-time", "Contract"]
+  },
+  {
+    "schemaVersion": "nomad-agent-job-row-v5",
+    "source": "ycombinator_was",
+    "id": "120003",
+    "url": "https://www.workatastartup.com/jobs/120003",
+    "title": "Associate Product Manager (Intern)",
+    "company": "Birch Systems",
+    "locations": ["Remote"],
+    "applicantLocations": [],
+    "postedAt": null,
+    "description": "Learn product management at an early stage startup.",
+    "descriptionHtml": null,
+    "workType": "remote",
+    "salary": null,
+    "employmentTypes": ["Internship"]
+  },
+  {
+    "id": "",
+    "title": "Row without an id"
+  }
+]

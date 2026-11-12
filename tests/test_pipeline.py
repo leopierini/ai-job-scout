@@ -874,6 +874,32 @@ def test_rescore_pipeline_needs_no_apify_token(db):
         assert p._sources == []
 
 
+def test_free_sources_need_no_apify_token(db):
+    s = Settings()
+    s.linkedin.enabled = False
+    s.scoring.provider = "ollama"
+    s.careers.enabled = True
+    s.careers.pages = ["https://jobs.ashbyhq.com/example-labs"]
+    s.builtineurope.enabled = True
+    s.builtineurope.queries = ["AI engineer"]
+    s.vcboards.enabled = True  # no boards: skipped
+    with build_pipeline(s, Secrets(), db, "p") as p:
+        assert [src.name for src in p._sources] == ["builtineurope", "careers"]
+
+
+def test_apify_boards_need_the_apify_token(db):
+    s = Settings()
+    s.linkedin.enabled = False
+    s.scoring.provider = "ollama"
+    s.wttj.enabled = True
+    s.wttj.queries = ["AI engineer"]
+    s.yc.enabled = True  # no queries: skipped
+    with pytest.raises(ConfigError, match="Apify"):
+        build_pipeline(s, Secrets(), db, "p")
+    with build_pipeline(s, Secrets(apify_token="t"), db, "p") as p:
+        assert [src.name for src in p._sources] == ["wttj"]
+
+
 def test_enabled_source_with_nothing_to_search_is_skipped(db):
     s = Settings()  # LinkedIn on by default, with no keywords or regions
     s.scoring.provider = "ollama"  # needs no key; nothing is scored

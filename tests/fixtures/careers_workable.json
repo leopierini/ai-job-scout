@@ -1,0 +1,36 @@
+{
+  "name": "Northwind Robotics",
+  "description": "<p>We build friendly robots.</p>",
+  "jobs": [
+    {
+      "title": "Robotics Engineer",
+      "shortcode": "9F8E7D6C5B",
+      "code": "",
+      "employment_type": "Full-time",
+      "telecommuting": false,
+      "department": "Engineering",
+      "url": "https://apply.workable.com/j/9F8E7D6C5B",
+      "shortlink": "https://apply.workable.com/j/9F8E7D6C5B",
+      "application_url": "https://apply.workable.com/j/9F8E7D6C5B/apply",
+      "published_on": "2026-11-07",
+      "created_at": "2026-11-07",
+      "country": "Spain",
+      "city": "Barcelona",
+      "state": "Catalonia",
+      "locations": [{"country": "Spain", "countryCode": "ES", "city": "Barcelona", "region": "Catalonia", "hidden": false}],
+      "description": "<p>Build arms.</p>"
+    },
+    {
+      "title": "Technical Writer",
+      "shortcode": "1A2B3C4D5E",
+      "employment_type": "Contract",
+      "telecommuting": true,
+      "url": "https://apply.workable.com/j/1A2B3C4D5E",
+      "published_on": "2026-11-11",
+      "country": "Portugal",
+      "city": "Porto",
+      "locations": [],
+      "description": "<p>Write docs.</p>"
+    }
+  ]
+}

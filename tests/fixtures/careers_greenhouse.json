@@ -1,0 +1,35 @@
+{
+  "jobs": [
+    {
+      "absolute_url": "https://job-boards.greenhouse.io/kestrelpayments/jobs/4100001",
+      "internal_job_id": 900001,
+      "location": {"name": "Amsterdam, Netherlands"},
+      "metadata": [],
+      "id": 4100001,
+      "updated_at": "2026-11-11T10:00:00-05:00",
+      "requisition_id": "R-1",
+      "title": "Senior Backend Engineer",
+      "company_name": "Kestrel Payments",
+      "first_published": "2026-11-08T13:38:40-04:00",
+      "language": "en",
+      "content": "&lt;p&gt;Build the ledger at &lt;strong&gt;Kestrel&lt;/strong&gt; &amp;amp; friends.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Go&lt;/li&gt;&lt;/ul&gt;",
+      "departments": [{"id": 1, "name": "Engineering"}],
+      "offices": [{"id": 2, "name": "Amsterdam"}],
+      "pay_input_ranges": [
+        {"min_cents": 8500000, "max_cents": 10000000, "currency_type": "EUR", "title": "Netherlands", "blurb": "<p>Base pay.</p>"}
+      ]
+    },
+    {
+      "absolute_url": "https://job-boards.greenhouse.io/kestrelpayments/jobs/4100002",
+      "location": {"name": "Remote, Europe"},
+      "id": 4100002,
+      "updated_at": "2026-11-11T10:00:00-05:00",
+      "title": "Support Specialist",
+      "company_name": "Kestrel Payments",
+      "first_published": "2026-11-10T08:00:00-04:00",
+      "content": "&lt;p&gt;Help our customers.&lt;/p&gt;",
+      "pay_input_ranges": []
+    }
+  ],
+  "meta": {"total": 2}
+}

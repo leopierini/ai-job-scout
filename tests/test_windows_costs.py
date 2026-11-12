@@ -83,9 +83,30 @@ def test_estimate_empty_settings_is_free():
     assert estimate(Settings()) == CostEstimate(0, 0, 0, 0, 0.0)
 
 
+def test_estimate_with_apify_boards_and_free_sources():
+    s = Settings()
+    s.linkedin.enabled = False
+    s.wttj.enabled = True
+    s.wttj.queries = ["ai engineer", "product engineer"]
+    s.wttj.locations = ["IT", "FR", "DE"]
+    s.wttj.price_per_result = 0.001
+    s.yc.enabled = True
+    s.yc.queries = ["engineer"]  # no locations: one search
+    s.yc.price_per_result = 0.0001
+    s.wellfound.queries = ["engineer"]  # off: not counted
+    s.careers.enabled = True  # free: not counted
+    s.careers.pages = ["https://jobs.ashbyhq.com/example-labs"]
+    e = estimate(s)
+    assert (e.board_searches, e.board_max_results) == (7, 175)
+    assert (e.searches, e.max_results) == (7, 175)
+    assert e.max_usd == pytest.approx(150 * 0.001 + 25 * 0.0001)
+
+
 def test_billed_cost():
     s = Settings()
     assert billed_cost({"linkedin": 100, "indeed": 10}, s) == pytest.approx(100 * 0.0003 + 10 * 0.00005)
+    s.wttj.price_per_result = 0.002
+    assert billed_cost({"wttj": 10, "careers": 99}, s) == pytest.approx(10 * 0.002)  # free sources cost nothing
     assert billed_cost({}, s) == 0.0
 
 
