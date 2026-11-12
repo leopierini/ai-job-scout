@@ -35,7 +35,6 @@ from jobscout.sources import (
     posted_date,
     salary_text,
     web_url,
-    within_window,
 )
 from jobscout.sources.indeed import title_matches
 
@@ -483,7 +482,12 @@ class CareerPagesSource:
     def search_area(
         self, area: SearchArea, window_seconds: int, progress: Callable[[int, int, int], None]
     ) -> AreaResult:
-        """Read one company's job board and keep the jobs that pass the filters and the time window."""
+        """Read one company's job board and keep the jobs that pass the filters.
+
+        Every open job is kept, however old: these are companies the person chose to follow, so a role
+        posted weeks ago is still worth seeing once. Jobs already stored are skipped by the database, so
+        later runs only bring new ones. `window_seconds` is not used.
+        """
         progress(0, 1, 0)
         try:
             found = self._postings(area)
@@ -491,7 +495,7 @@ class CareerPagesSource:
             return AreaResult(jobs=[], billed=0, complete=False, error=exc)
         if found is None:  # cancelled
             return AreaResult(jobs=[], billed=0, complete=False)
-        jobs = self._keep(*found, area, window_seconds)
+        jobs = self._keep(*found, area)
         progress(1, 1, len(jobs))
         return AreaResult(jobs=jobs, billed=0, complete=True)
 
@@ -511,11 +515,10 @@ class CareerPagesSource:
         name = f"The job board of {area.label}"
         return board, read_feed(board, self._get(board.feed_url, name), name)
 
-    def _keep(self, board: Board, postings: list[Posting], area: SearchArea, window_seconds: int) -> list[Job]:
+    def _keep(self, board: Board, postings: list[Posting], area: SearchArea) -> list[Job]:
         s = self._settings
         words = [(w, fold(w)) for w in s.title_words if fold(w)]
         places = [fold(p) for p in s.locations if fold(p)]
-        today = self._today()
         jobs: dict[str, Job] = {}
         for p in postings:
             if not p.id or not p.title:
@@ -527,8 +530,6 @@ class CareerPagesSource:
             if p.remote and "remote" not in fold(location):
                 location = f"{location} (remote)" if location else "Remote"
             if places and p.location and not (title_matches(location, places) or (p.remote and "remote" in places)):
-                continue
-            if not within_window(p.posted, window_seconds, today):
                 continue
             job_id = f"{board.ats}:{board.key}:{p.id}"
             jobs.setdefault(

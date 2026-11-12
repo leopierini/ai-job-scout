@@ -121,6 +121,10 @@ def salary_text(low: object, high: object, currency: object = "", period: object
         return ""
     if lo is not None and hi is not None and hi < lo:
         lo, hi = hi, lo
+    per = _PERIODS.get(as_str(period).strip().lower().removeprefix("per ").removeprefix("per_"), "")
+    if per == "a year" and max(x for x in (lo, hi) if x is not None) < 1000:
+        # A yearly salary under 1,000 was written in thousands ("50–65" for 50k–65k).
+        lo, hi = (x * 1000 if x is not None else None for x in (lo, hi))
     fmt = "{:,.0f}".format
     if lo is not None and hi is not None and lo != hi:
         amount = f"{fmt(lo)}–{fmt(hi)}"
@@ -131,7 +135,6 @@ def salary_text(low: object, high: object, currency: object = "", period: object
     else:
         amount = f"up to {fmt(hi)}"
     code = as_str(currency).strip().upper()
-    per = _PERIODS.get(as_str(period).strip().lower().removeprefix("per ").removeprefix("per_"), "")
     return " ".join(x for x in (code, amount, per) if x)
 
 

@@ -420,7 +420,7 @@ def test_location_filter_keeps_a_remote_job_without_a_location():
     assert [j.location for j in result.jobs] == ["Remote"]
 
 
-def test_window_drops_old_postings_and_keeps_undated_ones():
+def test_every_open_posting_is_kept_whatever_its_date():
     feed = b"""{"jobs": [
         {"id": "new", "title": "New", "publishedAt": "2026-11-11T08:00:00Z"},
         {"id": "edge", "title": "Edge", "publishedAt": "2026-11-05T08:00:00Z"},
@@ -429,7 +429,7 @@ def test_window_drops_old_postings_and_keeps_undated_ones():
     ]}"""
     source, _, _ = make_source(["https://jobs.ashbyhq.com/example-labs"], {ASHBY: feed})
     result, _ = search(source, window=WEEK)
-    assert sorted(j.title for j in result.jobs) == ["Edge", "New", "Undated"]
+    assert sorted(j.title for j in result.jobs) == ["Edge", "New", "Old", "Undated"]
 
 
 # --- failures ---
