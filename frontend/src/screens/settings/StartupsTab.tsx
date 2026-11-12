@@ -3,7 +3,7 @@ import { ChevronRightIcon } from "lucide-react"
 import { toast } from "sonner"
 
 import { api } from "@/api/client"
-import type { ApifyBoardName, ApifyBoardSettings, Settings, VcBoardPreset } from "@/api/types"
+import type { ApifyBoardName, ApifyBoardSettings, Settings, StartupPlace, VcBoardPreset } from "@/api/types"
 import { ChipsInput } from "@/components/ChipsInput"
 import { EstimateNote } from "@/components/EstimateNote"
 import { describedBy, Field } from "@/components/Field"
@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils"
 import { Loaded, NumberField, SaveBar, SwitchRow, TabBody, useTabForm, type TabProps } from "./shared"
 
 const STARTUP_PATHS = [
+  "startup_places",
   "builtineurope",
   "jobgether",
   "vcboards",
@@ -33,21 +34,23 @@ export function StartupsTab(props: TabProps) {
   return <Loaded load={loadSettings}>{(data) => <StartupsForm {...props} loaded={data} />}</Loaded>
 }
 
-/** The VC boards the app knows, loaded once; an empty list if they can't be loaded (other boards still work). */
-function useVcPresets(): VcBoardPreset[] | null {
-  const [presets, setPresets] = useState<VcBoardPreset[] | null>(null)
+/** A list bundled with the app, loaded once; an empty list if it can't be loaded (typed values still work). */
+function useBundled<T>(path: string): T[] | null {
+  const [items, setItems] = useState<T[] | null>(null)
   useEffect(() => {
     let live = true
-    api.get<VcBoardPreset[]>("/api/vc-boards").then(
-      (p) => live && setPresets(p),
-      () => live && setPresets([]),
+    api.get<T[]>(path).then(
+      (p) => live && setItems(p),
+      () => live && setItems([]),
     )
     return () => {
       live = false
     }
-  }, [])
-  return presets
+  }, [path])
+  return items
 }
+
+const OWN_PLACES = "Leave it empty to use Where to search, at the top."
 
 const lower = (values: string[]) => [...new Set(values.map((v) => v.trim().toLowerCase()).filter(Boolean))]
 
@@ -78,7 +81,7 @@ const APIFY_BOARDS: {
     title: "Welcome to the Jungle",
     inSentence: "Welcome to the Jungle",
     intro: "Startups and scale-ups across Europe, including the jobs that used to be on Otta. Searched through Apify. Its terms forbid reading the site automatically: turn it on only if you accept that.",
-    locationHint: "A country code such as IT, a place such as Milan, or Remote. Each one adds one search per search above.",
+    locationHint: "A country code such as IT, a place such as Milan, or Remote. Each one adds one search.",
     placeholder: "e.g. IT",
   },
   {
@@ -86,7 +89,7 @@ const APIFY_BOARDS: {
     title: "Wellfound",
     inSentence: "Wellfound",
     intro: "Startup jobs, most with a salary range. Mostly in the US. Searched through Apify, which also charges $0.005 for each search plus its platform usage. Its terms forbid reading the site automatically: turn it on only if you accept that.",
-    locationHint: "A place such as Berlin or Italy, or Remote. Each one adds one search per search above.",
+    locationHint: "A place such as Berlin or Italy, or Remote. Each one adds one search.",
     placeholder: "e.g. Italy",
   },
   {
@@ -94,7 +97,7 @@ const APIFY_BOARDS: {
     title: "Y Combinator",
     inSentence: "Y Combinator",
     intro: "Jobs at Y Combinator startups (Work at a Startup). Searched through Apify.",
-    locationHint: "A place such as Milan, Italy or Europe, or Remote. Each one adds one search per search above.",
+    locationHint: "A place such as Milan, Italy or Europe, or Remote. Each one adds one search.",
     placeholder: "e.g. Europe",
   },
   {
@@ -102,7 +105,7 @@ const APIFY_BOARDS: {
     title: "Company job boards",
     inSentence: "company job boards",
     intro: "Thousands of companies' own job boards, searched at once. Searched through Apify.",
-    locationHint: "A country code such as IT, a place such as Milan or Europe, or Remote. Each one adds one search per search above.",
+    locationHint: "A country code such as IT, a place such as Milan or Europe, or Remote. Each one adds one search.",
     placeholder: "e.g. IT",
   },
 ]
@@ -113,7 +116,8 @@ function StartupsForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: 
   const set = draft.set
   const err = (path: string) => fieldError(fields, path)
   const live = useLiveEstimate(s)
-  const presets = useVcPresets()
+  const presets = useBundled<VcBoardPreset>("/api/vc-boards")
+  const places = useBundled<StartupPlace>("/api/startup-places")
 
   const onSave = async () => {
     const ok = await save.run(async () => {
@@ -135,6 +139,20 @@ function StartupsForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: 
           so they keep only jobs that match your searches, and only recent ones, except career pages.
         </p>
 
+        <Section title="Where to search" intro="Every source below searches these places, each in its own format. Career pages are the exception: they keep every place unless you set their own.">
+          <MultiSelect
+            label="Places"
+            options={(places ?? []).map((p) => ({ value: p.key, label: p.name }))}
+            value={s.startup_places}
+            onChange={(v) => set("startup_places", v)}
+            addLabel="Add a place"
+            searchPlaceholder="Search places"
+            emptyText={places ? "No place matches." : "Loading places…"}
+            hint="Pick countries, Europe for all of Europe, and Remote for remote jobs anywhere. On the boards searched through Apify, each place adds one search."
+            error={err("startup_places")}
+          />
+        </Section>
+
         <Section title="Built in Europe" intro="Free. Jobs at venture-backed European startups, many with a salary.">
           <SwitchRow
             label="Search Built in Europe"
@@ -153,11 +171,11 @@ function StartupsForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: 
                 error={err("builtineurope.queries")}
               />
               <ChipsInput
-                label="Countries"
+                label="Countries for this source"
                 value={s.builtineurope.countries.map(titleCase)}
                 onChange={(v) => set("builtineurope.countries", lower(v))}
                 placeholder="e.g. Italy"
-                hint="In English. Leave it empty to search all of Europe."
+                hint={`In English. ${OWN_PLACES}`}
                 error={err("builtineurope.countries")}
                 optional
               />
@@ -177,7 +195,7 @@ function StartupsForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: 
         <Section title="Jobgether" intro="Free. A large board of remote jobs, with filters for place and experience.">
           <SwitchRow
             label="Search Jobgether"
-            hint="Each search is run once, in all the places below."
+            hint="Each search is run once, in all your places at once."
             checked={s.jobgether.enabled}
             onCheckedChange={(on) => set("jobgether.enabled", on)}
           />
@@ -192,11 +210,11 @@ function StartupsForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: 
                 error={err("jobgether.queries")}
               />
               <ChipsInput
-                label="Places"
+                label="Places for this source"
                 value={s.jobgether.locations}
                 onChange={(v) => set("jobgether.locations", lower(v))}
                 placeholder="e.g. italy"
-                hint="As Jobgether writes them, e.g. italy, europe or anywhere. Leave it empty for anywhere."
+                hint={`As Jobgether writes them, e.g. italy, europe or anywhere. ${OWN_PLACES}`}
                 error={err("jobgether.locations")}
                 optional
               />
@@ -260,16 +278,16 @@ function StartupsForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: 
                 value={s.vcboards.queries}
                 onChange={(v) => set("vcboards.queries", v)}
                 placeholder="e.g. AI engineer"
-                hint="Leave it empty to take every job in the places below."
+                hint="Leave it empty to take every job in your places."
                 error={err("vcboards.queries")}
                 optional
               />
               <ChipsInput
-                label="Places"
+                label="Places for this source"
                 value={s.vcboards.locations}
                 onChange={(v) => set("vcboards.locations", v)}
                 placeholder="e.g. Italy"
-                hint="As the boards write them, e.g. Italy or Remote. Leave it empty for anywhere."
+                hint={`As the boards write them, e.g. Italy or Remote. ${OWN_PLACES}`}
                 error={err("vcboards.locations")}
                 optional
               />
@@ -320,7 +338,7 @@ function StartupsForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: 
                 value={s.careers.locations}
                 onChange={(v) => set("careers.locations", v)}
                 placeholder="e.g. Italy"
-                hint="Only jobs in one of these places, or remote, are kept. Leave it empty to keep every place."
+                hint="Only jobs whose location names one of these, e.g. Milan or Remote, are kept. Leave it empty to keep every place."
                 error={err("careers.locations")}
                 optional
               />
@@ -395,11 +413,11 @@ function ApifyBoardSection({
             error={err("queries")}
           />
           <ChipsInput
-            label="Places"
+            label="Places for this source"
             value={value.locations}
             onChange={(v) => onChange("locations", v)}
             placeholder={board.placeholder}
-            hint={board.locationHint}
+            hint={`${board.locationHint} ${OWN_PLACES}`}
             error={err("locations")}
             optional
           />

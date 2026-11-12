@@ -1,0 +1,178 @@
+{
+  "_note": "Places for the Startups tab: each startup source gets them in its own format (jobscout.startup_places).",
+  "places": [
+    {
+      "key": "europe",
+      "name": "Europe"
+    },
+    {
+      "key": "remote",
+      "name": "Remote"
+    },
+    {
+      "key": "at",
+      "name": "Austria",
+      "europe": true
+    },
+    {
+      "key": "be",
+      "name": "Belgium",
+      "europe": true
+    },
+    {
+      "key": "bg",
+      "name": "Bulgaria",
+      "europe": true
+    },
+    {
+      "key": "ca",
+      "name": "Canada",
+      "europe": false
+    },
+    {
+      "key": "hr",
+      "name": "Croatia",
+      "europe": true
+    },
+    {
+      "key": "cy",
+      "name": "Cyprus",
+      "europe": true
+    },
+    {
+      "key": "cz",
+      "name": "Czechia",
+      "europe": true
+    },
+    {
+      "key": "dk",
+      "name": "Denmark",
+      "europe": true
+    },
+    {
+      "key": "ee",
+      "name": "Estonia",
+      "europe": true
+    },
+    {
+      "key": "fi",
+      "name": "Finland",
+      "europe": true
+    },
+    {
+      "key": "fr",
+      "name": "France",
+      "europe": true
+    },
+    {
+      "key": "de",
+      "name": "Germany",
+      "europe": true
+    },
+    {
+      "key": "gr",
+      "name": "Greece",
+      "europe": true
+    },
+    {
+      "key": "hu",
+      "name": "Hungary",
+      "europe": true
+    },
+    {
+      "key": "is",
+      "name": "Iceland",
+      "europe": true
+    },
+    {
+      "key": "ie",
+      "name": "Ireland",
+      "europe": true
+    },
+    {
+      "key": "it",
+      "name": "Italy",
+      "europe": true
+    },
+    {
+      "key": "lv",
+      "name": "Latvia",
+      "europe": true
+    },
+    {
+      "key": "lt",
+      "name": "Lithuania",
+      "europe": true
+    },
+    {
+      "key": "lu",
+      "name": "Luxembourg",
+      "europe": true
+    },
+    {
+      "key": "mt",
+      "name": "Malta",
+      "europe": true
+    },
+    {
+      "key": "nl",
+      "name": "Netherlands",
+      "europe": true
+    },
+    {
+      "key": "no",
+      "name": "Norway",
+      "europe": true
+    },
+    {
+      "key": "pl",
+      "name": "Poland",
+      "europe": true
+    },
+    {
+      "key": "pt",
+      "name": "Portugal",
+      "europe": true
+    },
+    {
+      "key": "ro",
+      "name": "Romania",
+      "europe": true
+    },
+    {
+      "key": "sk",
+      "name": "Slovakia",
+      "europe": true
+    },
+    {
+      "key": "si",
+      "name": "Slovenia",
+      "europe": true
+    },
+    {
+      "key": "es",
+      "name": "Spain",
+      "europe": true
+    },
+    {
+      "key": "se",
+      "name": "Sweden",
+      "europe": true
+    },
+    {
+      "key": "ch",
+      "name": "Switzerland",
+      "europe": true
+    },
+    {
+      "key": "gb",
+      "name": "United Kingdom",
+      "europe": true
+    },
+    {
+      "key": "us",
+      "name": "United States",
+      "europe": false
+    }
+  ]
+}

@@ -230,6 +230,12 @@ export interface ApifyBoardSettings {
 
 export type ApifyBoardName = "wttj" | "wellfound" | "yc" | "atsindex"
 
+/** GET /api/startup-places: what "Where to search" offers. Key: a country code, "europe" or "remote". */
+export interface StartupPlace {
+  key: string
+  name: string
+}
+
 /** GET /api/vc-boards: the portfolio boards the app knows. */
 export interface VcBoardPreset {
   name: string
@@ -329,6 +335,8 @@ export interface Settings {
   wellfound: ApifyBoardSettings
   yc: ApifyBoardSettings
   atsindex: ApifyBoardSettings
+  /** "Where to search" on the Startups tab: keys from GET /api/startup-places. */
+  startup_places: string[]
   windows: WindowSettings
   filters: FilterSettings
   scoring: ScoringSettings
