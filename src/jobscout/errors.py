@@ -7,12 +7,16 @@ class ConfigError(Exception):
     """A settings, secrets or profile file is missing or unreadable."""
 
 
-class ApifyError(Exception):
-    """An Apify call failed. `kind` tells the caller how to react."""
+class SearchError(Exception):
+    """A job source failed. `kind` tells the caller how to react: "limit" and "auth" stop every search."""
 
     def __init__(self, message: str, kind: Literal["limit", "auth", "other"] = "other") -> None:
         super().__init__(message)
         self.kind = kind
+
+
+class ApifyError(SearchError):
+    """An Apify call failed."""
 
 
 class ProviderError(Exception):

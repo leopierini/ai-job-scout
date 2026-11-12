@@ -23,6 +23,7 @@ def job_payload(row: JobRow) -> dict:
         "title": row.title,
         "company": row.company,
         "location": row.location,
+        "salary": row.salary,
         "url": row.url,
         "score": row.score,
         "reason": row.reason,
