@@ -1,12 +1,15 @@
-"""One "Where to search" for the startup sources, written in each source's own format.
+"""One "What and where to search" for the startup sources, written in each source's own format.
 
-The Startups tab keeps a single list of places (`Settings.startup_places`): country codes such as "it",
-plus "europe" and "remote". Each source names places differently (Built in Europe wants "italy",
-Welcome to the Jungle "IT", Jobgether "italy" or "anywhere", ...), so `apply_places` fills each
-source's own place field from that list. A source whose own field is already set keeps it.
+The Startups tab keeps a single list of searches (`Settings.startup_queries`, such as "AI engineer") and a
+single list of places (`Settings.startup_places`): country codes such as "it", plus "europe" and "remote".
+Each source names places differently (Built in Europe wants "italy", Welcome to the Jungle "IT", Jobgether
+"italy" or "anywhere", ...), so `apply_shared` fills each source's own place field from that list, and its
+own searches with the shared ones. A source whose own field is already set keeps it.
 
-Career pages are left out on purpose: their filter matches words in each job's location, and job boards
-mostly write a city ("Milan") rather than the country, so a country would drop most of their jobs.
+Career pages are left out of both on purpose. Their place filter matches words in each job's location, and
+job boards mostly write a city ("Milan") rather than the country, so a country would drop most of their jobs.
+They have no searches either, only a filter on whole words in the job title, so a phrase such as
+"AI engineer" would also drop most of their jobs.
 """
 
 import json
@@ -66,14 +69,17 @@ def formats(keys: list[str]) -> dict[str, list[str]]:
 _FIELDS = {"builtineurope": "countries"}  # every other source calls it `locations`
 
 
-def apply_places(s: "Settings") -> "Settings":
-    """A copy of the settings where each startup source without its own places uses `startup_places`."""
-    if not s.startup_places:
+def apply_shared(s: "Settings") -> "Settings":
+    """A copy of the settings where each startup source without its own searches or places uses
+    `startup_queries` and `startup_places`. The same settings when neither is set."""
+    if not s.startup_places and not s.startup_queries:
         return s
     out = s.model_copy(deep=True)
     for source, places in formats(s.startup_places).items():
         section = getattr(out, source)
         field = _FIELDS.get(source, "locations")
-        if not getattr(section, field):
+        if s.startup_places and not getattr(section, field):
             setattr(section, field, places)
+        if not section.queries:
+            section.queries = list(s.startup_queries)
     return out

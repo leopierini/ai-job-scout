@@ -5,7 +5,7 @@ from dataclasses import dataclass
 import httpx
 
 from jobscout.settings import ApifyBoardSettings, Settings
-from jobscout.startup_places import apply_places
+from jobscout.startup_places import apply_shared
 from jobscout.sources.indeed import searches as indeed_searches
 
 LIMITS_URL = "https://api.apify.com/v2/users/me/limits"
@@ -44,7 +44,7 @@ class CostEstimate:
 
 def estimate(s: Settings) -> CostEstimate:
     """Worst-case searches, results and dollars for one run with these settings."""
-    s = apply_places(s)
+    s = apply_shared(s)
     li, ind = s.linkedin, s.indeed
     li_searches = len(li.regions) * len(li.keywords) if li.enabled else 0
     li_results = li_searches * li.cap_per_keyword

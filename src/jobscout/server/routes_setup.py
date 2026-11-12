@@ -108,7 +108,7 @@ def vc_boards() -> list[dict]:
 
 @router.get("/startup-places")
 def startup_places() -> list[dict]:
-    """The places "Where to search" offers on the Startups tab: Europe, Remote, then countries."""
+    """The places offered at the top of the Startups tab: Europe, Remote, then countries."""
     return [{"key": key, "name": name} for key, name in catalog().items()]
 
 

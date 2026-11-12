@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils"
 import { Loaded, NumberField, SaveBar, SwitchRow, TabBody, useTabForm, type TabProps } from "./shared"
 
 const STARTUP_PATHS = [
+  "startup_queries",
   "startup_places",
   "builtineurope",
   "jobgether",
@@ -50,7 +51,8 @@ function useBundled<T>(path: string): T[] | null {
   return items
 }
 
-const OWN_PLACES = "Leave it empty to use Where to search, at the top."
+const OWN_SEARCHES = "Leave it empty to use the searches at the top."
+const OWN_PLACES = "Leave it empty to use the places at the top."
 
 const lower = (values: string[]) => [...new Set(values.map((v) => v.trim().toLowerCase()).filter(Boolean))]
 
@@ -139,7 +141,18 @@ function StartupsForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: 
           so they keep only jobs that match your searches, and only recent ones, except career pages.
         </p>
 
-        <Section title="Where to search" intro="Every source below searches these places, each in its own format. Career pages are the exception: they keep every place unless you set their own.">
+        <Section
+          title="What and where to search"
+          intro="Every source below uses these searches and places, each in its own format, unless it has its own. Career pages are the exception: they keep every job unless you set their own title words and places."
+        >
+          <ChipsInput
+            label="Searches"
+            value={s.startup_queries}
+            onChange={(v) => set("startup_queries", v)}
+            placeholder="e.g. AI engineer"
+            hint="Job titles or skills. On the boards searched through Apify, each one is searched in each place."
+            error={err("startup_queries")}
+          />
           <MultiSelect
             label="Places"
             options={(places ?? []).map((p) => ({ value: p.key, label: p.name }))}
@@ -163,12 +176,13 @@ function StartupsForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: 
           {s.builtineurope.enabled && (
             <>
               <ChipsInput
-                label="Searches"
+                label="Searches for this source"
                 value={s.builtineurope.queries}
                 onChange={(v) => set("builtineurope.queries", v)}
                 placeholder="e.g. AI engineer"
-                hint="Job titles or skills, as you'd type them on the site."
+                hint={`Job titles or skills, as you'd type them on the site. ${OWN_SEARCHES}`}
                 error={err("builtineurope.queries")}
+                optional
               />
               <ChipsInput
                 label="Countries for this source"
@@ -202,12 +216,13 @@ function StartupsForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: 
           {s.jobgether.enabled && (
             <>
               <ChipsInput
-                label="Searches"
+                label="Searches for this source"
                 value={s.jobgether.queries}
                 onChange={(v) => set("jobgether.queries", v)}
                 placeholder="e.g. AI engineer"
-                hint="Job titles or skills."
+                hint={`Job titles or skills. ${OWN_SEARCHES}`}
                 error={err("jobgether.queries")}
+                optional
               />
               <ChipsInput
                 label="Places for this source"
@@ -274,11 +289,15 @@ function StartupsForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: 
                 optional
               />
               <ChipsInput
-                label="Searches"
+                label="Searches for this source"
                 value={s.vcboards.queries}
                 onChange={(v) => set("vcboards.queries", v)}
                 placeholder="e.g. AI engineer"
-                hint="Leave it empty to take every job in your places."
+                hint={
+                  s.startup_queries.length > 0
+                    ? OWN_SEARCHES
+                    : "Leave it empty to take every job in your places, as there are no searches at the top."
+                }
                 error={err("vcboards.queries")}
                 optional
               />
@@ -405,12 +424,13 @@ function ApifyBoardSection({
       {value.enabled && (
         <>
           <ChipsInput
-            label="Searches"
+            label="Searches for this source"
             value={value.queries}
             onChange={(v) => onChange("queries", v)}
             placeholder="e.g. AI engineer"
-            hint="Job titles or skills. Each search adds one search per place."
+            hint={`Job titles or skills. Each one is searched in each place. ${OWN_SEARCHES}`}
             error={err("queries")}
+            optional
           />
           <ChipsInput
             label="Places for this source"
