@@ -37,6 +37,7 @@ from jobscout.sources.vcboards import VcBoardsSource
 from jobscout.sources.wellfound import WellfoundSource
 from jobscout.sources.wttj import WttjSource
 from jobscout.sources.yc import YcSource
+from jobscout.startup_places import apply_places
 
 COUNT_KEYS = (
     "archived", "searched", "billed_linkedin", "billed_indeed", *(f"billed_{name}" for name in APIFY_BOARDS),
@@ -428,6 +429,7 @@ def build_pipeline(
         )  # fmt: skip
     if settings.scoring.provider == "fake":
         raise ConfigError("Pick an AI provider first.")
+    settings = apply_places(settings)  # each startup source gets "Where to search" in its own format
 
     li, ind = settings.linkedin, settings.indeed
     # An enabled source with nothing to search is skipped, not an error.

@@ -19,6 +19,7 @@ from jobscout.outputs.notion import NotionClient, parse_page_id
 from jobscout.scoring.providers import make_provider, test_provider
 from jobscout.server.workspace import SAMPLE_READ_ONLY, Workspace
 from jobscout.settings import NotionOutputSettings, ScoringSettings
+from jobscout.startup_places import catalog
 
 router = APIRouter(prefix="/api")
 
@@ -103,6 +104,12 @@ def vc_boards() -> list[dict]:
         {"name": b["name"], "url": b["url"], "platform": b["platform"], "country": b.get("country", "")}
         for b in data["boards"]
     ]
+
+
+@router.get("/startup-places")
+def startup_places() -> list[dict]:
+    """The places "Where to search" offers on the Startups tab: Europe, Remote, then countries."""
+    return [{"key": key, "name": name} for key, name in catalog().items()]
 
 
 @router.post("/test/ai")

@@ -1,0 +1,145 @@
+{
+  "_note": "Places for the Startups tab: each startup source gets them in its own format (jobscout.startup_places).",
+  "places": [
+    {
+      "key": "europe",
+      "name": "Europe"
+    },
+    {
+      "key": "remote",
+      "name": "Remote"
+    },
+    {
+      "key": "at",
+      "name": "Austria"
+    },
+    {
+      "key": "be",
+      "name": "Belgium"
+    },
+    {
+      "key": "bg",
+      "name": "Bulgaria"
+    },
+    {
+      "key": "ca",
+      "name": "Canada"
+    },
+    {
+      "key": "hr",
+      "name": "Croatia"
+    },
+    {
+      "key": "cy",
+      "name": "Cyprus"
+    },
+    {
+      "key": "cz",
+      "name": "Czechia"
+    },
+    {
+      "key": "dk",
+      "name": "Denmark"
+    },
+    {
+      "key": "ee",
+      "name": "Estonia"
+    },
+    {
+      "key": "fi",
+      "name": "Finland"
+    },
+    {
+      "key": "fr",
+      "name": "France"
+    },
+    {
+      "key": "de",
+      "name": "Germany"
+    },
+    {
+      "key": "gr",
+      "name": "Greece"
+    },
+    {
+      "key": "hu",
+      "name": "Hungary"
+    },
+    {
+      "key": "is",
+      "name": "Iceland"
+    },
+    {
+      "key": "ie",
+      "name": "Ireland"
+    },
+    {
+      "key": "it",
+      "name": "Italy"
+    },
+    {
+      "key": "lv",
+      "name": "Latvia"
+    },
+    {
+      "key": "lt",
+      "name": "Lithuania"
+    },
+    {
+      "key": "lu",
+      "name": "Luxembourg"
+    },
+    {
+      "key": "mt",
+      "name": "Malta"
+    },
+    {
+      "key": "nl",
+      "name": "Netherlands"
+    },
+    {
+      "key": "no",
+      "name": "Norway"
+    },
+    {
+      "key": "pl",
+      "name": "Poland"
+    },
+    {
+      "key": "pt",
+      "name": "Portugal"
+    },
+    {
+      "key": "ro",
+      "name": "Romania"
+    },
+    {
+      "key": "sk",
+      "name": "Slovakia"
+    },
+    {
+      "key": "si",
+      "name": "Slovenia"
+    },
+    {
+      "key": "es",
+      "name": "Spain"
+    },
+    {
+      "key": "se",
+      "name": "Sweden"
+    },
+    {
+      "key": "ch",
+      "name": "Switzerland"
+    },
+    {
+      "key": "gb",
+      "name": "United Kingdom"
+    },
+    {
+      "key": "us",
+      "name": "United States"
+    }
+  ]
+}

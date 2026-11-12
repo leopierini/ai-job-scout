@@ -905,6 +905,20 @@ def test_free_sources_need_no_apify_token(db):
         assert [src.name for src in p._sources] == ["builtineurope", "careers"]
 
 
+def test_where_to_search_reaches_each_source_in_its_own_format(db):
+    s = Settings(startup_places=["it", "remote"])
+    s.linkedin.enabled = False
+    s.scoring.provider = "ollama"
+    s.careers.enabled = True
+    s.careers.pages = ["https://jobs.ashbyhq.com/example-labs"]
+    s.wttj.enabled = True
+    s.wttj.queries = ["AI engineer"]
+    with build_pipeline(s, Secrets(apify_token="t"), db, "p") as p:
+        by_name = {src.name: src for src in p._sources}
+        assert by_name["careers"]._settings.locations == ["Italy", "Remote"]
+        assert [a.label for a in by_name["wttj"].areas()] == ["IT", "Remote"]
+
+
 def test_apify_boards_need_the_apify_token(db):
     s = Settings()
     s.linkedin.enabled = False

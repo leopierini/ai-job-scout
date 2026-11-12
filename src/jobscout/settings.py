@@ -278,6 +278,9 @@ class Settings(_Model):
     wellfound: WellfoundSettings = WellfoundSettings()
     yc: YcSettings = YcSettings()
     atsindex: AtsIndexSettings = AtsIndexSettings()
+    # Where the startup sources search, as keys of data/startup_places.json ("it", "europe", "remote").
+    # A source whose own places are empty uses these, in its own format (jobscout.startup_places).
+    startup_places: list[str] = []
     windows: WindowSettings = WindowSettings()
     filters: FilterSettings = FilterSettings()
     scoring: ScoringSettings = ScoringSettings()
