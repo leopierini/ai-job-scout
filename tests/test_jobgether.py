@@ -54,6 +54,19 @@ def test_request_body_with_filters():
     }  # fmt: skip
 
 
+@pytest.mark.parametrize(
+    ("locations", "sent"),
+    [
+        (["europe", "anywhere"], ["europe"]),  # with "anywhere" the API kept only jobs open anywhere
+        ([" Anywhere ", "italy", "spain"], ["italy", "spain"]),
+        (["anywhere"], ["anywhere"]),
+        (["anywhere", "ANYWHERE"], ["anywhere"]),
+    ],
+)
+def test_request_body_sends_anywhere_only_alone(locations, sent):
+    assert request_body(JobgetherSettings(locations=locations), "pm", 1, 10)["locations"] == sent
+
+
 def test_request_body_without_filters_means_anywhere_and_any_level():
     assert request_body(JobgetherSettings(locations=[" "]), "pm", 1, 10) == {
         "keyword": "pm", "sort": "date", "page": 1, "limit": 10,

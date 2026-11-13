@@ -13,6 +13,22 @@ LIMIT_MESSAGE = "Apify monthly limit reached. It resets on your billing day. Add
 TIMEOUT_MESSAGE = "Apify took too long to answer. This search was skipped and will be retried next run."
 UNREACHABLE_MESSAGE = "Apify couldn't be reached. Check your internet connection and try again."
 AUTH_MESSAGE = "Apify rejected the token. Check the token and try again."
+RUN_FAILED_MESSAGE = (
+    "The Apify actor failed while searching. The searches for this place were skipped and will be retried next run."
+)
+_INPUT_MESSAGE = "The Apify actor didn't accept this search: {detail}"
+_DETAIL_LIMIT = 300
+
+
+def _error(response: httpx.Response) -> tuple[str, str]:
+    """Apify's error type and message from an error answer, e.g. ("run-failed", "Actor run did not succeed ...")."""
+    try:
+        error = response.json().get("error")
+    except (ValueError, AttributeError):
+        return "", ""
+    if not isinstance(error, dict):
+        return "", ""
+    return str(error.get("type") or ""), str(error.get("message") or "")
 
 
 class ApifyClient:
@@ -45,6 +61,19 @@ class ApifyClient:
                 raise ApifyError(LIMIT_MESSAGE, kind="limit") from None
             if status == 401:
                 raise ApifyError(AUTH_MESSAGE, kind="auth") from None
+            # The run-sync endpoint answers 400 both when it refuses the input and when the run it started
+            # ended FAILED (an error inside the actor), and 408 when the run outlasts the endpoint's wait.
+            kind, message = _error(exc.response)
+            if kind in ("run-failed", "actor-run-failed"):
+                raise ApifyError(RUN_FAILED_MESSAGE, kind="other") from None
+            if status == 408 or kind == "run-timeout-exceeded":
+                raise ApifyError(TIMEOUT_MESSAGE, kind="other") from None
+            if kind == "invalid-input" and message.strip():
+                detail = message.strip()
+                if self._token:  # before cutting, so no piece of the token is left behind
+                    detail = detail.replace(self._token, "***")
+                detail = detail[:_DETAIL_LIMIT]
+                raise ApifyError(_INPUT_MESSAGE.format(detail=detail), kind="other") from None
             raise ApifyError(f"Apify request failed (HTTP {status}).", kind="other") from None
         except httpx.ReadTimeout:
             raise ApifyError(TIMEOUT_MESSAGE, kind="other") from None

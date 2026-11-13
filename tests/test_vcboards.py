@@ -413,6 +413,50 @@ def test_consider_parsing():
     assert designer.salary == ""
 
 
+# Some Consider boards send each location as the Python form of a list of places (seen live on
+# 2026-11-13); the place below is fictional but the shape is the one those boards send.
+PACKED_PLACE = (
+    "[{'id': 9001, 'name': 'Port Example City', 'location': 'Port Example, Examplestan', "
+    "'location_key': 'port example, examplestan', 'country': 'Examplestan', 'country_code': 'EX', "
+    "'state': 'Example State', 'city': 'Port Example', 'remote': False, 'workplace': 'office'}]"
+)
+
+
+@pytest.mark.parametrize(
+    ("locations", "expected"),
+    [
+        ([PACKED_PLACE], "Port Example City"),
+        ([PACKED_PLACE, PACKED_PLACE.replace("Port Example City", "Lakeside")], "Port Example City; Lakeside"),
+        (['[{"id": 9001, "name": "Port Example City"}]'], "Port Example City"),  # the same, as JSON
+        ([[{"id": 9001, "name": "Port Example City"}]], "Port Example City"),  # a list inside the list
+        ([["Port Example", ["Lakeside"]], "Port Example"], "Port Example; Lakeside"),  # lists of lists
+        ([{"id": 9001, "city": "Port Example"}], "Port Example"),  # an object named only by its city
+        (["[Remote] Port Example"], "[Remote] Port Example"),  # brackets in a real name stay
+    ],
+)
+def test_consider_locations_in_every_shape_become_names(locations, expected):
+    job = parse_consider_job(consider_job(1, locations=locations), board_url=CONSIDER_BOARD, keyword="", area="X")
+    assert job.location == expected
+
+
+def test_consider_unreadable_packed_location_falls_back_to_normalized_ones():
+    truncated = PACKED_PLACE[:60]  # cut short, so it can't be read
+    item = consider_job(
+        1,
+        locations=[truncated, "{'id': 9001}"],  # neither gives a name
+        normalizedLocations=[{"id": "Port Example", "label": "Port Example, EX", "value": "Port Example"}],
+    )
+    job = parse_consider_job(item, board_url=CONSIDER_BOARD, keyword="", area="X")
+    assert job.location == "Port Example, EX"
+    assert "{" not in job.description and "[" not in job.location
+
+
+def test_consider_packed_locations_through_the_search():
+    page = {"jobs": [consider_job(1, locations=[PACKED_PLACE])], "meta": {}, "total": 1}
+    result = run(make_source(FakeBoards(consider_pages=[page]), boards=[CONSIDER_BOARD]))
+    assert [j.location for j in result.jobs] == ["Port Example City"]
+
+
 def test_consider_job_without_links_points_at_the_board():
     job = parse_consider_job(consider_job(5, url="javascript:alert(1)"), board_url=CONSIDER_BOARD, keyword="", area="X")
     assert job.url == CONSIDER_BOARD

@@ -37,6 +37,7 @@ LABEL = "Jobgether"
 PER_PAGE = 25  # the API's cap
 MAX_PAGES = 10  # the API's cap
 PAUSE_SECONDS = 2.0  # robots.txt asks for Crawl-delay: 2
+ANYWHERE = "anywhere"  # the location slug for jobs open to anyone, wherever they live
 _SALARY = re.compile(r"\s*([\d.,]+)\s*(?:-|–)\s*([\d.,]+)\s*([A-Za-z]{3})?\s*|\s*([\d.,]+)\s*([A-Za-z]{3})?\s*")
 
 
@@ -44,6 +45,10 @@ def request_body(settings: JobgetherSettings, query: str, page: int, limit: int)
     """The JSON body for one page of one query. Empty filters are left out (anywhere, any level)."""
     body: dict = {"keyword": query.strip(), "sort": "date", "page": page, "limit": limit}
     locations = [x.strip() for x in settings.locations if x.strip()]
+    # Every place already includes the jobs open to anyone anywhere, and "anywhere" next to "europe" keeps only
+    # those (checked 2026-11-13): send it only when it is the sole place.
+    if len(locations) > 1:
+        locations = [x for x in locations if x.casefold() != ANYWHERE] or locations[:1]
     experience = [x.strip() for x in settings.experience if x.strip()]
     if locations:
         body["locations"] = locations

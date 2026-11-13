@@ -82,7 +82,10 @@ class Board:
 
 # --- telling the system from an address or a page -------------------------------------------------
 
-_SLUG = r"[A-Za-z0-9][\w%-]*"
+# An Ashby board name may hold dots ("example.ai"): a dot counts only when more of the name follows,
+# so a sentence's full stop, a query string or a job's path is never taken in. "%2E" (an encoded dot)
+# is read too, and decoded when the board is made.
+_SLUG = r"[A-Za-z0-9][\w%-]*(?:\.[\w%-]+)*"
 _SUB = r"[A-Za-z0-9][A-Za-z0-9-]*"
 _ASHBY = re.compile(rf"(?:jobs|api)\.ashbyhq\.com/(?:posting-api/job-board/)?({_SLUG})", re.IGNORECASE)
 _GREENHOUSE = (
@@ -110,8 +113,17 @@ _NOT_A_BOARD = frozenset({
 })  # fmt: skip
 
 
+# Endings of a file's name: "jobs.ashbyhq.com/embed.js" is the system's script, not a board called "embed.js".
+_FILE_ENDINGS = frozenset({"css", "htm", "html", "ico", "jpeg", "jpg", "js", "json", "map", "png", "svg", "txt", "webp", "xml"})
+
+
+def _not_a_board(slug: str) -> bool:
+    parts = slug.lower().split(".")
+    return parts[0] in _NOT_A_BOARD or (len(parts) > 1 and parts[-1] in _FILE_ENDINGS)
+
+
 def _first(pattern: re.Pattern, text: str, group: int = 1) -> re.Match | None:
-    return next((m for m in pattern.finditer(text) if m.group(group).lower() not in _NOT_A_BOARD), None)
+    return next((m for m in pattern.finditer(text) if not _not_a_board(m.group(group))), None)
 
 
 def find_board(text: str, page_url: str = "") -> Board | None:
@@ -162,8 +174,15 @@ def normalise_url(url: str) -> str:
 _HOST_PREFIXES = ("www.", "careers.", "career.", "jobs.", "job.", "karriere.", "work.", "join.", "apply.")
 
 
+# A board name like "example.io" or "example.ai" ends in its web address's suffix: ".ai" is read as
+# part of the name ("Example AI"), the others are left out ("Example").
+_WEB_SUFFIX = re.compile(r"\.(ai|app|co|com|dev|io|net|org|so|tech)$", re.IGNORECASE)
+
+
 def _pretty(slug: str) -> str:
-    words = [w for w in re.split(r"[-_.\s]+", unquote(slug)) if w]
+    name = unquote(slug)
+    name = _WEB_SUFFIX.sub(lambda m: " AI" if m.group(1).lower() == "ai" else "", name)
+    words = [w for w in re.split(r"[-_.\s]+", name) if w]
     return " ".join(w if any(c.isupper() for c in w) else w.capitalize() for w in words)
 
 

@@ -18,6 +18,7 @@ Neither list API returns a job's full text, so the description is put together f
 it does return; each job's own page is never fetched.
 """
 
+import ast
 import functools
 import json
 import re
@@ -107,16 +108,54 @@ def board_label(url: str) -> str:
 # --- parsing -------------------------------------------------------------------------------------
 
 
-def _labels(value: object) -> list[str]:
-    """Readable names from a list of strings or of {"label"/"name": ...} objects."""
-    if not isinstance(value, list):
+_NAME_KEYS = ("label", "name", "location", "city")
+_PACKED_LIMIT = 5000  # longer text that looks like a packed list is not unpacked
+_PACKED_STARTS = ("[{", "[[", "['", '["', "{'", '{"')  # a packed list we couldn't read is never shown
+
+
+def _unpack(text: str) -> object:
+    """A list or object written out as text, else None.
+
+    Some Consider boards send a location as the Python form of a list of places, e.g.
+    "[{'id': 1, 'name': 'New York City', 'city': 'New York', ...}]" (seen live on 2026-11-13).
+    Read with json or ast.literal_eval, which only reads literals and never runs code.
+    """
+    if not (text.startswith(("[", "{")) and text.endswith(("]", "}"))) or len(text) > _PACKED_LIMIT:
+        return None
+    try:
+        return json.loads(text)
+    except ValueError:
+        pass
+    try:
+        return ast.literal_eval(text)
+    except (ValueError, TypeError, SyntaxError, MemoryError, RecursionError):
+        return None
+
+
+def _labels(value: object, depth: int = 0) -> list[str]:
+    """Readable names from a list of strings or of {"label"/"name": ...} objects.
+
+    Lists inside the list, and lists written out as text, are unpacked too; anything that
+    still isn't a name (a list we couldn't read, an object without one) is left out.
+    """
+    if not isinstance(value, list) or depth > 3:
         return []
-    names = []
+    names: list[str] = []
     for item in value:
-        name = as_str(item.get("label") or item.get("name")) if isinstance(item, dict) else as_str(item)
-        name = name.strip()
-        if name and name not in names:
-            names.append(name)
+        found: list[str] = []
+        if isinstance(item, str) and (packed := _unpack(item.strip())) is not None:
+            item = packed
+        if isinstance(item, dict):
+            name = next((as_str(item.get(k)).strip() for k in _NAME_KEYS if as_str(item.get(k)).strip()), "")
+            found = [name] if name else []
+        elif isinstance(item, list):
+            found = _labels(item, depth + 1)
+        else:
+            text = as_str(item).strip()
+            found = [text] if text and not text.startswith(_PACKED_STARTS) else []
+        for name in found:
+            if name not in names:
+                names.append(name)
     return names
 
 
