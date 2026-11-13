@@ -2,8 +2,9 @@
 
 Built for `jtpalms~ats-jobs-index` (Greenhouse, Ashby, Lever, Workable, Recruitee, Personio, Breezy, Teamtailor,
 Gem and Pinpoint boards); input and output fields from its input schema and README (build 1.0.20, checked
-2026-11-12). A location is a two-letter country code ("IT", sent as `countries`) or a place, region or work
-policy as job boards write it ("Milan", "Italy", "Europe", "Remote", sent as `locations`).
+2026-11-12). A location is a two-letter country code ("IT", sent as `countries`) or a place or work policy as job
+boards write it ("Milan", "Italy", "Remote", sent as `locations`). "Europe" (or "EU") is sent as every European
+country code: as a location it only matches jobs whose board names the region, so a job in "Munich" is left out.
 """
 
 from jobscout.models import Job
@@ -25,11 +26,13 @@ from jobscout.sources._apify_board import (
     window_days,
     with_work_policy,
 )
+from jobscout.startup_places import european
 
 # The actor's `timeRange` choices: jobs new to the index in that many days. A longer window searches every
 # open job, kept to those the employer posted within the window.
 _TIME_RANGES = ((1, "24h"), (7, "7d"), (14, "14d"))
 _WORK_TYPES = {"remote": "Remote", "hybrid": "Hybrid", "onsite": "On-site"}
+_EUROPE = frozenset({"europe", "eu"})
 
 
 def request_payload(settings: AtsIndexSettings, query: str, location: str, window_seconds: int) -> dict:
@@ -44,7 +47,9 @@ def request_payload(settings: AtsIndexSettings, query: str, location: str, windo
     }
     if time_range == "all":
         payload["postedWithinDays"] = days
-    if code := country_code(location):
+    if location.strip().casefold() in _EUROPE:
+        payload["countries"] = [k.upper() for k in european()]
+    elif code := country_code(location):
         payload["countries"] = [code]
     elif location.strip():
         payload["locations"] = [location.strip()]

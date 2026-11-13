@@ -22,6 +22,7 @@ from jobscout.sources.atsindex import AtsIndexSource
 from jobscout.sources.wellfound import WellfoundSource, location_slug
 from jobscout.sources.wttj import WttjSource, date_posted
 from jobscout.sources.yc import YcSource
+from jobscout.startup_places import european
 
 FIXTURES = Path(__file__).parent / "fixtures"
 DAY = 86400
@@ -144,6 +145,45 @@ def test_stops_at_first_apify_error_keeping_jobs_so_far(respx_mock, name):
     assert route.call_count == 2  # the third query never ran
     assert res.complete is False and res.error.kind == "limit"
     assert res.billed == len(BOARDS[name][3])
+
+
+def apify_error(status, kind, message):
+    return httpx.Response(status, json={"error": {"type": kind, "message": message}})
+
+
+BAD_INPUT = "Input is not valid: Field input.locationTypes.0 must be equal to one of the allowed values"
+
+
+@pytest.mark.parametrize(
+    ("response", "message"),
+    [
+        # The run started but the actor failed inside it (e.g. a timeout of its own): not a bad input.
+        (
+            apify_error(400, "run-failed", "Actor run did not succeed (run ID: r1, status: FAILED)"),
+            "The Apify actor failed while searching. The searches for this place were skipped and will be retried next run.",
+        ),
+        (apify_error(400, "invalid-input", BAD_INPUT), f"The Apify actor didn't accept this search: {BAD_INPUT}"),
+        (
+            apify_error(400, "invalid-input", "bad value tok-secret-123"),
+            "The Apify actor didn't accept this search: bad value ***",
+        ),
+        (  # the token straddles the cut: it is hidden before the message is shortened
+            apify_error(400, "invalid-input", "x" * 295 + " tok-secret-123"),
+            "The Apify actor didn't accept this search: " + "x" * 295 + " ***",
+        ),
+        (
+            apify_error(408, "run-timeout-exceeded", "Actor run exceeded the timeout"),
+            "Apify took too long to answer. This search was skipped and will be retried next run.",
+        ),
+        (httpx.Response(400, text="not json"), "Apify request failed (HTTP 400)."),
+        (httpx.Response(400, json={"error": "odd"}), "Apify request failed (HTTP 400)."),
+    ],
+)
+def test_apify_error_answers_say_what_went_wrong(respx_mock, response, message):
+    route = respx_mock.post(url__regex=run_url(YcSettings().actor)).mock(return_value=response)
+    res = search(make("yc", queries=("a", "b")))
+    assert route.call_count == 1  # no retry: the run may have started, and a second one would bill again
+    assert res.complete is False and res.error.kind == "other" and str(res.error) == message
 
 
 @pytest.mark.parametrize("name", BOARDS)
@@ -392,7 +432,7 @@ def test_atsindex_window(respx_mock, days, time_range, posted_within):
 
 def test_atsindex_payload_locations(respx_mock):
     route = mock_run(respx_mock, "atsindex", json_body=[])
-    src = make("atsindex", locations=("IT", "uk", "Europe"), max_results_per_search=40)
+    src = make("atsindex", locations=("IT", "uk", "Europe", "eu", "Remote"), max_results_per_search=40)
     for area in src.areas():
         src.search_area(area, DAY, lambda *a: None)
     search(make("atsindex", queries=(" ",), locations=()), window=DAY)
@@ -405,8 +445,13 @@ def test_atsindex_payload_locations(respx_mock):
         "countries": ["IT"],
     }
     assert sent[1]["countries"] == ["GB"]
-    assert sent[2]["locations"] == ["Europe"] and "countries" not in sent[2]
-    assert sent[3]["keywords"] == [] and not {"locations", "countries"} & set(sent[3])
+    # "Europe" as a location matches only boards that write the region, not "Munich": send its countries.
+    europe = [k.upper() for k in european()]
+    assert {"DE", "FR", "GB", "IT", "CH"} <= set(europe)
+    assert sent[2]["countries"] == europe and "locations" not in sent[2]
+    assert sent[3]["countries"] == europe
+    assert sent[4]["locations"] == ["Remote"] and "countries" not in sent[4]
+    assert sent[5]["keywords"] == [] and not {"locations", "countries"} & set(sent[5])
 
 
 def test_atsindex_parse_full():

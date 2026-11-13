@@ -154,6 +154,55 @@ def test_board_from_url(url, ats, token, feed):
     assert (board.ats, board.token, board.feed_url) == (ats, token, feed)
 
 
+ASHBY_DOTTED = "https://api.ashbyhq.com/posting-api/job-board/example.ai?includeCompensation=true"
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "https://jobs.ashbyhq.com/example.ai",
+        "https://jobs.ashbyhq.com/example.ai/",
+        "https://jobs.ashbyhq.com/example.ai/0f1e-abc-123",
+        "https://jobs.ashbyhq.com/example.ai?utm_source=site",
+        "https://jobs.ashbyhq.com/example%2Eai",  # an encoded dot, as some links carry it
+        "https://jobs.ashbyhq.com/example%2eai/0f1e",
+        "https://api.ashbyhq.com/posting-api/job-board/example.ai?includeCompensation=true",
+        '<a href="https://jobs.ashbyhq.com/example.ai">Open roles</a>',
+        "<p>See our roles at https://jobs.ashbyhq.com/example.ai.</p>",  # a full stop ends the sentence
+    ],
+)
+def test_ashby_board_names_may_hold_dots(text):
+    board = find_board(text)
+    assert (board.ats, board.token, board.feed_url) == ("ashby", "example.ai", ASHBY_DOTTED)
+
+
+def test_ashby_board_name_stops_at_trailing_punctuation():
+    assert find_board("<p>Roles at https://jobs.ashbyhq.com/example-labs.</p>").feed_url == ASHBY
+    assert find_board("(jobs.ashbyhq.com/example-labs), then").token == "example-labs"
+    assert board_from_url("https://jobs.ashbyhq.com/example-labs/?embed=js").token == "example-labs"
+
+
+def test_ashby_script_and_reserved_names_are_not_boards():
+    html = '<script src="https://jobs.ashbyhq.com/embed.js"></script><a href="https://jobs.ashbyhq.com/example-labs">'
+    assert find_board(html).token == "example-labs"
+    assert find_board('<a href="https://jobs.ashbyhq.com/api.v1">x</a>') is None
+
+
+def test_company_label_for_dotted_board_names():
+    assert company_label("https://jobs.ashbyhq.com/example.ai") == "Example AI"
+    assert company_label("https://jobs.ashbyhq.com/example%2Eai") == "Example AI"
+    assert company_label("https://jobs.ashbyhq.com/fjord-labs.io") == "Fjord Labs"
+    assert company_label("https://jobs.ashbyhq.com/example-labs") == "Example Labs"
+
+
+def test_dotted_ashby_board_is_read():
+    feed = b'{"jobs": [{"id": "d1", "title": "AI Engineer", "jobUrl": "https://jobs.ashbyhq.com/example.ai/d1"}]}'
+    source, _, _ = make_source(["https://jobs.ashbyhq.com/example.ai"], {ASHBY_DOTTED: feed})
+    result, _ = search(source)
+    assert result.complete and [j.job_id for j in result.jobs] == ["ashby:example.ai:d1"]
+    assert result.jobs[0].company == "Example AI"
+
+
 @pytest.mark.parametrize(
     "url",
     ["https://careers.kestrel.example/", "https://apply.workable.com/j/9F8E7D6C5B", "https://www.recruitee.com/"],
