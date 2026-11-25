@@ -161,6 +161,6 @@ def test_estimate_counts_the_closed_job_check():
     s.linkedin.enabled = False
     base = estimate(s).max_usd
     assert estimate(s, kept_linkedin=50).max_usd == pytest.approx(base + 0.001 + 0.0002 * 50)
-    assert estimate(s, kept_linkedin=150).max_usd == pytest.approx(base + 2 * 0.001 + 0.0002 * 150)  # two actor runs
+    assert estimate(s, kept_linkedin=150).max_usd == pytest.approx(base + 3 * 0.001 + 0.0002 * 150)  # three actor runs
     s.cleanup.closed = False
     assert estimate(s, kept_linkedin=50).max_usd == pytest.approx(base)

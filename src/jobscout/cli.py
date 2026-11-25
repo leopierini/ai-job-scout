@@ -15,7 +15,7 @@ import httpx
 from jobscout import paths
 from jobscout._text import plural
 from jobscout.cleanup import archive_closed, closed_candidates, kept_linkedin, run_cleanup
-from jobscout.costs import CostEstimate, apify_credit, estimate
+from jobscout.costs import CostEstimate, apify_credit, closed_check_cost, estimate
 from jobscout.db import Database
 from jobscout._output_sync import notion_status_changes, read_back_notion_statuses
 from jobscout.errors import ConfigError, NotionError, RunInProgress
@@ -230,8 +230,14 @@ def _cmd_cleanup(args: argparse.Namespace) -> int:
         with httpx.Client() as client:
             apify = ApifyClient(secrets.apify_token, client) if secrets.apify_token else None
             closed, result = archive_closed(db, candidates, closed_checker(apify, client, threading.Event()), args.dry_run)
+        if result.actor_runs:
+            cost = closed_check_cost(result.linkedin_jobs, result.actor_runs)
+            print(f"Checked {plural(result.linkedin_jobs, 'LinkedIn job')} on Apify (${cost:.2f}).")
+        unchecked = sum(1 for r in candidates if r.source == "linkedin") if apify is None else 0
+        if unchecked:
+            print(f"{plural(unchecked, 'LinkedIn job')} not checked for closing: add your Apify token.")
         if result.note:
-            print(f"Closed-job check skipped: {result.note}", file=sys.stderr)
+            print(f"Closed-job check: {result.note}", file=sys.stderr)
         stale += closed
         for pk, reason in stale:
             row = db.get(pk)

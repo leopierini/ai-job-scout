@@ -1228,10 +1228,11 @@ class FakeClosedCheck:
     def __init__(self, closed=(), note=""):
         self.closed, self.note, self.calls = set(closed), note, []
 
-    def __call__(self, rows):
+    def __call__(self, rows, progress):
         from jobscout.closed import ClosedCheck
 
         self.calls.append([r.pk for r in rows])
+        progress(len(rows), len(rows))
         found = {r.pk: "closed on LinkedIn" for r in rows if r.pk in self.closed}
         return ClosedCheck(closed=found, linkedin_jobs=len(rows), actor_runs=1, note=self.note)
 
@@ -1273,7 +1274,7 @@ def test_closed_check_failure_does_not_fail_the_run(db):
     check, events = FakeClosedCheck(note=LIMIT_MESSAGE), []
     s = make_pipeline(db, [], closed_check=check, on_event=events.append).run()
     assert s.status == "done" and db.get(pk).archived_reason is None
-    assert final_events(events)["cleanup"].message == f"0 archived · closed-job check skipped: {LIMIT_MESSAGE}"
+    assert final_events(events)["cleanup"].message == f"0 archived · closed-job check: {LIMIT_MESSAGE}"
 
 
 def test_closed_check_off_runs_nothing(db):
@@ -1283,3 +1284,11 @@ def test_closed_check_off_runs_nothing(db):
     check = FakeClosedCheck({"linkedin:1"})
     make_pipeline(db, [], settings=settings, closed_check=check).run()
     assert check.calls == []
+
+
+def test_cleanup_reports_progress_while_checking(db):
+    scored_row(db, make_job(job_id="1"))
+    events = []
+    make_pipeline(db, [], closed_check=FakeClosedCheck(), on_event=events.append).run()
+    running = [e.message for e in events if e.step == "cleanup" and e.status == "running"]
+    assert "Checking 1 of 1 kept jobs" in running

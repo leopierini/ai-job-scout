@@ -13,7 +13,7 @@ from jobscout import _search as search
 from jobscout._steps import STEPS, UNEXPECTED, StepResult, StepRunner, ignore  # noqa: F401 - STEPS is public here
 from jobscout._text import plural
 from jobscout.cleanup import ClosedChecker, archive_closed, closed_candidates, run_cleanup
-from jobscout.closed import ClosedCheck, check_closed
+from jobscout.closed import ClosedCheck, Progress, check_closed
 from jobscout.costs import APIFY_BOARDS, PAID_SOURCES, billed_cost, closed_check_cost
 from jobscout.db import Database
 from jobscout.errors import ConfigError, NotionError
@@ -190,7 +190,7 @@ class Pipeline(StepRunner):
         if closed:
             message += f" ({len(closed)} closed)"
         if note:
-            message += f" · closed-job check skipped: {note}"
+            message += f" · closed-job check: {note}"
         if changes:
             message += f" · {plural(changes, 'status change')} from Notion"
         if not_archived:
@@ -206,7 +206,10 @@ class Pipeline(StepRunner):
             self._checked = set()
         rows = [r for r in rows if r.pk not in self._checked]
         self._checked.update(r.pk for r in rows)
-        archived, result = archive_closed(self._db, rows, self._closed_check)
+        def progress(done: int, total: int) -> None:
+            self._emit("running", f"Checking {done} of {total} kept jobs", done, total)
+
+        archived, result = archive_closed(self._db, rows, self._closed_check, progress=progress)
         self._closed_cost += closed_check_cost(result.linkedin_jobs, result.actor_runs)
         self._counts["closed"] = self._counts.get("closed", 0) + len(archived)
         return archived, result.note
@@ -433,7 +436,7 @@ class Pipeline(StepRunner):
         if closed:
             final += f" · {len(closed)} closed"
         if note:
-            final += f" · closed-job check skipped: {note}"
+            final += f" · closed-job check: {note}"
         if csv_note:
             final += f" · {csv_note}"
         return StepResult(final, done=delivered + failed, total=len(sends))
@@ -512,8 +515,8 @@ def build_pipeline(
 def closed_checker(apify: ApifyClient | None, client: httpx.Client, cancel: threading.Event) -> ClosedChecker:
     """The real closed-job check: LinkedIn through Apify (when there is a token), job boards directly."""
 
-    def check(rows: list[JobRow]) -> ClosedCheck:
-        return check_closed(rows, apify, client, cancel)
+    def check(rows: list[JobRow], progress: Progress) -> ClosedCheck:
+        return check_closed(rows, apify, client, cancel, progress)
 
     return check
 

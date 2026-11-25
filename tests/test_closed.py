@@ -70,7 +70,7 @@ def test_check_closed_linkedin(respx_mock):
 
 def test_check_closed_batches(respx_mock):
     route = respx_mock.post(url__regex=RUN).respond(200, json=[])
-    rows = [_li(str(1000 + i)) for i in range(101)]
+    rows = [_li(str(4400001000 + i)) for i in range(51)]
     with httpx.Client() as client:
         result = _check(rows, client)
     assert route.call_count == 2
@@ -138,3 +138,95 @@ def test_without_apify_only_boards_are_checked(respx_mock):
         result = check_closed([_li("31"), gone], None, client, threading.Event())
     assert result.closed == {gone.pk: BOARD_REASON}
     assert result.actor_runs == 0
+
+
+# --- review fixes: only a clear answer archives ---
+
+LEVER_FEED = "https://api.lever.co/v0/postings/fjord?mode=json"
+RECRUITEE_FEED = "https://fjord.recruitee.com/api/offers/"
+
+
+def test_missing_apply_button_key_is_not_closed():
+    assert linkedin_verdicts([{"type": "job", "jobId": "1", "jobState": "open", "isClosed": False}]) == {"1": False}
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://jobs.lever.co/fjord",  # the board itself, no job id
+        "https://jobs.ashbyhq.com/fjordlabs?utm_source=newsletter",
+        "https://click.tracker.example/r/abc?u=https://boards.greenhouse.io/nordwind/jobs/4242",  # a tracking link
+    ],
+)
+def test_board_urls_without_a_job_id_are_kept(respx_mock, url):
+    respx_mock.get(LEVER_FEED).respond(200, json=[{"id": "cccc-3333", "text": "PM"}])
+    respx_mock.get(ASHBY_FEED).respond(200, json={"jobs": [{"id": "aaaa-1111", "title": "PM"}]})
+    respx_mock.get(GREENHOUSE_FEED).respond(200, json={"jobs": [{"id": 999, "title": "PM"}]})
+    with httpx.Client() as client:
+        result = _check([make_row(source="wellfound", job_id="w1", url=url)], client)
+    assert result.closed == {}
+
+
+@pytest.mark.parametrize("listed,closed", [(4242, False), (999, True)])
+def test_greenhouse_id_in_the_query(respx_mock, listed, closed):
+    respx_mock.get(GREENHOUSE_FEED).respond(200, json={"jobs": [{"id": listed, "title": "PM"}]})
+    row = make_row(source="atsindex", job_id="gh:4242", url="https://boards.greenhouse.io/nordwind?gh_jid=4242")
+    with httpx.Client() as client:
+        assert bool(_check([row], client).closed) is closed
+
+
+def test_recruitee_jobs_match_by_slug(respx_mock):
+    respx_mock.get(RECRUITEE_FEED).respond(200, json={"offers": [
+        {"id": 77, "title": "PM", "slug": "product-manager", "careers_url": "https://careers.fjord.example/o/product-manager"},
+    ]})  # fmt: skip
+    still = make_row(source="vcboards", job_id="r1", url="https://fjord.recruitee.com/o/product-manager")
+    gone = make_row(source="vcboards", job_id="r2", url="https://fjord.recruitee.com/l/en/o/old-role")
+    with httpx.Client() as client:
+        assert _check([still, gone], client).closed == {gone.pk: BOARD_REASON}
+
+
+def test_careers_rows_use_their_stored_id(respx_mock):
+    respx_mock.get(ASHBY_FEED).respond(200, json={"jobs": [{"id": "aaaa-1111", "title": "PM"}]})
+    still = make_row(source="careers", job_id="ashby:fjordlabs:aaaa-1111", url="https://jobs.ashbyhq.com/fjordlabs")
+    gone = make_row(source="careers", job_id="ashby:fjordlabs:bbbb-2222", url="https://jobs.ashbyhq.com/fjordlabs")
+    with httpx.Client() as client:
+        assert _check([still, gone], client).closed == {gone.pk: BOARD_REASON}
+
+
+def test_unlisted_ashby_job_still_counts_as_open(respx_mock):
+    respx_mock.get(ASHBY_FEED).respond(200, json={"jobs": [
+        {"id": "aaaa-1111", "title": "PM"}, {"id": "bbbb-2222", "title": "APM", "isListed": False},
+    ]})  # fmt: skip
+    with httpx.Client() as client:
+        assert _check([_ashby("bbbb-2222")], client).closed == {}
+
+
+def test_a_failed_batch_does_not_stop_the_others(respx_mock):
+    respx_mock.post(url__regex=RUN).mock(side_effect=[
+        httpx.Response(400, json={"error": {"type": "run-failed", "message": "Actor run did not succeed"}}),
+        httpx.Response(200, json=[_job("4400000099", isClosed=True, jobState="closed")]),
+    ])  # fmt: skip
+    rows = [_li(str(4400000000 + i)) for i in range(100)]
+    with httpx.Client() as client:
+        result = _check(rows, client)
+    assert result.closed == {rows[-1].pk: LINKEDIN_REASON}
+    assert result.actor_runs == 2  # the failed run may have been billed its start
+    assert "50 LinkedIn jobs" in result.note
+
+
+def test_an_apify_limit_stops_every_batch(respx_mock):
+    route = respx_mock.post(url__regex=RUN).respond(403, text='{"error":{"message":"Monthly usage hard limit exceeded"}}')
+    with httpx.Client() as client:
+        result = _check([_li(str(4400000000 + i)) for i in range(100)], client)
+    assert route.call_count == 1 and result.closed == {}
+
+
+def test_progress_is_reported(respx_mock):
+    respx_mock.post(url__regex=RUN).respond(200, json=[])
+    respx_mock.get(ASHBY_FEED).respond(200, json={"jobs": [{"id": "aaaa-1111", "title": "PM"}]})
+    seen = []
+    rows = [_li(str(4400000000 + i)) for i in range(60)] + [_ashby("aaaa-1111")]
+    with httpx.Client() as client:
+        check_closed(rows, ApifyClient("tok", client, sleep=lambda _s: None), client, threading.Event(),
+                     progress=lambda done, total: seen.append((done, total)))  # fmt: skip
+    assert seen == [(50, 61), (60, 61), (61, 61)]

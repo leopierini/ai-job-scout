@@ -399,7 +399,15 @@ def test_cleanup_checks_closed_linkedin_jobs(capsys, respx_mock):
     assert db.get(pk).archived_reason is None
     db.close()
     assert main(["cleanup"]) == 0
-    assert "archived: Data Analyst Intern at Fjord Labs · closed on LinkedIn" in capsys.readouterr().out
+    out = capsys.readouterr().out
+    assert "archived: Data Analyst Intern at Fjord Labs · closed on LinkedIn" in out
+    assert "Checked 1 LinkedIn job on Apify ($0.00)." in out
     db = Database(paths.db_path())
     assert db.get(pk).archived_reason == "closed on LinkedIn"
     db.close()
+
+
+def test_cleanup_says_linkedin_jobs_need_a_token(capsys):
+    stored_job(job_id="4400000002", url="https://uk.linkedin.com/jobs/view/product-intern-at-fjord-labs-4400000002")
+    assert main(["cleanup", "--dry-run"]) == 0
+    assert "1 LinkedIn job not checked for closing: add your Apify token." in capsys.readouterr().out

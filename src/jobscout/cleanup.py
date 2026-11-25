@@ -4,7 +4,7 @@ from collections.abc import Callable
 from dataclasses import replace
 from datetime import date, timedelta
 
-from jobscout.closed import ClosedCheck
+from jobscout.closed import ClosedCheck, Progress
 from jobscout.db import Database
 from jobscout.models import ACTIVE_STATUSES, JobRow, JobState, Status
 from jobscout.normalize import PlaceMatcher
@@ -74,7 +74,7 @@ def run_cleanup(
 
 # --- jobs that no longer take applications --------------------------------------------------------
 
-ClosedChecker = Callable[[list[JobRow]], ClosedCheck]
+ClosedChecker = Callable[[list[JobRow], Progress], ClosedCheck]  # rows, progress -> result
 
 
 def closed_candidates(rows: list[JobRow], cfg: CleanupSettings) -> list[JobRow]:
@@ -91,14 +91,18 @@ def closed_candidates(rows: list[JobRow], cfg: CleanupSettings) -> list[JobRow]:
     ]
 
 
+def _quiet(_done: int, _total: int) -> None:
+    pass
+
+
 def archive_closed(
-    db: Database, rows: list[JobRow], check: ClosedChecker, dry_run: bool = False
+    db: Database, rows: list[JobRow], check: ClosedChecker, dry_run: bool = False, progress: Progress = _quiet
 ) -> tuple[list[tuple[str, str]], ClosedCheck]:
     """Check `rows` and archive the closed ones. Returns (pk, reason) for each one archived (all of them on a
     dry run, which archives nothing) and the check's result. No rows: no check, nothing billed."""
     if not rows:
         return [], ClosedCheck()
-    result = check(rows)
+    result = check(rows, progress)
     # db.archive re-checks the status: one changed since the read (e.g. to Applied) wins.
     archived = [(pk, why) for pk, why in result.closed.items() if dry_run or db.archive(pk, why)]
     return archived, result

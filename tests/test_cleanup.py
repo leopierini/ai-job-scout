@@ -168,7 +168,7 @@ def test_archive_closed(db):
     rows = db.tracked()
     seen = []
 
-    def check(given):
+    def check(given, progress):
         seen.extend(r.pk for r in given)
         return ClosedCheck(closed={closed_job.pk: "closed on LinkedIn"}, linkedin_jobs=2, actor_runs=1)
 
