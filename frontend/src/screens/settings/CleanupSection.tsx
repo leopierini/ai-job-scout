@@ -41,6 +41,13 @@ export function CleanupSection({ cleanup: c, set, fields }: CleanupSectionProps)
           disabled={off}
         />
         <SwitchRow
+          label="Archive jobs that no longer take applications"
+          hint="Checks LinkedIn through Apify (about $0.02 per 100 jobs) and company job boards for free."
+          checked={c.closed}
+          onCheckedChange={(on) => set("closed", on)}
+          disabled={off}
+        />
+        <SwitchRow
           label="Archive jobs that start too early"
           hint="Uses the start date when the posting gives one."
           checked={c.start_too_early}

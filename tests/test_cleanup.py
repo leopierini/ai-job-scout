@@ -123,3 +123,61 @@ def test_cleanup_reports_only_what_it_really_archived(db):
 
     assert run_cleanup(ChangedMeanwhile(), Settings(), TODAY) == []
     assert db.get(pk).archived_reason is None
+
+
+# --- closed jobs ---
+
+from jobscout.cleanup import archive_closed, closed_candidates  # noqa: E402
+from jobscout.closed import ClosedCheck  # noqa: E402
+from jobscout.models import JobState  # noqa: E402
+
+
+@pytest.mark.parametrize(
+    "kw,checked",
+    [
+        (dict(), True),
+        (dict(status=Status.INTERESTED), True),
+        (dict(status=Status.APPLIED), False),
+        (dict(status=Status.INTERVIEWING), False),
+        (dict(status=Status.OFFER), False),
+        (dict(status=Status.NOT_INTERESTED), False),
+        (dict(status=Status.REJECTED), False),
+        (dict(restored=True), False),
+        (dict(archived_reason="old"), False),
+        (dict(state=JobState.BELOW_THRESHOLD), False),
+    ],
+)
+def test_closed_candidates(kw, checked):
+    row = make_row(**kw)
+    assert closed_candidates([row], CleanupSettings()) == ([row] if checked else [])
+
+
+def test_closed_candidates_follow_the_switches():
+    row = make_row()
+    assert closed_candidates([row], CleanupSettings(closed=False)) == []
+    assert closed_candidates([row], CleanupSettings(enabled=False)) == []
+
+
+def test_archive_closed(db):
+    from conftest import make_job
+
+    open_job, closed_job = make_job(job_id="1"), make_job(job_id="2")
+    for job in (open_job, closed_job):
+        db.insert_scraped([job], {job.pk: f"key-{job.pk}"})
+        db.save_score(ScoreResult(job.pk, 80, "Good match.", [], "", ""), min_score=70)
+    rows = db.tracked()
+    seen = []
+
+    def check(given, progress):
+        seen.extend(r.pk for r in given)
+        return ClosedCheck(closed={closed_job.pk: "closed on LinkedIn"}, linkedin_jobs=2, actor_runs=1)
+
+    archived, result = archive_closed(db, rows, check, dry_run=True)
+    assert archived == [(closed_job.pk, "closed on LinkedIn")]
+    assert db.get(closed_job.pk).archived_reason is None  # a dry run archives nothing
+    archived, result = archive_closed(db, rows, check)
+    assert archived == [(closed_job.pk, "closed on LinkedIn")] and result.actor_runs == 1
+    assert db.get(closed_job.pk).archived_reason == "closed on LinkedIn"
+    assert db.get(open_job.pk).archived_reason is None
+    assert archive_closed(db, [], check) == ([], ClosedCheck())  # nothing to check: no call
+    assert len(seen) == 4

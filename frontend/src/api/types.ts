@@ -284,6 +284,8 @@ export interface CleanupSettings {
   start_too_early: boolean
   too_old: boolean
   excluded_place: boolean
+  /** Jobs that no longer take applications (LinkedIn through Apify, companies' own job boards). */
+  closed: boolean
   /** ISO date (YYYY-MM-DD) or null. */
   earliest_start: string | null
   max_age_days: number

@@ -1217,3 +1217,78 @@ def test_sample_start_dates_count_from_today():
     assert answers["sample:eu-01"]["start_date"] == "2031-07-19"
     assert answers["sample:uk-04"]["start_date"] == "2031-09-16"
     assert sample_answers(date(2031, 6, 1))["sample:eu-01"]["start_date"] == "2031-07-31"
+
+
+# --- closed jobs ---
+
+
+class FakeClosedCheck:
+    """Says which pks are closed; records what each call was asked about."""
+
+    def __init__(self, closed=(), note=""):
+        self.closed, self.note, self.calls = set(closed), note, []
+
+    def __call__(self, rows, progress):
+        from jobscout.closed import ClosedCheck
+
+        self.calls.append([r.pk for r in rows])
+        progress(len(rows), len(rows))
+        found = {r.pk: "closed on LinkedIn" for r in rows if r.pk in self.closed}
+        return ClosedCheck(closed=found, linkedin_jobs=len(rows), actor_runs=1, note=self.note)
+
+
+def test_cleanup_archives_closed_jobs(db):
+    closed, still_open = scored_row(db, make_job(job_id="1")), scored_row(db, make_job(job_id="2"))
+    applied = scored_row(db, make_job(job_id="3"), status=Status.APPLIED)
+    check, events = FakeClosedCheck({closed, applied}), []
+    s = make_pipeline(db, [], closed_check=check, on_event=events.append).run()
+    assert s.status == "done"
+    assert db.get(closed).archived_reason == "closed on LinkedIn"
+    assert db.get(still_open).archived_reason is None
+    assert db.get(applied).archived_reason is None
+    assert sorted(check.calls[0]) == sorted([closed, still_open])  # Applied jobs are never checked
+    assert s.counts["archived"] == 1 and s.counts["closed"] == 1
+    assert final_events(events)["cleanup"].message == "1 archived (1 closed)"
+    assert s.cost_usd == pytest.approx(0.001 + 0.0002 * 2)
+
+
+def test_save_checks_jobs_kept_this_run(db, respx_mock):
+    route = respx_mock.post(HOOK_URL).respond(200)
+    old = scored_row(db, make_job(job_id="1", title="Data Intern"))
+    src = FakeSource("linkedin", {"linkedin:EEA": ok(make_job(job_id="2", title="Product Intern"), make_job(job_id="3", title="Growth Intern"))})
+    check, events = FakeClosedCheck({"linkedin:2"}), []
+    s = make_pipeline(
+        db, [src], provider=FakeProvider(scores={"linkedin:2": 90, "linkedin:3": 90}), closed_check=check,
+        webhook=WebhookOutput(HOOK_URL, httpx.Client(), sleep=no_sleep), on_event=events.append,
+    ).run()  # fmt: skip
+    assert check.calls == [[old], ["linkedin:2", "linkedin:3"]]  # the old job is not checked twice
+    assert db.get("linkedin:2").archived_reason == "closed on LinkedIn"
+    sent = sorted(json.loads(c.request.content)["id"] for c in route.calls)
+    assert sent == [old, "linkedin:3"]  # the closed job is never sent
+    assert s.counts["closed"] == 1 and s.counts["archived"] == 1
+    assert final_events(events)["save"].message.startswith("2 kept · 2 sent · 0 failed · 1 closed")
+
+
+def test_closed_check_failure_does_not_fail_the_run(db):
+    pk = scored_row(db, make_job(job_id="1"))
+    check, events = FakeClosedCheck(note=LIMIT_MESSAGE), []
+    s = make_pipeline(db, [], closed_check=check, on_event=events.append).run()
+    assert s.status == "done" and db.get(pk).archived_reason is None
+    assert final_events(events)["cleanup"].message == f"0 archived · closed-job check: {LIMIT_MESSAGE}"
+
+
+def test_closed_check_off_runs_nothing(db):
+    scored_row(db, make_job(job_id="1"))
+    settings = Settings()
+    settings.cleanup.closed = False
+    check = FakeClosedCheck({"linkedin:1"})
+    make_pipeline(db, [], settings=settings, closed_check=check).run()
+    assert check.calls == []
+
+
+def test_cleanup_reports_progress_while_checking(db):
+    scored_row(db, make_job(job_id="1"))
+    events = []
+    make_pipeline(db, [], closed_check=FakeClosedCheck(), on_event=events.append).run()
+    running = [e.message for e in events if e.step == "cleanup" and e.status == "running"]
+    assert "Checking 1 of 1 kept jobs" in running

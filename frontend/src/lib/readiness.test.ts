@@ -14,7 +14,7 @@ function settings(): Settings {
     windows: { default_days: 15, overlap_minutes: 60 },
     filters: { excluded_countries: [], excluded_cities: [], excluded_title_words: [], languages: [] },
     scoring: { provider: "claude_code", model: "sonnet", min_score: 70, send_below_threshold: false, reasoning_language: "English", batch_size: 10, max_jobs_per_run: null, bands: "", dealbreakers: [], extra_instructions: "" },
-    cleanup: { enabled: true, deadline_passed: true, start_too_early: true, too_old: true, excluded_place: true, earliest_start: null, max_age_days: 60, interested_exempt_from_age: true },
+    cleanup: { enabled: true, deadline_passed: true, start_too_early: true, too_old: true, excluded_place: true, closed: true, earliest_start: null, max_age_days: 60, interested_exempt_from_age: true },
     outputs: { csv: { enabled: false, path: "", auto_export: true }, webhook: { enabled: false, url: "" }, notion: { enabled: false, parent_page_id: "", database_id: "" } },
     ui: { setup_complete: true, headline: "", columns: ["score", "role"], default_sort: "score" },
   }

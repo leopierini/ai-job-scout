@@ -1,8 +1,11 @@
 """Apify cost estimates and the remaining account credit."""
 
+import math
 from dataclasses import dataclass
 
 import httpx
+
+from jobscout.closed import BATCH_SIZE, JOB_PRICE_USD, RUN_FEE_USD
 
 from jobscout.settings import ApifyBoardSettings, Settings
 from jobscout.startup_places import apply_shared
@@ -42,8 +45,16 @@ class CostEstimate:
         return self.linkedin_max_results + self.indeed_max_results + self.board_max_results
 
 
-def estimate(s: Settings) -> CostEstimate:
-    """Worst-case searches, results and dollars for one run with these settings."""
+def closed_check_cost(jobs: int, runs: int) -> float:
+    """Dollars for a closed-job check that ran the actor `runs` times and got `jobs` job rows back."""
+    return runs * RUN_FEE_USD + jobs * JOB_PRICE_USD
+
+
+def estimate(s: Settings, kept_linkedin: int = 0) -> CostEstimate:
+    """Worst-case searches, results and dollars for one run with these settings.
+
+    `kept_linkedin`: the kept LinkedIn jobs the closed-job check would read again (see cleanup.kept_linkedin).
+    """
     s = apply_shared(s)
     li, ind = s.linkedin, s.indeed
     li_searches = len(li.regions) * len(li.keywords) if li.enabled else 0
@@ -58,6 +69,8 @@ def estimate(s: Settings) -> CostEstimate:
         other_searches += n
         other_results += n * board.max_results_per_search
         max_usd += n * (board.max_results_per_search * board.price_per_result + START_FEES_USD.get(name, 0.0))
+    if s.cleanup.enabled and s.cleanup.closed and kept_linkedin > 0:
+        max_usd += closed_check_cost(kept_linkedin, math.ceil(kept_linkedin / BATCH_SIZE))
     return CostEstimate(li_searches, li_results, ind_searches, ind_results, max_usd, other_searches, other_results)
 
 

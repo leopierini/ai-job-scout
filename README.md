@@ -81,7 +81,8 @@ Apify charges for each job it finds. The app's default actors cost about **$0.00
 
 The startup boards on Apify cost more per job: about **$0.003** for Welcome to the Jungle and Wellfound, **$0.0001** for Y Combinator and **$0.005** for company job boards. Wellfound also charges **$0.005 for each search**, which the estimate includes, plus Apify platform usage, which it doesn't. The free startup sources cost nothing.
 
-- **The cost is shown before every run.** The top of the main screen says "Next run up to $…", worked out from your keywords, regions and results limits, next to your remaining Apify credit. It is an upper estimate: it assumes every search returns its maximum number of results (only Wellfound's platform usage is left out).
+- **The cost is shown before every run.** The top of the main screen says "Next run up to $…", worked out from your keywords, regions and results limits, next to your remaining Apify credit. It is an upper estimate: it assumes every search returns its maximum number of results (only Wellfound's platform usage and the closed-job check of jobs kept during the run are left out).
+- **Closed jobs are checked too.** Every run reads your kept LinkedIn jobs again on Apify, about **$0.0002 a job** plus $0.001 for every 50, and archives the ones that no longer take applications. Jobs from companies' own job boards (Ashby, Greenhouse, Lever and others) are checked for free. The estimate counts the jobs you already keep; new LinkedIn jobs kept during the run are checked too, which adds about $0.02 for every 100. Turn it off under **Clean up old jobs** in Settings.
 - **You rarely pay twice for the same posting.** Each search only looks back to your last run, and jobs the app has already seen are never scored again. Repeats can still happen in two ways: a small overlap (60 minutes by default) is added to each search so nothing is missed, and two searches (different keywords or regions) can find the same job. The app removes those repeats, but Apify still charges for them.
 
 ## Your data stays on your computer
@@ -120,7 +121,7 @@ The app is a Python package managed with [uv](https://docs.astral.sh/uv/). From 
 uv run jobscout start      # open the app (--port N, --no-browser, --sample)
 uv run jobscout run        # search, score and save new jobs (--window today|week|month|N, --sample)
 uv run jobscout estimate   # the most a run can cost, and your Apify credit left
-uv run jobscout cleanup    # archive stale jobs (--dry-run only lists them)
+uv run jobscout cleanup    # archive stale and closed jobs (--dry-run only lists them; both read LinkedIn jobs on Apify)
 uv run jobscout rescore    # score stored jobs again (--yes skips the question)
 uv run jobscout export jobs.csv   # write your tracked jobs to a CSV file
 uv run jobscout paths      # show where your files are

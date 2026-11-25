@@ -154,3 +154,13 @@ def test_apify_credit_none_on_non_json(respx_mock):
     respx_mock.get(LIMITS_URL).respond(200, text="not json")
     with httpx.Client() as client:
         assert apify_credit("tok", client) is None
+
+
+def test_estimate_counts_the_closed_job_check():
+    s = Settings()
+    s.linkedin.enabled = False
+    base = estimate(s).max_usd
+    assert estimate(s, kept_linkedin=50).max_usd == pytest.approx(base + 0.001 + 0.0002 * 50)
+    assert estimate(s, kept_linkedin=150).max_usd == pytest.approx(base + 3 * 0.001 + 0.0002 * 150)  # three actor runs
+    s.cleanup.closed = False
+    assert estimate(s, kept_linkedin=50).max_usd == pytest.approx(base)
