@@ -1,10 +1,12 @@
 """Rules that archive jobs which are no longer worth looking at."""
 
+from collections.abc import Callable
 from dataclasses import replace
 from datetime import date, timedelta
 
+from jobscout.closed import ClosedCheck
 from jobscout.db import Database
-from jobscout.models import ACTIVE_STATUSES, JobRow, Status
+from jobscout.models import ACTIVE_STATUSES, JobRow, JobState, Status
 from jobscout.normalize import PlaceMatcher
 from jobscout.settings import CleanupSettings, Settings
 
@@ -68,3 +70,40 @@ def run_cleanup(
         if reason is not None and (dry_run or db.archive(row.pk, reason)):
             stale.append((row.pk, reason))
     return stale
+
+
+# --- jobs that no longer take applications --------------------------------------------------------
+
+ClosedChecker = Callable[[list[JobRow]], ClosedCheck]
+
+
+def closed_candidates(rows: list[JobRow], cfg: CleanupSettings) -> list[JobRow]:
+    """The rows the closed-job rule applies to: kept, To review or Interested, not archived or restored."""
+    if not (cfg.enabled and cfg.closed):
+        return []
+    return [
+        r
+        for r in rows
+        if r.state == JobState.KEPT
+        and r.status in (Status.TO_REVIEW, Status.INTERESTED)
+        and r.archived_reason is None
+        and not r.restored
+    ]
+
+
+def archive_closed(
+    db: Database, rows: list[JobRow], check: ClosedChecker, dry_run: bool = False
+) -> tuple[list[tuple[str, str]], ClosedCheck]:
+    """Check `rows` and archive the closed ones. Returns (pk, reason) for each one archived (all of them on a
+    dry run, which archives nothing) and the check's result. No rows: no check, nothing billed."""
+    if not rows:
+        return [], ClosedCheck()
+    result = check(rows)
+    # db.archive re-checks the status: one changed since the read (e.g. to Applied) wins.
+    archived = [(pk, why) for pk, why in result.closed.items() if dry_run or db.archive(pk, why)]
+    return archived, result
+
+
+def kept_linkedin(db: Database, s: Settings) -> int:
+    """How many LinkedIn jobs the next closed-job check would send to Apify (for the cost estimate)."""
+    return sum(1 for r in closed_candidates(db.tracked(), s.cleanup) if r.source == "linkedin")

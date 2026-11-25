@@ -382,3 +382,24 @@ def test_no_command_is_a_usage_error(capsys):
     with pytest.raises(SystemExit) as exc:
         main([])
     assert exc.value.code == 2
+
+
+CLOSED_RUN = r".*acts/automation_craft~linkedin-job-details-scraper/run-sync-get-dataset-items.*"
+
+
+def test_cleanup_checks_closed_linkedin_jobs(capsys, respx_mock):
+    save_secrets(Secrets(apify_token="tok"))
+    pk = stored_job(job_id="4400000001", url="https://uk.linkedin.com/jobs/view/product-intern-at-fjord-labs-4400000001")
+    respx_mock.post(url__regex=CLOSED_RUN).respond(
+        200, json=[{"type": "job", "status": "ok", "jobId": "4400000001", "isClosed": True, "jobState": "closed"}]
+    )
+    assert main(["cleanup", "--dry-run"]) == 0
+    assert "would archive: Data Analyst Intern at Fjord Labs · closed on LinkedIn" in capsys.readouterr().out
+    db = Database(paths.db_path())
+    assert db.get(pk).archived_reason is None
+    db.close()
+    assert main(["cleanup"]) == 0
+    assert "archived: Data Analyst Intern at Fjord Labs · closed on LinkedIn" in capsys.readouterr().out
+    db = Database(paths.db_path())
+    assert db.get(pk).archived_reason == "closed on LinkedIn"
+    db.close()

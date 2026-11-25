@@ -229,6 +229,7 @@ class CleanupSettings(_Model):
     start_too_early: bool = True
     too_old: bool = True
     excluded_place: bool = True
+    closed: bool = True  # jobs that no longer take applications (LinkedIn via Apify, company job boards)
     earliest_start: date | None = None
     max_age_days: int = Field(default=60, ge=1)
     interested_exempt_from_age: bool = True

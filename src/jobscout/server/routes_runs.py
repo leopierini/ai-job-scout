@@ -11,6 +11,7 @@ import httpx
 from fastapi import APIRouter, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 
+from jobscout.cleanup import kept_linkedin
 from jobscout.costs import apify_credit, estimate
 from jobscout.models import StepEvent
 from jobscout.server.runner import RunManager
@@ -126,7 +127,8 @@ def cancel_run(run_id: int, request: Request) -> dict:
 @router.post("/estimate")
 def post_estimate(body: EstimateBody, request: Request) -> dict:
     ws = _workspace(request)
-    est = estimate(body.settings or ws.settings())
+    settings = body.settings or ws.settings()
+    est = estimate(settings, kept_linkedin(ws.db(), settings))
     token = ws.secrets().apify_token  # always the saved token: never taken from the request
     credit = request.app.state.credit.get(token, _fetch_credit) if token and ws.mode == "real" else None
     return {

@@ -6,6 +6,7 @@ import sys
 import threading
 from collections.abc import Callable, Iterator
 from contextlib import closing, contextmanager
+from dataclasses import replace
 from datetime import date
 from pathlib import Path
 
@@ -13,16 +14,17 @@ import httpx
 
 from jobscout import paths
 from jobscout._text import plural
-from jobscout.cleanup import run_cleanup
-from jobscout.costs import apify_credit, estimate
+from jobscout.cleanup import archive_closed, closed_candidates, kept_linkedin, run_cleanup
+from jobscout.costs import CostEstimate, apify_credit, estimate
 from jobscout.db import Database
 from jobscout._output_sync import notion_status_changes, read_back_notion_statuses
 from jobscout.errors import ConfigError, NotionError, RunInProgress
 from jobscout.models import RunSummary, Status, StepEvent
 from jobscout.outputs.csv_out import export_csv
 from jobscout.outputs.notion import NotionClient
-from jobscout.pipeline import STEPS, Pipeline, build_pipeline
+from jobscout.pipeline import STEPS, Pipeline, build_pipeline, closed_checker
 from jobscout.settings import Secrets, Settings, load_profile, load_secrets, load_settings
+from jobscout.sources.apify import ApifyClient
 from jobscout.sources.sample import SAMPLE_PROFILE, sample_settings
 
 STEP_TITLES = {"cleanup": "Clean up", "search": "Search", "filter": "Filter", "score": "Score", "save": "Save"}
@@ -142,8 +144,14 @@ def _execute(
     return _finish(summary)
 
 
+def _estimate(settings: Settings) -> CostEstimate:
+    """The estimate for the next run, counting the kept LinkedIn jobs the closed-job check reads again."""
+    with closing(Database(paths.db_path())) as db:
+        return estimate(settings, kept_linkedin(db, settings))
+
+
 def _cost_line(settings: Settings) -> str:
-    est = estimate(settings)
+    est = _estimate(settings)
     searches = est.searches
     results = est.max_results
     return f"This run can cost up to ${est.max_usd:.2f} on Apify ({plural(searches, 'search', 'searches')}, at most {plural(results, 'result')})."
@@ -177,7 +185,7 @@ def _confirm(prompt: str) -> bool:
 
 def _cmd_estimate(_args: argparse.Namespace) -> int:
     settings, secrets = load_settings(), load_secrets()
-    est = estimate(settings)
+    est = _estimate(settings)
     print(f"Searches: {est.searches}")
     print(f"Max results: {est.max_results}")
     print(f"Max cost: ${est.max_usd:.2f}")
@@ -216,6 +224,15 @@ def _cmd_cleanup(args: argparse.Namespace) -> int:
             print(f"Nothing archived: couldn't read statuses from Notion. {exc}", file=sys.stderr)
             return 1
         stale = run_cleanup(db, settings, date.today(), dry_run=args.dry_run, status_overrides=overrides)
+        rows = [replace(r, status=overrides.get(r.pk, r.status)) for r in db.tracked()]
+        stale_pks = {pk for pk, _ in stale}  # a dry run archived nothing: don't check what it would archive anyway
+        candidates = [r for r in closed_candidates(rows, settings.cleanup) if r.pk not in stale_pks]
+        with httpx.Client() as client:
+            apify = ApifyClient(secrets.apify_token, client) if secrets.apify_token else None
+            closed, result = archive_closed(db, candidates, closed_checker(apify, client, threading.Event()), args.dry_run)
+        if result.note:
+            print(f"Closed-job check skipped: {result.note}", file=sys.stderr)
+        stale += closed
         for pk, reason in stale:
             row = db.get(pk)
             name = f"{row.title} at {row.company}" if row else pk

@@ -12,8 +12,9 @@ from jobscout import _output_sync as sync
 from jobscout import _search as search
 from jobscout._steps import STEPS, UNEXPECTED, StepResult, StepRunner, ignore  # noqa: F401 - STEPS is public here
 from jobscout._text import plural
-from jobscout.cleanup import run_cleanup
-from jobscout.costs import APIFY_BOARDS, PAID_SOURCES, billed_cost
+from jobscout.cleanup import ClosedChecker, archive_closed, closed_candidates, run_cleanup
+from jobscout.closed import ClosedCheck, check_closed
+from jobscout.costs import APIFY_BOARDS, PAID_SOURCES, billed_cost, closed_check_cost
 from jobscout.db import Database
 from jobscout.errors import ConfigError, NotionError
 from jobscout.models import JobRow, JobState, RunSummary, ScoreResult, StepEvent
@@ -40,7 +41,7 @@ from jobscout.sources.yc import YcSource
 from jobscout.startup_places import apply_shared
 
 COUNT_KEYS = (
-    "archived", "searched", "billed_linkedin", "billed_indeed", *(f"billed_{name}" for name in APIFY_BOARDS),
+    "archived", "closed", "searched", "billed_linkedin", "billed_indeed", *(f"billed_{name}" for name in APIFY_BOARDS),
     "new", "duplicates", "excluded", "scored", "kept", "below", "failed_scoring", "delivered", "delivery_failed",
 )  # fmt: skip
 
@@ -74,6 +75,7 @@ class Pipeline(StepRunner):
         on_event: Callable[[StepEvent], None] = ignore,
         cancel: threading.Event | None = None,
         client: httpx.Client | None = None,
+        closed_check: ClosedChecker | None = None,
     ) -> None:
         super().__init__(db, on_event, cancel)
         self._settings = settings
@@ -85,6 +87,9 @@ class Pipeline(StepRunner):
         self._webhook = webhook
         self._now = now
         self._client = client  # owned: closed by close()
+        self._closed_check = closed_check  # None: jobs that stopped taking applications are not looked for
+        self._checked: set[str] | None = None  # pks checked for closing this run; None: not checked at cleanup
+        self._closed_cost = 0.0
         self._start_time = now()
         self._counts: dict[str, int] = {}
         self._billed: dict[str, int] = {}
@@ -129,6 +134,8 @@ class Pipeline(StepRunner):
         self._counts = dict.fromkeys(COUNT_KEYS, 0)
         self._billed = {}
         self._closed = set()
+        self._checked = None
+        self._closed_cost = 0.0
         self._notion_blocked = False
         self._found_now = set()
         status, error = "error", UNEXPECTED
@@ -142,7 +149,7 @@ class Pipeline(StepRunner):
                 run_id=self._run_id,
                 status=status,
                 counts=dict(self._counts),
-                cost_usd=billed_cost(self._billed, self._settings),
+                cost_usd=billed_cost(self._billed, self._settings) + self._closed_cost,
                 error=error,
             )
             self._db.finish_run(self._run_id, summary)
@@ -173,16 +180,36 @@ class Pipeline(StepRunner):
                 return StepResult(f"Nothing archived: couldn't read statuses from Notion. {exc}")
         self._apply_threshold()
         archived = run_cleanup(self._db, self._settings, self._now().date())
+        closed, note = self._archive_closed(closed_candidates(self._db.tracked(), self._settings.cleanup))
+        archived += closed
         self._counts["archived"] = len(archived)
         if self._notion is not None:
             include_below = self._settings.scoring.send_below_threshold
             not_archived = sync.archive_orphaned_pages(self._db, self._notion, include_below, self._beat)
         message = f"{len(archived)} archived"
+        if closed:
+            message += f" ({len(closed)} closed)"
+        if note:
+            message += f" · closed-job check skipped: {note}"
         if changes:
             message += f" · {plural(changes, 'status change')} from Notion"
         if not_archived:
             message += f" · {plural(not_archived, 'Notion page')} not archived"
         return StepResult(message, data={"archived": [{"id": pk, "reason": why} for pk, why in archived]})
+
+    def _archive_closed(self, rows: list[JobRow]) -> tuple[list[tuple[str, str]], str]:
+        """Archive the rows that no longer take applications: (pk, reason) for each, and why a part of the
+        check was skipped ("" when nothing was). Each job is checked once per run."""
+        if self._closed_check is None:
+            return [], ""
+        if self._checked is None:
+            self._checked = set()
+        rows = [r for r in rows if r.pk not in self._checked]
+        self._checked.update(r.pk for r in rows)
+        archived, result = archive_closed(self._db, rows, self._closed_check)
+        self._closed_cost += closed_check_cost(result.linkedin_jobs, result.actor_runs)
+        self._counts["closed"] = self._counts.get("closed", 0) + len(archived)
+        return archived, result.note
 
     # --- 2. search --------------------------------------------------------
 
@@ -372,6 +399,11 @@ class Pipeline(StepRunner):
 
     def _save(self) -> StepResult:
         self._counts["duplicates"] += dedup.drop_kept_duplicates(self._db)
+        closed: list[tuple[str, str]] = []
+        note = ""
+        if self._checked is not None and not self._notion_blocked:  # checked at cleanup: now the jobs kept since
+            closed, note = self._archive_closed(closed_candidates(self._db.tracked(), self._settings.cleanup))
+            self._counts["archived"] += len(closed)
         csv_note = sync.auto_export_csv(self._db, self._settings.outputs.csv)
         include_below = self._settings.scoring.send_below_threshold
         sends: list[Callable[[], bool]] = []
@@ -397,7 +429,13 @@ class Pipeline(StepRunner):
                 failed += 1
             self._emit("running", message(), delivered + failed, len(sends))
         self._counts.update(delivered=delivered, delivery_failed=failed)
-        final = f"{message()} · {csv_note}" if csv_note else message()
+        final = message()
+        if closed:
+            final += f" · {len(closed)} closed"
+        if note:
+            final += f" · closed-job check skipped: {note}"
+        if csv_note:
+            final += f" · {csv_note}"
         return StepResult(final, done=delivered + failed, total=len(sends))
 
 
@@ -449,11 +487,12 @@ def build_pipeline(
     if hook_cfg.enabled and not hook_cfg.url.strip():
         raise ConfigError("The webhook is on but has no URL. Add one, or turn the webhook off.")
 
-    needs_http = uses_apify or bool(free) or notion_cfg.enabled or hook_cfg.enabled
+    check_closed_jobs = not for_rescore and settings.cleanup.enabled and settings.cleanup.closed
+    needs_http = uses_apify or bool(free) or notion_cfg.enabled or hook_cfg.enabled or check_closed_jobs
     client = httpx.Client() if needs_http else None
     sources: list[Source] = []
-    if client is not None and uses_apify:
-        apify = ApifyClient(secrets.apify_token or "", client)
+    apify = ApifyClient(secrets.apify_token, client) if client is not None and secrets.apify_token else None
+    if apify is not None and uses_apify:
         if use_linkedin:
             sources.append(LinkedInSource(li, apify, cancel))
         if use_indeed:
@@ -461,12 +500,22 @@ def build_pipeline(
         sources += [_APIFY_BOARD_SOURCES[n](getattr(settings, n), apify, cancel) for n in boards]
     if client is not None:
         sources += [make(client, cancel) for make in free]
+    closed_check = closed_checker(apify, client, cancel) if client is not None and check_closed_jobs else None
     notion = NotionClient(secrets.notion_token or "", client) if client and notion_cfg.enabled else None
     webhook = WebhookOutput(hook_cfg.url.strip(), client) if client and hook_cfg.enabled else None
     return Pipeline(
         settings, secrets, db, profile_md, sources, provider,
-        notion=notion, webhook=webhook, on_event=on_event, cancel=cancel, client=client,
+        notion=notion, webhook=webhook, on_event=on_event, cancel=cancel, client=client, closed_check=closed_check,
     )  # fmt: skip
+
+
+def closed_checker(apify: ApifyClient | None, client: httpx.Client, cancel: threading.Event) -> ClosedChecker:
+    """The real closed-job check: LinkedIn through Apify (when there is a token), job boards directly."""
+
+    def check(rows: list[JobRow]) -> ClosedCheck:
+        return check_closed(rows, apify, client, cancel)
+
+    return check
 
 
 def _free_sources_in_use(s: Settings) -> list[Callable[[httpx.Client, threading.Event], Source]]:
