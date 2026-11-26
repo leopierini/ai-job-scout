@@ -1,11 +1,17 @@
 """Jobgether's public job API (remote-first). Free, no key.
 
-Checked 2026-11-12 against https://jobgether.com/astroapi/ai/jobs/docs: `POST /api/v1/jobs` takes a
+Checked 2026-11-26 against https://jobgether.com/astroapi/ai/jobs/docs: `POST /api/v1/jobs` takes a
 JSON body with `keyword`, `locations`, `experience`, `sort`, `page` (capped at 10) and `limit`
 (capped at 25), and answers `{"jobs": [...], "pagination": {"page", "limit", "hasMore"}}`. POST keeps
 the filters out of the address: robots.txt disallows query strings on this path. Results are sorted
 newest first, so paging stops once a whole page is older than the run's window. Jobs carry no
 description, so one is built from the structured fields for the scoring AI.
+
+A location matches the jobs whose own place is that place or an area around it, never a smaller one
+(checked 2026-11-26): "italy" finds jobs in Italy, in all of Europe and anywhere, but "europe" finds
+only the jobs open across all of Europe and anywhere, and misses every job set in a European country
+(listed as "Europe, European Union, EMEA, Germany"). Most jobs are set in a country, so "europe" is
+sent as Europe's countries: a job matching any of several locations is returned.
 """
 
 import re
@@ -19,6 +25,7 @@ import httpx
 from jobscout.errors import SearchError
 from jobscout.models import Job
 from jobscout.settings import JobgetherSettings
+from jobscout.startup_places import jobgether_europe
 from jobscout.sources import (
     DESCRIPTION_LIMIT,
     USER_AGENT,
@@ -38,14 +45,20 @@ PER_PAGE = 25  # the API's cap
 MAX_PAGES = 10  # the API's cap
 PAUSE_SECONDS = 2.0  # robots.txt asks for Crawl-delay: 2
 ANYWHERE = "anywhere"  # the location slug for jobs open to anyone, wherever they live
+EUROPE = "europe"  # sent as Europe's countries: see the module docstring
 _SALARY = re.compile(r"\s*([\d.,]+)\s*(?:-|–)\s*([\d.,]+)\s*([A-Za-z]{3})?\s*|\s*([\d.,]+)\s*([A-Za-z]{3})?\s*")
 
 
 def request_body(settings: JobgetherSettings, query: str, page: int, limit: int) -> dict:
     """The JSON body for one page of one query. Empty filters are left out (anywhere, any level)."""
     body: dict = {"keyword": query.strip(), "sort": "date", "page": page, "limit": limit}
-    locations = [x.strip() for x in settings.locations if x.strip()]
-    # Every place already includes the jobs open to anyone anywhere, and "anywhere" next to "europe" keeps only
+    locations: list[str] = []
+    for raw in settings.locations:
+        place = raw.strip()
+        for slug in jobgether_europe() if place.casefold() == EUROPE else [place]:
+            if slug and slug.casefold() not in (x.casefold() for x in locations):
+                locations.append(slug)
+    # Every place already includes the jobs open to anyone anywhere, and "anywhere" next to another place kept only
     # those (checked 2026-11-13): send it only when it is the sole place.
     if len(locations) > 1:
         locations = [x for x in locations if x.casefold() != ANYWHERE] or locations[:1]

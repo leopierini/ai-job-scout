@@ -124,3 +124,7 @@ def test_shared_searches_round_trip_through_the_api(client):
     body["startup_queries"] = [" AI engineer", "AI engineer", "ML engineer"]
     assert client.put("/api/settings", json=body, headers=headers).status_code == 200
     assert client.get("/api/settings").json()["startup_queries"] == ["AI engineer", "ML engineer"]
+
+
+def test_jobgether_slugs_where_its_name_differs():
+    assert formats(["lt", "cz", "gb"])["jobgether"] == ["republic-of-lithuania", "czechia", "united-kingdom"]

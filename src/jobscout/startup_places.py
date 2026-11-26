@@ -43,6 +43,20 @@ def _slug(name: str) -> str:
     return name.lower().replace(" ", "-")
 
 
+# Where Jobgether's slug isn't the English name (checked 2026-11-26).
+_JOBGETHER_SLUGS = {"lt": "republic-of-lithuania"}
+
+
+def jobgether_slug(key: str) -> str:
+    """Jobgether's location slug for a country in the catalog, such as "italy" or "united-kingdom"."""
+    return _JOBGETHER_SLUGS.get(key) or _slug(catalog()[key])
+
+
+def jobgether_europe() -> list[str]:
+    """Jobgether's slugs for the European countries in the catalog."""
+    return [jobgether_slug(k) for k in european()]
+
+
 def formats(keys: list[str]) -> dict[str, list[str]]:
     """Each source's places for these keys. Unknown keys are ignored; an empty list means anywhere."""
     names, in_europe = catalog(), set(european())
@@ -53,10 +67,12 @@ def formats(keys: list[str]) -> dict[str, list[str]]:
     # Sources with no "Europe" of their own get Europe as its countries.
     spelled_out = list(dict.fromkeys((european() if europe else []) + countries))
     remote_word = ["Remote"] if remote else []
+    remote_slug = ["anywhere"] if remote else []
     return {
         # Built in Europe only lists jobs in Europe and has no remote filter: no country means all of Europe.
         "builtineurope": [] if europe else [names[k].lower() for k in countries if k in in_europe],
-        "jobgether": [_slug(names[k]) for k in beyond] + (["europe"] if europe else []) + (["anywhere"] if remote else []),
+        # Jobgether's own "europe" finds only jobs open across all of Europe: the source sends its countries instead.
+        "jobgether": [jobgether_slug(k) for k in beyond] + (["europe"] if europe else []) + remote_slug,
         "vcboards": [names[k] for k in spelled_out] + remote_word,
         # Welcome to the Jungle is a European board: Europe is one search with no place, remote jobs included.
         "wttj": [] if europe else [k.upper() for k in countries] + remote_word,

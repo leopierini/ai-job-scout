@@ -82,7 +82,7 @@ class BuiltInEuropeSettings(_Model):
     max_results_per_query: int = Field(default=50, ge=1, le=500)
 
 
-# Jobgether's experience levels (its API docs, checked 2026-11-12).
+# Jobgether's experience levels (its API docs, checked 2026-11-26).
 JobgetherExperience = Literal[
     "entry-level-graduate", "junior-1-2-years", "mid-level-2-5-years", "senior-5-10-years", "expert-10-years"
 ]
@@ -93,7 +93,7 @@ class JobgetherSettings(_Model):
 
     enabled: bool = False
     queries: list[str] = []
-    locations: list[str] = []  # Jobgether location slugs, e.g. "italy", "europe"; empty: anywhere
+    locations: list[str] = []  # Jobgether slugs, e.g. "italy" or "europe" (sent as its countries); empty: anywhere
     experience: list[JobgetherExperience] = []  # empty: any level
     max_results_per_query: int = Field(default=50, ge=1, le=250)  # Jobgether gives at most 10 pages of 25
 
