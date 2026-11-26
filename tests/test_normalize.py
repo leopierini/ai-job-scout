@@ -53,3 +53,10 @@ def test_term_matcher_matches_whole_words_ignoring_case_and_accents():
     assert m.match("Headquarters Product Manager") is None
     assert m.match("") is None
     assert TermMatcher([]).match("Senior Product Manager") is None
+
+
+def test_dedup_key_same_remote_job_on_two_boards():
+    a = dedup_key("Product Manager", "Kestrel Payments", "Remote (Italy, Spain)")
+    b = dedup_key("Product Manager", "Kestrel Payments", "Remote (Europe)")
+    assert a == b and city_of("Remote (Worldwide)") == "remote"
+    assert city_of("Remote, Milan") == "remote"

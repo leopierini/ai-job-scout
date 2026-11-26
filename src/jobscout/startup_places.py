@@ -4,7 +4,8 @@ The Startups tab keeps a single list of searches (`Settings.startup_queries`, su
 single list of places (`Settings.startup_places`): country codes such as "it", plus "europe" and "remote".
 Each source names places differently (Built in Europe wants "italy", Welcome to the Jungle "IT", Jobgether
 "italy" or "anywhere", ...), so `apply_shared` fills each source's own place field from that list, and its
-own searches with the shared ones. A source whose own field is already set keeps it.
+own searches with the shared ones. A source whose own field is already set keeps it. Remotive and Remote OK
+have no places, only searches: each is one feed of remote jobs, kept to the ones open to people in Europe.
 
 Career pages are left out of both on purpose. Their place filter matches words in each job's location, and
 job boards mostly write a city ("Milan") rather than the country, so a country would drop most of their jobs.
@@ -43,6 +44,20 @@ def _slug(name: str) -> str:
     return name.lower().replace(" ", "-")
 
 
+# Where Jobgether's slug isn't the English name (checked 2026-11-26).
+_JOBGETHER_SLUGS = {"lt": "republic-of-lithuania"}
+
+
+def jobgether_slug(key: str) -> str:
+    """Jobgether's location slug for a country in the catalog, such as "italy" or "united-kingdom"."""
+    return _JOBGETHER_SLUGS.get(key) or _slug(catalog()[key])
+
+
+def jobgether_europe() -> list[str]:
+    """Jobgether's slugs for the European countries in the catalog."""
+    return [jobgether_slug(k) for k in european()]
+
+
 def formats(keys: list[str]) -> dict[str, list[str]]:
     """Each source's places for these keys. Unknown keys are ignored; an empty list means anywhere."""
     names, in_europe = catalog(), set(european())
@@ -53,10 +68,15 @@ def formats(keys: list[str]) -> dict[str, list[str]]:
     # Sources with no "Europe" of their own get Europe as its countries.
     spelled_out = list(dict.fromkeys((european() if europe else []) + countries))
     remote_word = ["Remote"] if remote else []
+    remote_slug = ["anywhere"] if remote else []
     return {
         # Built in Europe only lists jobs in Europe and has no remote filter: no country means all of Europe.
         "builtineurope": [] if europe else [names[k].lower() for k in countries if k in in_europe],
-        "jobgether": [_slug(names[k]) for k in beyond] + (["europe"] if europe else []) + (["anywhere"] if remote else []),
+        # Jobgether's own "europe" finds only jobs open across all of Europe: the source sends its countries instead.
+        "jobgether": [jobgether_slug(k) for k in beyond] + (["europe"] if europe else []) + remote_slug,
+        # Himalayas searches one country at a time, worldwide jobs included, and keeps only jobs open to Europe:
+        # Europe (or Remote alone) is one search with no country, and countries outside Europe are left out.
+        "himalayas": [] if europe else [k.upper() for k in countries if k in in_europe],
         "vcboards": [names[k] for k in spelled_out] + remote_word,
         # Welcome to the Jungle is a European board: Europe is one search with no place, remote jobs included.
         "wttj": [] if europe else [k.upper() for k in countries] + remote_word,
@@ -66,7 +86,9 @@ def formats(keys: list[str]) -> dict[str, list[str]]:
     }
 
 
-_FIELDS = {"builtineurope": "countries"}  # every other source calls it `locations`
+_FIELDS = {"builtineurope": "countries", "himalayas": "countries"}  # every other source calls it `locations`
+# Sources that take the shared searches but have no places: one feed each, kept to jobs open to Europe.
+_SEARCH_ONLY = ("remotive", "remoteok")
 
 
 def apply_shared(s: "Settings") -> "Settings":
@@ -80,6 +102,10 @@ def apply_shared(s: "Settings") -> "Settings":
         field = _FIELDS.get(source, "locations")
         if s.startup_places and not getattr(section, field):
             setattr(section, field, places)
+        if not section.queries:
+            section.queries = list(s.startup_queries)
+    for source in _SEARCH_ONLY:
+        section = getattr(out, source)
         if not section.queries:
             section.queries = list(s.startup_queries)
     return out

@@ -5,7 +5,14 @@ import { SOURCE_LABELS } from "@/lib/jobs"
 export const APIFY_BOARDS: readonly ApifyBoardName[] = ["wttj", "wellfound", "yc", "atsindex"]
 
 /** The startup sources that take the shared searches at the top of the Startups tab (not career pages). */
-export type SearchingStartupSource = "builtineurope" | "jobgether" | "vcboards" | ApifyBoardName
+export type SearchingStartupSource =
+  | "builtineurope"
+  | "jobgether"
+  | "remotive"
+  | "himalayas"
+  | "remoteok"
+  | "vcboards"
+  | ApifyBoardName
 
 /** What a startup source searches for: its own searches, or the shared ones when it has none (as `apply_shared`). */
 export function queriesFor(s: Settings, name: SearchingStartupSource): string[] {
@@ -19,6 +26,8 @@ export function sourcesInUse(s: Settings): string[] {
   if (s.indeed.enabled && s.indeed.queries.length > 0) on.push("indeed")
   if (s.builtineurope.enabled && queriesFor(s, "builtineurope").length > 0) on.push("builtineurope")
   if (s.jobgether.enabled && queriesFor(s, "jobgether").length > 0) on.push("jobgether")
+  for (const name of ["remotive", "himalayas", "remoteok"] as const)
+    if (s[name].enabled && queriesFor(s, name).length > 0) on.push(name)
   if (s.vcboards.enabled && s.vcboards.boards.length > 0) on.push("vcboards")
   if (s.careers.enabled && s.careers.pages.length > 0) on.push("careers")
   for (const name of APIFY_BOARDS) if (s[name].enabled && queriesFor(s, name).length > 0) on.push(name)

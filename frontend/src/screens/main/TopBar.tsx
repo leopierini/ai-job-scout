@@ -25,7 +25,9 @@ export type WindowValue = (typeof WINDOWS)[number]["value"]
 export function headlineFor(settings: Settings): string {
   if (settings.ui.headline.trim()) return settings.ui.headline.trim()
   const { linkedin, indeed } = settings
-  const others = (["builtineurope", "jobgether", "wttj", "wellfound", "yc", "atsindex"] as const)
+  const others = (
+    ["builtineurope", "jobgether", "remotive", "himalayas", "remoteok", "wttj", "wellfound", "yc", "atsindex"] as const
+  )
     .filter((name) => settings[name].enabled)
     .map((name) => queriesFor(settings, name))
   const keywords = linkedin.enabled

@@ -6,7 +6,7 @@ from pathlib import Path
 import httpx
 import pytest
 
-from jobscout.settings import JobgetherSettings
+from jobscout.settings import JobgetherSettings, Settings
 from jobscout.sources import AreaResult, SearchArea, jobgether
 from jobscout.sources.jobgether import (
     JobgetherSource,
@@ -14,6 +14,7 @@ from jobscout.sources.jobgether import (
     parse_salary,
     request_body,
 )
+from jobscout.startup_places import apply_shared, jobgether_europe
 
 PAGE = json.loads((Path(__file__).parent / "fixtures" / "jobgether_page.json").read_text(encoding="utf-8"))
 URL = "https://jobgether.com/api/v1/jobs"
@@ -47,17 +48,26 @@ def run(src, window=MONTH, calls=None):
 
 
 def test_request_body_with_filters():
-    s = JobgetherSettings(locations=["italy", " europe "], experience=["entry-level-graduate"])
+    s = JobgetherSettings(locations=["italy", " spain "], experience=["entry-level-graduate"])
     assert request_body(s, " data analyst ", 2, 25) == {
         "keyword": "data analyst", "sort": "date", "page": 2, "limit": 25,
-        "locations": ["italy", "europe"], "experience": ["entry-level-graduate"],
+        "locations": ["italy", "spain"], "experience": ["entry-level-graduate"],
     }  # fmt: skip
+
+
+def test_europe_is_sent_as_its_countries():
+    # Jobgether's "europe" misses every job set in a European country: send the countries instead.
+    sent = request_body(JobgetherSettings(locations=["italy", " Europe ", "Spain"]), "pm", 1, 10)["locations"]
+    assert sent == ["italy", *[x for x in jobgether_europe() if x != "italy"]]
+    assert "europe" not in sent and len(sent) == len(jobgether_europe()) == 31
+    assert {"germany", "united-kingdom", "czechia", "republic-of-lithuania"} <= set(sent)
 
 
 @pytest.mark.parametrize(
     ("locations", "sent"),
     [
-        (["europe", "anywhere"], ["europe"]),  # with "anywhere" the API kept only jobs open anywhere
+        (["germany", "anywhere"], ["germany"]),  # with "anywhere" the API kept only jobs open anywhere
+        (["europe", "anywhere"], jobgether_europe()),
         ([" Anywhere ", "italy", "spain"], ["italy", "spain"]),
         (["anywhere"], ["anywhere"]),
         (["anywhere", "ANYWHERE"], ["anywhere"]),
@@ -259,3 +269,51 @@ def test_an_item_that_cannot_be_parsed_is_skipped_alone(respx_mock, monkeypatch)
     respx_mock.post(URL).respond(200, json=PAGE)
     res = run(make_source())
     assert [j.job_id for j in res.jobs] == ["6b0000000000000000000001"] and res.complete
+
+
+# --- places, against a stand-in for the API's location rule ---
+
+PLACES = json.loads((Path(__file__).parent / "fixtures" / "jobgether_places.json").read_text(encoding="utf-8"))
+LEVELS = {"Entry-level / graduate": "entry-level-graduate", "Junior (1-2 years)": "junior-1-2-years",
+          "Senior (5-10 years)": "senior-5-10-years"}  # fmt: skip
+
+
+def jobgether_api(request: httpx.Request) -> httpx.Response:
+    """Answers like Jobgether (checked 2026-11-26): a location matches the jobs whose own place (the last one
+    listed) is that place or an area around it, never a smaller one, and an unknown location is refused."""
+    body = json.loads(request.content)
+    known = {*jobgether_europe(), "europe", "anywhere", "united-states"}
+    if bad := [x for x in body.get("locations", []) if x not in known]:
+        return httpx.Response(400, json={"status": 400, "code": "invalid_parameter", "field": "locations"})
+    around = {"europe": {"anywhere"}, "anywhere": set(), "united-states": {"anywhere"}}
+
+    def matches(job: dict, place: str) -> bool:
+        own = job["location"].split(", ")[-1].lower().replace(" ", "-")
+        return own == place or own in around.get(place, {"europe", "anywhere"})
+
+    places = body.get("locations", [])
+    jobs = [j for j in PLACES["jobs"] if not places or any(matches(j, p) for p in places)]
+    if levels := body.get("experience"):
+        jobs = [j for j in jobs if LEVELS.get(j["experience"]) in levels]
+    return httpx.Response(200, json={**PLACES, "jobs": jobs})
+
+
+def shared_source(places: list[str]) -> JobgetherSource:
+    """The source as a run builds it from the Startups tab's shared places."""
+    levels = ["entry-level-graduate", "junior-1-2-years"]
+    own = JobgetherSettings(enabled=True, queries=["Product Manager"], experience=levels)
+    s = apply_shared(Settings(startup_places=places, jobgether=own))
+    return JobgetherSource(s.jobgether, httpx.Client(transport=httpx.MockTransport(jobgether_api)),
+                           threading.Event(), today=lambda: TODAY, sleep=lambda _: None)  # fmt: skip
+
+
+def test_europe_finds_the_jobs_set_in_european_countries():
+    res = run(shared_source(["europe", "remote"]))
+    assert res.complete and res.error is None
+    # Anywhere, Germany, Lithuania and all of Europe; not the United States, not the senior job.
+    assert sorted(j.job_id[-1] for j in res.jobs) == ["1", "2", "3", "4"]
+
+
+def test_lithuania_uses_jobgethers_own_slug():
+    res = run(shared_source(["lt"]))
+    assert res.error is None and sorted(j.job_id[-1] for j in res.jobs) == ["1", "3", "4"]

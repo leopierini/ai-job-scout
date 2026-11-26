@@ -237,9 +237,13 @@ def fetch_json(
     json: Any = None,
     headers: dict[str, str] | None = None,
     sleep: Callable[[float], None] | None = None,
+    retries: int = 3,
 ) -> Any:
-    """`request_json` for a free source: any failure becomes a SearchError naming `label`, never the URL."""
-    kwargs: dict[str, Any] = {"json": json, "headers": headers, "timeout": 30}
+    """`request_json` for a free source: any failure becomes a SearchError naming `label`, never the URL.
+
+    `retries` is the number of attempts in all; 1 sends the request once, for an API that blocks repeats.
+    """
+    kwargs: dict[str, Any] = {"json": json, "headers": headers, "timeout": 30, "retries": retries}
     if sleep is not None:
         kwargs["sleep"] = sleep
     try:

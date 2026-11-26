@@ -12,7 +12,14 @@ def fold(text: str) -> str:
 
 
 def city_of(location: str) -> str:
-    """The folded first comma-separated part of a location ("" when empty)."""
+    """The folded first comma-separated part of a location ("" when empty).
+
+    A remote job shown as "Remote (Italy, Spain)" or "Remote (Europe)" is just "remote": each remote board
+    names its countries differently, and the same job on two of them must get the same key.
+    """
+    folded = fold(location)
+    if folded.startswith("remote (") and folded.endswith(")"):
+        return "remote"
     return fold(location.split(",", 1)[0])
 
 

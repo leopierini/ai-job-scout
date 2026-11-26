@@ -1,0 +1,85 @@
+{
+  "jobs": [
+    {
+      "id": "6c0000000000000000000001",
+      "title": "Associate Product Manager",
+      "company": "Fjord Labs",
+      "url": "https://jobgether.com/offer/6c0000000000000000000001-associate-product-manager",
+      "location": "Anywhere",
+      "remote": "Full Remote",
+      "contractType": "Full time",
+      "experience": "Junior (1-2 years)",
+      "salaryRange": "",
+      "jobFunctions": ["Product Manager"],
+      "postedAt": "2026-11-11T08:31:17.712Z"
+    },
+    {
+      "id": "6c0000000000000000000002",
+      "title": "Junior Product Manager (m/w/d)",
+      "company": "Kestrel Payments",
+      "url": "https://jobgether.com/offer/6c0000000000000000000002-junior-product-manager",
+      "location": "Europe, European Union, EMEA, Germany",
+      "remote": "Full Remote",
+      "contractType": "Full time",
+      "experience": "Junior (1-2 years)",
+      "salaryRange": "45000-55000 EUR",
+      "jobFunctions": ["Product Manager"],
+      "postedAt": "2026-11-10T15:31:11.317Z"
+    },
+    {
+      "id": "6c0000000000000000000003",
+      "title": "Product Manager Intern",
+      "company": "Heron Robotics",
+      "url": "https://jobgether.com/offer/6c0000000000000000000003-product-manager-intern",
+      "location": "Europe, European Union, EMEA, Republic of Lithuania",
+      "remote": "Full Remote",
+      "contractType": "Internships",
+      "experience": "Entry-level / graduate",
+      "salaryRange": "",
+      "jobFunctions": ["Product Manager"],
+      "postedAt": "2026-11-09T10:00:00.000Z"
+    },
+    {
+      "id": "6c0000000000000000000004",
+      "title": "Graduate Product Manager",
+      "company": "Lumen Atlas",
+      "url": "https://jobgether.com/offer/6c0000000000000000000004-graduate-product-manager",
+      "location": "Europe",
+      "remote": "Remote First",
+      "contractType": "Full time",
+      "experience": "Entry-level / graduate",
+      "salaryRange": "",
+      "jobFunctions": ["Product Manager"],
+      "postedAt": "2026-11-08T10:00:00.000Z"
+    },
+    {
+      "id": "6c0000000000000000000005",
+      "title": "Associate Product Manager, New Grad",
+      "company": "Quill Harbor",
+      "url": "https://jobgether.com/offer/6c0000000000000000000005-associate-product-manager-new-grad",
+      "location": "United States",
+      "remote": "Full Remote",
+      "contractType": "Full time",
+      "experience": "Junior (1-2 years)",
+      "salaryRange": "90000-110000 USD",
+      "jobFunctions": ["Product Manager"],
+      "postedAt": "2026-11-07T10:00:00.000Z"
+    },
+    {
+      "id": "6c0000000000000000000006",
+      "title": "Senior Product Manager",
+      "company": "Fjord Labs",
+      "url": "https://jobgether.com/offer/6c0000000000000000000006-senior-product-manager",
+      "location": "Europe, European Union, EMEA, Italy",
+      "remote": "Full Remote",
+      "contractType": "Full time",
+      "experience": "Senior (5-10 years)",
+      "salaryRange": "",
+      "jobFunctions": ["Product Manager"],
+      "postedAt": "2026-11-06T10:00:00.000Z"
+    }
+  ],
+  "pagination": {"page": 1, "limit": 25, "hasMore": false},
+  "browseOnSiteUrl": "https://jobgether.com/search-offers?keyword=product+manager",
+  "docs": "/astroapi/ai/jobs/docs"
+}

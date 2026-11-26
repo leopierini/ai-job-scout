@@ -201,6 +201,29 @@ export interface JobgetherSettings {
   max_results_per_query: number
 }
 
+/** Remotive's public API of remote jobs, read once a run. Free. */
+export interface RemotiveSettings {
+  enabled: boolean
+  /** Jobs whose title has every word of one of these are kept. */
+  queries: string[]
+}
+
+/** Himalayas' public search API of remote jobs. Free. */
+export interface HimalayasSettings {
+  enabled: boolean
+  queries: string[]
+  /** Two-letter country codes, e.g. "IT"; each includes the jobs open worldwide. Empty: no country. */
+  countries: string[]
+  max_results_per_query: number
+}
+
+/** Remote OK's public feed of remote jobs, read once a run. Free. */
+export interface RemoteOkSettings {
+  enabled: boolean
+  /** Jobs whose title has every word of one of these are kept. */
+  queries: string[]
+}
+
 /** Venture capital firms' portfolio job boards (Getro or Consider). Free. */
 export interface VcBoardsSettings {
   enabled: boolean
@@ -331,6 +354,9 @@ export interface Settings {
   indeed: IndeedSettings
   builtineurope: BuiltInEuropeSettings
   jobgether: JobgetherSettings
+  remotive: RemotiveSettings
+  himalayas: HimalayasSettings
+  remoteok: RemoteOkSettings
   vcboards: VcBoardsSettings
   careers: CareerPagesSettings
   wttj: ApifyBoardSettings
