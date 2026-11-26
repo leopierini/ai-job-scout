@@ -129,6 +129,20 @@ describe("the shared startup searches", () => {
     expect(readiness(s, keys(), "Some text", "real")).toEqual([])
   })
 
+  test("the remote job boards are free and use the shared searches", () => {
+    const s = startups((s) => ({
+      ...s,
+      remotive: { ...s.remotive, enabled: true },
+      himalayas: { ...s.himalayas, enabled: true },
+      remoteok: { ...s.remoteok, enabled: true, queries: ["Product manager"] },
+    }))
+    expect(sourcesInUse(s)).toEqual(["remotive", "himalayas", "remoteok"])
+    expect(queriesFor(s, "himalayas")).toEqual(["AI engineer"])
+    expect(usesApify(s)).toBe(false)
+    expect(readiness(s, keys(), "Some text", "real")).toEqual([])
+    expect(headlineFor(s)).toBe("AI engineer")
+  })
+
   test("a source's own searches win over the shared ones", () => {
     const s = startups((s) => ({ ...s, yc: { ...s.yc, enabled: true, queries: ["founding engineer"] } }))
     expect(queriesFor(s, "yc")).toEqual(["founding engineer"])

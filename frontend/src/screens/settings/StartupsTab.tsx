@@ -21,6 +21,9 @@ const STARTUP_PATHS = [
   "startup_places",
   "builtineurope",
   "jobgether",
+  "remotive",
+  "himalayas",
+  "remoteok",
   "vcboards",
   "careers",
   "wttj",
@@ -55,6 +58,11 @@ const OWN_SEARCHES = "Leave it empty to use the searches at the top."
 const OWN_PLACES = "Leave it empty to use the places at the top."
 
 const lower = (values: string[]) => [...new Set(values.map((v) => v.trim().toLowerCase()).filter(Boolean))]
+const upper = (values: string[]) => [...new Set(values.map((v) => v.trim().toUpperCase()).filter(Boolean))]
+
+/** Said of the three remote job boards, which keep only jobs a person in Europe can apply for. */
+const EUROPE_ONLY = "Only jobs open to people in Europe, or anywhere, are kept."
+const TITLE_MATCH = "Jobs whose title has every word of a search are kept."
 
 /** "united kingdom" → "United Kingdom": countries are saved in lower case, as the site wants them. */
 const titleCase = (value: string) => value.replace(/\b\p{L}/gu, (c) => c.toUpperCase())
@@ -137,7 +145,7 @@ function StartupsForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: 
     <>
       <TabBody readOnly={readOnly} root={root}>
         <p className="text-muted-foreground">
-          More places to find jobs at startups. The first four are free: they only cost the AI's reading of each new job,
+          More places to find jobs at startups and remote jobs. The first seven are free: they only cost the AI's reading of each new job,
           so they keep only jobs that match your searches, and only recent ones, except career pages.
         </p>
 
@@ -254,6 +262,86 @@ function StartupsForm({ loaded, readOnly, onDirtyChange }: TabProps & { loaded: 
                 error={err("jobgether.max_results_per_query")}
               />
             </>
+          )}
+        </Section>
+
+        <Section title="Remotive" intro={`Free. A board of remote jobs, read once a run. ${EUROPE_ONLY}`}>
+          <SwitchRow
+            label="Search Remotive"
+            hint={`${TITLE_MATCH} Remotive asks apps to read it at most four times a day, so keep to four runs a day.`}
+            checked={s.remotive.enabled}
+            onCheckedChange={(on) => set("remotive.enabled", on)}
+          />
+          {s.remotive.enabled && (
+            <ChipsInput
+              label="Searches for this source"
+              value={s.remotive.queries}
+              onChange={(v) => set("remotive.queries", v)}
+              placeholder="e.g. Product manager"
+              hint={`Job titles. ${OWN_SEARCHES}`}
+              error={err("remotive.queries")}
+              optional
+            />
+          )}
+        </Section>
+
+        <Section title="Himalayas" intro={`Free. A large board of remote jobs, with a salary on many. ${EUROPE_ONLY}`}>
+          <SwitchRow
+            label="Search Himalayas"
+            hint={`Each search is run once in each country. ${TITLE_MATCH}`}
+            checked={s.himalayas.enabled}
+            onCheckedChange={(on) => set("himalayas.enabled", on)}
+          />
+          {s.himalayas.enabled && (
+            <>
+              <ChipsInput
+                label="Searches for this source"
+                value={s.himalayas.queries}
+                onChange={(v) => set("himalayas.queries", v)}
+                placeholder="e.g. Product manager"
+                hint={`Job titles. ${OWN_SEARCHES}`}
+                error={err("himalayas.queries")}
+                optional
+              />
+              <ChipsInput
+                label="Countries for this source"
+                value={s.himalayas.countries}
+                onChange={(v) => set("himalayas.countries", upper(v))}
+                placeholder="e.g. IT"
+                hint={`Two-letter codes such as IT. Each country includes the jobs open worldwide. ${OWN_PLACES}`}
+                error={err("himalayas.countries")}
+                optional
+              />
+              <NumberField
+                label="Results per search"
+                hint="The most jobs taken from each search, up to 100."
+                value={s.himalayas.max_results_per_query}
+                onChange={(v) => set("himalayas.max_results_per_query", v)}
+                min={1}
+                max={100}
+                error={err("himalayas.max_results_per_query")}
+              />
+            </>
+          )}
+        </Section>
+
+        <Section title="Remote OK" intro={`Free. The newest remote jobs, read once a run. ${EUROPE_ONLY}`}>
+          <SwitchRow
+            label="Search Remote OK"
+            hint={TITLE_MATCH}
+            checked={s.remoteok.enabled}
+            onCheckedChange={(on) => set("remoteok.enabled", on)}
+          />
+          {s.remoteok.enabled && (
+            <ChipsInput
+              label="Searches for this source"
+              value={s.remoteok.queries}
+              onChange={(v) => set("remoteok.queries", v)}
+              placeholder="e.g. Product manager"
+              hint={`Job titles. ${OWN_SEARCHES}`}
+              error={err("remoteok.queries")}
+              optional
+            />
           )}
         </Section>
 

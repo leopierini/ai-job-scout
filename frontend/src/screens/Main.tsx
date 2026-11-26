@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { canFindJobs, useSavedEstimate } from "@/lib/estimate"
 import { money } from "@/lib/format"
 import { readiness, type Missing } from "@/lib/readiness"
-import { sourcesText } from "@/lib/sources"
+import { sourcesText, usesApify } from "@/lib/sources"
 import { ResultsTable } from "./main/ResultsTable"
 import { RunPanel } from "./main/RunPanel"
 import { TopBar, WINDOWS, type WindowValue } from "./main/TopBar"
@@ -156,6 +156,8 @@ export function Main({ state }: ScreenProps) {
                     Press Find jobs to search {sourcesText(s)}.
                     {sample ? (
                       " Sample runs are free."
+                    ) : ready && !usesApify(s) ? (
+                      " These sources are free."
                     ) : ready && estimate && (
                       <>
                         {" "}
