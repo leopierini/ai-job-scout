@@ -1,0 +1,89 @@
+{
+  "comments": "Search results come 20 to a page.",
+  "updatedAt": 1795658208,
+  "offset": 0,
+  "limit": 20,
+  "totalCount": 6,
+  "jobs": [
+    {
+      "title": "Associate Product Manager",
+      "excerpt": "Help us build the planning tools farmers use every day.",
+      "companyName": "Meadowlark Agritech",
+      "companySlug": "meadowlark-agritech",
+      "companyLogo": "",
+      "employmentType": "Full Time",
+      "minSalary": 38000,
+      "maxSalary": 46000,
+      "salaryPeriod": "annual",
+      "seniority": ["Entry-level"],
+      "currency": "EUR",
+      "locationRestrictions": ["Italy", "Spain"],
+      "timezoneRestrictions": [1, 2],
+      "categories": ["Product-Management", "Associate-Product-Manager"],
+      "parentCategories": ["Product"],
+      "description": "<h3>About the role</h3><p>Work with growers across <strong>Southern Europe</strong>.</p>",
+      "pubDate": 1795600000,
+      "expiryDate": 1800889480,
+      "applicationLink": "https://himalayas.app/companies/meadowlark-agritech/jobs/associate-product-manager?utm_source=api",
+      "guid": "https://himalayas.app/companies/meadowlark-agritech/jobs/associate-product-manager"
+    },
+    {
+      "title": "Product Manager, Payments",
+      "excerpt": "Own card payments.",
+      "companyName": "Kestrel Payments",
+      "employmentType": "Full Time",
+      "minSalary": null,
+      "maxSalary": null,
+      "salaryPeriod": "annual",
+      "seniority": ["Mid-level"],
+      "currency": null,
+      "locationRestrictions": [],
+      "categories": [],
+      "description": "",
+      "pubDate": 1795500000,
+      "applicationLink": "https://himalayas.app/companies/kestrel-payments/jobs/product-manager-payments?utm_source=api",
+      "guid": "https://himalayas.app/companies/kestrel-payments/jobs/product-manager-payments"
+    },
+    {
+      "title": "Sales Manager, SMB",
+      "excerpt": "Works closely with the product manager.",
+      "companyName": "Fjord Labs",
+      "employmentType": "Full Time",
+      "seniority": ["Mid-level"],
+      "locationRestrictions": [],
+      "description": "<p>Sell to small businesses.</p>",
+      "pubDate": 1795500000,
+      "applicationLink": "https://himalayas.app/companies/fjord-labs/jobs/sales-manager-smb?utm_source=api",
+      "guid": "https://himalayas.app/companies/fjord-labs/jobs/sales-manager-smb"
+    },
+    {
+      "title": "Senior Product Manager",
+      "excerpt": "US only.",
+      "companyName": "Otter Analytics",
+      "employmentType": "Full Time",
+      "seniority": ["Senior"],
+      "locationRestrictions": ["United States"],
+      "description": "<p>US only.</p>",
+      "pubDate": 1795400000,
+      "applicationLink": "https://himalayas.app/companies/otter-analytics/jobs/senior-product-manager?utm_source=api",
+      "guid": "https://himalayas.app/companies/otter-analytics/jobs/senior-product-manager"
+    },
+    {
+      "title": "Product Manager",
+      "excerpt": "Open across Europe and the Americas.",
+      "companyName": "Heron Robotics",
+      "employmentType": "Contractor",
+      "seniority": ["Mid-level"],
+      "locationRestrictions": ["Austria", "Brazil", "France", "Germany", "Italy", "United States"],
+      "description": "<p>Robots for warehouses.</p>",
+      "pubDate": 1795300000,
+      "applicationLink": "https://himalayas.app/companies/heron-robotics/jobs/product-manager?utm_source=api",
+      "guid": "https://himalayas.app/companies/heron-robotics/jobs/product-manager"
+    },
+    {
+      "title": "Product Manager Without An Id",
+      "companyName": "Nobody Ltd",
+      "locationRestrictions": []
+    }
+  ]
+}

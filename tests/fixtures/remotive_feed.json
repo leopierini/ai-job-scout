@@ -1,0 +1,84 @@
+{
+  "00-warning": "Remotive main domain moved to remotive.com !",
+  "0-legal-notice": "Legal warning - please link back to the URL found on Remotive and mention Remotive as a source.",
+  "job-count": 8,
+  "total-job-count": 8,
+  "jobs": [
+    {
+      "id": 3000001,
+      "url": "https://remotive.com/remote-jobs/product/associate-product-manager-3000001",
+      "title": "Associate Product Manager",
+      "company_name": "Kestrel Payments",
+      "company_logo": "https://remotive.com/job/3000001/logo",
+      "category": "Product Management",
+      "tags": ["product", "fintech"],
+      "job_type": "full_time",
+      "publication_date": "2026-11-20T09:15:00",
+      "candidate_required_location": "Europe",
+      "salary": "€40k - €50k",
+      "description": "<p>Join our <strong>payments</strong> team.</p><ul><li>Own the roadmap</li><li>Talk to merchants</li></ul>"
+    },
+    {
+      "id": 3000002,
+      "url": "https://remotive.com/remote-jobs/product/senior-product-manager-3000002",
+      "title": "Senior Product Manager",
+      "company_name": "Fjord Labs",
+      "category": "Product Management",
+      "job_type": "full_time",
+      "publication_date": "2026-11-21T10:00:00",
+      "candidate_required_location": "USA Only",
+      "salary": "",
+      "description": "<p>US only.</p>"
+    },
+    {
+      "id": 3000003,
+      "url": "https://remotive.com/remote-jobs/product/product-manager-3000003",
+      "title": "Product Manager",
+      "company_name": "Heron Robotics",
+      "category": "Product Management",
+      "job_type": "contract",
+      "publication_date": "2026-08-01T10:00:00",
+      "candidate_required_location": "Worldwide",
+      "salary": "",
+      "description": "<p>An old posting.</p>"
+    },
+    {
+      "id": 3000004,
+      "url": "https://remotive.com/remote-jobs/customer-service/customer-success-lead-3000004",
+      "title": "Customer Success Lead",
+      "company_name": "Lumen Freight",
+      "category": "Customer Service",
+      "job_type": "full_time",
+      "publication_date": "2026-11-22T10:00:00",
+      "candidate_required_location": "Worldwide",
+      "salary": "",
+      "description": "<p>Not a product role.</p>"
+    },
+    {
+      "id": 3000005,
+      "url": "https://remotive.com/remote-jobs/product/product-manager-growth-3000005",
+      "title": "Product Manager, Growth",
+      "company_name": "Lumen Freight",
+      "category": "Product Management",
+      "job_type": "",
+      "publication_date": "2026-11-18T12:00:00",
+      "candidate_required_location": "LATAM, Europe, USA, Canada, APAC",
+      "salary": "$70,000 - $85,000",
+      "description": "<p>Grow the shipper app.</p>"
+    },
+    {
+      "title": "Product Manager Without An Id",
+      "company_name": "Nobody Ltd",
+      "candidate_required_location": "Worldwide"
+    },
+    42,
+    {
+      "id": 3000001,
+      "url": "https://remotive.com/remote-jobs/product/associate-product-manager-3000001",
+      "title": "Associate Product Manager (repeated)",
+      "company_name": "Kestrel Payments",
+      "publication_date": "2026-11-20T09:15:00",
+      "candidate_required_location": "Europe"
+    }
+  ]
+}

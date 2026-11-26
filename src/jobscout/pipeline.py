@@ -31,7 +31,10 @@ from jobscout.sources.atsindex import AtsIndexSource
 from jobscout.sources.builtineurope import BuiltInEuropeSource
 from jobscout.sources.careers import CareerPagesSource
 from jobscout.sources.indeed import IndeedSource
+from jobscout.sources.himalayas import HimalayasSource
 from jobscout.sources.jobgether import JobgetherSource
+from jobscout.sources.remoteok import RemoteOkSource
+from jobscout.sources.remotive import RemotiveSource
 from jobscout.sources.linkedin import LinkedInSource
 from jobscout.sources.sample import SampleSource, sample_answers
 from jobscout.sources.vcboards import VcBoardsSource
@@ -528,6 +531,12 @@ def _free_sources_in_use(s: Settings) -> list[Callable[[httpx.Client, threading.
         makers.append(lambda client, cancel: BuiltInEuropeSource(s.builtineurope, client, cancel))
     if s.jobgether.enabled and s.jobgether.queries:
         makers.append(lambda client, cancel: JobgetherSource(s.jobgether, client, cancel))
+    if s.remotive.enabled and s.remotive.queries:
+        makers.append(lambda client, cancel: RemotiveSource(s.remotive, client, cancel))
+    if s.himalayas.enabled and s.himalayas.queries:
+        makers.append(lambda client, cancel: HimalayasSource(s.himalayas, client, cancel))
+    if s.remoteok.enabled and s.remoteok.queries:
+        makers.append(lambda client, cancel: RemoteOkSource(s.remoteok, client, cancel))
     if s.vcboards.enabled and s.vcboards.boards:
         makers.append(lambda client, cancel: VcBoardsSource(s.vcboards, client, cancel))
     if s.careers.enabled and s.careers.pages:

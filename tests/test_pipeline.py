@@ -945,6 +945,21 @@ def test_sources_with_only_the_shared_searches_run(db):
         assert by_name["jobgether"]._settings.queries == ["AI engineer"]
 
 
+def test_the_remote_job_boards_run_free_with_the_shared_searches(db):
+    s = Settings(startup_queries=["Product Manager"], startup_places=["it"])
+    s.linkedin.enabled = False
+    s.scoring.provider = "ollama"
+    s.remotive.enabled = s.himalayas.enabled = s.remoteok.enabled = True
+    with build_pipeline(s, Secrets(), db, "p") as p:  # no Apify token needed
+        by_name = {src.name: src for src in p._sources}
+        assert list(by_name) == ["remotive", "himalayas", "remoteok"]
+        assert by_name["himalayas"]._settings.countries == ["IT"]
+        assert all(src._settings.queries == ["Product Manager"] for src in by_name.values())
+    s.startup_queries = []
+    with build_pipeline(s, Secrets(), db, "p") as p:  # on, but nothing to search
+        assert p._sources == []
+
+
 def test_an_apify_board_with_only_the_shared_searches_needs_the_token(db):
     s = Settings(startup_queries=["AI engineer"])
     s.linkedin.enabled = False

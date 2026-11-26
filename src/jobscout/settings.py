@@ -98,6 +98,40 @@ class JobgetherSettings(_Model):
     max_results_per_query: int = Field(default=50, ge=1, le=250)  # Jobgether gives at most 10 pages of 25
 
 
+class RemotiveSettings(_Model):
+    """Remotive's public API of remote jobs. Free. Read once a run: its terms ask for at most four calls a day."""
+
+    enabled: bool = False
+    queries: list[str] = []  # kept: jobs whose title has every word of one of these
+
+
+class HimalayasSettings(_Model):
+    """Himalayas' public search API of remote jobs. Free."""
+
+    enabled: bool = False
+    queries: list[str] = []
+    # ISO country codes, e.g. "IT": each search is run once in each, and a country includes the jobs open
+    # worldwide. Empty: one search with no country.
+    countries: list[str] = []
+    max_results_per_query: int = Field(default=50, ge=1, le=100)  # Himalayas gives 20 a page; at most 5 pages read
+
+    @field_validator("countries")
+    @classmethod
+    def _countries(cls, v: list[str]) -> list[str]:
+        codes = list(dict.fromkeys(c.strip().upper() for c in v if c.strip()))
+        bad = [c for c in codes if not (len(c) == 2 and c.isalpha())]
+        if bad:
+            raise ValueError(f"Not a two-letter country code: {', '.join(bad)}")
+        return codes
+
+
+class RemoteOkSettings(_Model):
+    """Remote OK's public feed of remote jobs. Free. Read once a run."""
+
+    enabled: bool = False
+    queries: list[str] = []  # kept: jobs whose title has every word of one of these
+
+
 class VcBoardsSettings(_Model):
     """Portfolio job boards run by venture capital firms on Getro or Consider. Free."""
 
@@ -273,6 +307,9 @@ class Settings(_Model):
     indeed: IndeedSettings = IndeedSettings()
     builtineurope: BuiltInEuropeSettings = BuiltInEuropeSettings()
     jobgether: JobgetherSettings = JobgetherSettings()
+    remotive: RemotiveSettings = RemotiveSettings()
+    himalayas: HimalayasSettings = HimalayasSettings()
+    remoteok: RemoteOkSettings = RemoteOkSettings()
     vcboards: VcBoardsSettings = VcBoardsSettings()
     careers: CareerPagesSettings = CareerPagesSettings()
     wttj: WttjSettings = WttjSettings()

@@ -1,0 +1,84 @@
+[
+  {
+    "last_updated": 1795707628,
+    "legal": "API Terms of Service: Please link back to the URL on Remote OK and mention Remote OK as a source."
+  },
+  {
+    "slug": "remote-junior-product-manager-pinecone-studio-4000001",
+    "id": "4000001",
+    "epoch": 1795617609,
+    "date": "2026-11-24T14:40:09+00:00",
+    "company": "Pinecone Studio",
+    "company_logo": "",
+    "position": "Junior Product Manager",
+    "tags": ["product", "saas"],
+    "description": "<div><b>About us</b></div><div>We make scheduling software for clinics.</div>",
+    "location": "Worldwide",
+    "salary_min": 45000,
+    "salary_max": 60000,
+    "apply_url": "https://remoteOK.com/remote-jobs/remote-junior-product-manager-pinecone-studio-4000001",
+    "original": true,
+    "logo": "",
+    "url": "https://remoteOK.com/remote-jobs/remote-junior-product-manager-pinecone-studio-4000001"
+  },
+  {
+    "slug": "remote-product-manager-ai-otter-analytics-4000002",
+    "id": "4000002",
+    "epoch": 1795531209,
+    "date": "2026-11-23T14:40:09+00:00",
+    "company": "Otter Analytics",
+    "position": "Product Manager, AI",
+    "tags": ["product", "ai"],
+    "description": "<p>Ship our assistant.</p>",
+    "location": "US Only",
+    "salary_min": 0,
+    "salary_max": 0,
+    "url": "https://remoteOK.com/remote-jobs/remote-product-manager-ai-otter-analytics-4000002"
+  },
+  {
+    "slug": "remote-product-manager-ai-birch-health-4000003",
+    "id": "4000003",
+    "epoch": 1795444809,
+    "date": "2026-11-22T14:40:09+00:00",
+    "company": "Birch Health",
+    "position": "Product Manager AI",
+    "tags": ["product"],
+    "description": "<p>Clinical tools.</p>",
+    "location": "UK Only",
+    "salary_min": 0,
+    "salary_max": 0,
+    "url": "https://remoteOK.com/remote-jobs/remote-product-manager-ai-birch-health-4000003"
+  },
+  {
+    "slug": "remote-backend-engineer-birch-health-4000004",
+    "id": "4000004",
+    "epoch": 1795444809,
+    "date": "2026-11-22T14:40:09+00:00",
+    "company": "Birch Health",
+    "position": "Backend Engineer",
+    "tags": ["dev"],
+    "description": "<p>Go and Postgres.</p>",
+    "location": "Europe",
+    "url": "https://remoteOK.com/remote-jobs/remote-backend-engineer-birch-health-4000004"
+  },
+  {
+    "slug": "remote-product-manager-newark",
+    "id": "4000005",
+    "epoch": 1795444809,
+    "date": "2026-11-22T14:40:09+00:00",
+    "company": "Quill Logistics",
+    "position": "Product Manager",
+    "location": "Newark",
+    "url": "https://remoteOK.com/remote-jobs/remote-product-manager-newark"
+  },
+  {
+    "slug": "remote-product-manager-old",
+    "id": "4000006",
+    "epoch": 1785444809,
+    "date": "2026-07-28T14:40:09+00:00",
+    "company": "Quill Logistics",
+    "position": "Product Manager",
+    "location": "Europe",
+    "url": "https://remoteOK.com/remote-jobs/remote-product-manager-old"
+  }
+]

@@ -21,6 +21,20 @@ def test_each_source_gets_its_own_format():
     assert f["wttj"] == ["IT", "GB", "Remote"]
     assert f["wellfound"] == f["yc"] == ["Italy", "United Kingdom", "Remote"]
     assert f["atsindex"] == ["IT", "GB", "Remote"]
+    assert f["himalayas"] == ["IT", "GB"]  # a country search includes the jobs open worldwide
+
+
+def test_himalayas_only_gets_european_countries_and_searches_europe_without_one():
+    assert formats(["us", "it", "remote"])["himalayas"] == ["IT"]
+    assert formats(["europe", "it"])["himalayas"] == []  # no country: kept to jobs open to Europe
+    assert formats(["remote"])["himalayas"] == []
+    assert apply_shared(Settings(startup_places=["de", "it"])).himalayas.countries == ["DE", "IT"]
+
+
+def test_the_remote_feeds_get_searches_but_no_places():
+    assert "remotive" not in formats(["it"]) and "remoteok" not in formats(["it"])
+    s = apply_shared(Settings(startup_places=["it"], startup_queries=["Product Manager"]))
+    assert s.remotive.queries == s.remoteok.queries == ["Product Manager"]
 
 
 def test_career_pages_are_not_given_places():
@@ -86,7 +100,8 @@ def test_api_lists_the_places(client):
 
 def test_shared_searches_fill_each_search_based_source():
     s = apply_shared(Settings(startup_queries=["AI engineer", "ML engineer"]))
-    for name in ("builtineurope", "jobgether", "vcboards", "wttj", "wellfound", "yc", "atsindex"):
+    for name in ("builtineurope", "jobgether", "remotive", "himalayas", "remoteok", "vcboards", "wttj", "wellfound",
+                 "yc", "atsindex"):  # fmt: skip
         assert getattr(s, name).queries == ["AI engineer", "ML engineer"], name
     assert s.yc.locations == [] and s.builtineurope.countries == []  # no shared places: places untouched
 
@@ -96,6 +111,8 @@ def test_a_source_with_its_own_searches_keeps_them():
     s.wellfound.queries = ["founding engineer"]
     out = apply_shared(s)
     assert out.wellfound.queries == ["founding engineer"] and out.jobgether.queries == ["AI engineer"]
+    s.remoteok.queries = ["product manager"]
+    assert apply_shared(s).remoteok.queries == ["product manager"] and apply_shared(s).remotive.queries == ["AI engineer"]
     assert s.jobgether.queries == []  # the saved settings are not changed
 
 
