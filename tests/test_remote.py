@@ -23,6 +23,8 @@ def test_open_to_europe(restriction):
         "APAC", "Asia", "Canada Only", "Americas, LATAM, Canada, USA timezones", "USA, Canada, USA timezones",
         "US Remote", "Anywhere in the US", "Remote, Canada", "Worldwide (PST hours)", "Philippines",
         "Newark", "New Jersey", "Atlanta, Georgia", ["United States"], ["Brazil", "Mexico"],
+        "Remote - California", "San Francisco, CA (Remote)", "Toronto (Remote)", "Remote, NYC", "Remote - Ontario",
+        "Remote - Newark", "Sydney, New South Wales", "New South Wales, Australia", "Boston, New England",
     ],
 )  # fmt: skip
 def test_not_open_to_europe(restriction):
@@ -34,6 +36,8 @@ def test_not_open_to_europe(restriction):
     [
         ("", "Remote (Worldwide)"),
         ("Worldwide", "Remote (Worldwide)"),
+        ("Remote only", "Remote (Worldwide)"),
+        ("Wales, UK", "Remote (Wales, UK)"),
         ("Europe", "Remote (Europe)"),
         ("UK Only", "Remote (UK)"),
         ("European Union", "Remote (Europe)"),
@@ -60,6 +64,9 @@ def test_remote_location(restriction, shown):
         ("Product Management Intern", "Product Intern"),
         ("APM – Growth", "APM"),
         ("Gestión de Producto", "gestion de producto"),
+        ("Full-Stack Product Manager", "fullstack product manager"),
+        ("Full-Stack Product Manager", "full-stack product manager"),
+        ("Product Head", "Head of Product"),
     ],
 )
 def test_matching_query(title, query):

@@ -52,12 +52,23 @@ ELSEWHERE_WORDS = frozenset({
     "hong kong", "korea", "south korea", "taiwan", "indonesia", "vietnam", "malaysia", "thailand",
     "israel", "uae", "united arab emirates", "saudi arabia", "egypt", "nigeria", "kenya", "south africa",
     "turkey", "russia", "est", "edt", "pst", "pdt", "mst",
+    "new south wales", "new england",
 })  # fmt: skip
 
-# Words that say a job takes people anywhere.
+# Places outside Europe whose names hold a European one ("Wales" in New South Wales): hidden before Europe is
+# looked for, so they don't read as Europe.
+NOT_EUROPE_PHRASES = frozenset({"new south wales", "new england"})
+
+# Words that say a job takes people anywhere. "Remote" only counts when nothing else names a place: "Remote -
+# California" or "Toronto (Remote)" is not open to Europe.
 ANYWHERE_WORDS = frozenset({
     "worldwide", "anywhere", "global", "globally", "international", "everywhere", "remote", "any location",
     "fully remote", "100% remote", "no restriction", "no restrictions", "work from anywhere",
+})  # fmt: skip
+
+# Words that may stand next to the words above without naming a place ("Remote only", "Worldwide, async").
+FILLER_WORDS = frozenset({
+    "only", "in", "from", "the", "and", "or", "work", "based", "friendly", "first", "async", "ok", "position", "world",
 })  # fmt: skip
 
 
@@ -67,6 +78,7 @@ def _pattern(words: frozenset[str]) -> re.Pattern[str]:
 
 
 _EUROPE, _ELSEWHERE, _ANYWHERE = _pattern(EUROPE_WORDS), _pattern(ELSEWHERE_WORDS), _pattern(ANYWHERE_WORDS)
+_NOT_EUROPE, _FILLER = _pattern(NOT_EUROPE_PHRASES), _pattern(FILLER_WORDS)
 
 
 def _text(restriction: str | list[str] | None) -> str:
@@ -75,20 +87,28 @@ def _text(restriction: str | list[str] | None) -> str:
     return fold(restriction or "")
 
 
+def _europe_text(text: str) -> str:
+    """`text` with the places outside Europe that hold a European name blanked out."""
+    return _NOT_EUROPE.sub(" ", text)
+
+
 def open_to_europe(restriction: str | list[str] | None) -> bool:
     """True when a person living in Europe may apply: no restriction, "Worldwide", or a place in Europe.
 
     `restriction` is the board's own text ("USA only", "LATAM, Europe, USA") or list of countries. A
     restriction that names Europe or a European country is kept even when it names other places too; one
     that only names other places ("US Only", "Americas", "APAC", "Anywhere in Canada") is not, nor is a place
-    this list doesn't know ("Newark"): it can't be told apart from a city in the US.
+    this list doesn't know ("Newark", "Remote - Newark"): it can't be told apart from a city in the US.
     """
     text = _text(restriction)
     if not text.strip(" ,;/-()"):
         return True
-    if _EUROPE.search(text):
+    if _EUROPE.search(_europe_text(text)):
         return True
-    return bool(_ANYWHERE.search(text)) and not _ELSEWHERE.search(text)
+    if not _ANYWHERE.search(text) or _ELSEWHERE.search(text):
+        return False
+    rest = _FILLER.sub(" ", _ANYWHERE.sub(" ", text))
+    return not re.search(r"[^\W\d_]", rest)  # nothing but "anywhere" words left: no other place named
 
 
 _UPPER = frozenset({"eu", "eea", "emea", "cet", "cest", "dach", "uk"})
@@ -114,16 +134,25 @@ def remote_location(restriction: str | list[str] | None) -> str:
     Only the European places are named, so a job open to Europe and the US isn't dropped by an excluded
     country such as the United States. More than three of them read as Europe.
     """
-    named = list(dict.fromkeys(_display(m.group(0)) for m in _EUROPE.finditer(_text(restriction))))
+    named = list(dict.fromkeys(_display(m.group(0)) for m in _EUROPE.finditer(_europe_text(_text(restriction)))))
     if not named:
         return "Remote (Worldwide)"
     return f"Remote ({', '.join(named)})" if len(named) <= 3 else "Remote (Europe)"
 
 
+# Words a search may hold that a title needn't ("Head of Product" matches "Product Head").
+_QUERY_FILLER = frozenset({"of", "and", "the", "for", "a", "an", "in", "at", "to"})
+
+
 def _words(text: str) -> set[str]:
-    """Folded words, with apostrophes dropped and a plural or possessive "s" taken off ("founder's" → founder)."""
+    """Folded words, with apostrophes dropped and a plural or possessive "s" taken off ("founder's" → founder).
+
+    A hyphenated word counts both split and joined: "Full-Stack" gives full, stack and fullstack.
+    """
+    folded = fold(text).replace("'", "").replace("’", "")
+    joined = re.findall(r"\w+(?:-\w+)+", folded)
     out = set()
-    for word in re.findall(r"\w+", fold(text).replace("'", "").replace("’", "")):
+    for word in re.findall(r"\w+", folded) + [w.replace("-", "") for w in joined]:
         out.add(word[:-1] if len(word) > 3 and word.endswith("s") else word)
     return out
 
@@ -132,7 +161,7 @@ def matching_query(title: str, queries: list[str]) -> str | None:
     """The first search whose every word is in the job's title, in any order; None when none is."""
     have = _words(title)
     for query in queries:
-        want = _words(query)
+        want = _words(query) - _QUERY_FILLER
         if want and want <= have:
             return query
     return None
@@ -149,6 +178,8 @@ class FeedSource:
     label = ""
     url = ""
     retries = 3  # attempts for the one request
+    publish_delay_days = 0  # how long after its posted date a job shows up in the feed
+    min_hours_between_reads = 0  # a board that asks to be read only a few times a day
 
     def __init__(
         self,
@@ -188,6 +219,14 @@ class FeedSource:
         progress(0, 1, 0)
         if self._cancel.is_set():
             return AreaResult(jobs=[], billed=0, complete=False)
+        # The window runs from the last read (plus an overlap): a short one means the feed was read recently.
+        # Not reading leaves the area incomplete, so the next read's window still covers this gap.
+        if self.min_hours_between_reads and window_seconds < self.min_hours_between_reads * 3600:
+            wait = SearchError(
+                f"{self.label} asks to be read only a few times a day, and was read under "
+                f"{self.min_hours_between_reads} hours ago. It is read again on a later run."
+            )
+            return AreaResult(jobs=[], billed=0, complete=False, error=wait)
         headers = {"User-Agent": USER_AGENT, "Accept": "application/json"}
         try:
             data = fetch_json(
@@ -200,6 +239,7 @@ class FeedSource:
             unreadable = SearchError(f"{self.label} sent an answer we couldn't read.")
             return AreaResult(jobs=[], billed=0, complete=False, error=unreadable)
         today = self._today()
+        window = window_seconds + self.publish_delay_days * 86400
         jobs: dict[str, Job] = {}
         for item in items:
             if not isinstance(item, dict):
@@ -211,7 +251,7 @@ class FeedSource:
                 job = self.parse_item(item, query, area.label)
             except Exception:  # noqa: BLE001 - one malformed item must not lose the others
                 continue
-            if job is not None and within_window(job.posted, window_seconds, today):
+            if job is not None and within_window(job.posted, window, today):
                 jobs.setdefault(job.job_id, job)
         progress(1, 1, len(jobs))
         return AreaResult(jobs=list(jobs.values()), billed=0, complete=True)

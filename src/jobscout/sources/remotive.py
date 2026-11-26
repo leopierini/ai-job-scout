@@ -60,6 +60,8 @@ class RemotiveSource(FeedSource):
     label = LABEL
     url = FEED_URL
     retries = 1  # a repeat within a minute can get the app blocked
+    publish_delay_days = 1  # jobs show up a day after their publication date
+    min_hours_between_reads = 6  # its terms ask for at most four calls a day
 
     def items(self, data: object) -> list | None:
         jobs = data.get("jobs") if isinstance(data, dict) else None

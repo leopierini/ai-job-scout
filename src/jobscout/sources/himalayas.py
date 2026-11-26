@@ -110,6 +110,10 @@ def parse_item(item: dict, query: str, area: str) -> Job | None:
     )
 
 
+class BadCountry(SearchError):
+    """Himalayas turned down a country: only that country's searches are skipped."""
+
+
 class HimalayasSource:
     name = "himalayas"
 
@@ -149,8 +153,8 @@ class HimalayasSource:
         try:
             data = fetch_json(self._client, "GET", url, LABEL, headers=headers, sleep=self._sleep)
         except SearchError as exc:
-            if "(HTTP 400)" in str(exc):  # the API's answer to a country it doesn't know
-                raise SearchError(f"{LABEL} didn't accept the country {country}. Check it in Settings.") from None
+            if country and "(HTTP 400)" in str(exc):  # the API's answer to a country it doesn't know
+                raise BadCountry(f"{LABEL} didn't accept the country {country}. Check it in Settings.") from None
             raise
         if not isinstance(data, dict) or not isinstance(data.get("jobs"), list):
             raise SearchError(f"{LABEL} sent an answer we couldn't read.")
@@ -166,9 +170,13 @@ class HimalayasSource:
         jobs: dict[str, Job] = {}
         error: SearchError | None = None
         complete = True
+        bad_countries: set[str] = set()
         progress(0, len(searches), 0)
         for done, (query, country) in enumerate(searches):
             found: set[str] = set()
+            if country in bad_countries:
+                progress(done + 1, len(searches), len(jobs))
+                continue
             for page in range(1, MAX_PAGES + 1):
                 self._pause()
                 if self._cancel.is_set():
@@ -176,6 +184,10 @@ class HimalayasSource:
                     break
                 try:
                     items = self._fetch_page(query, country, page)
+                except BadCountry as exc:  # the other countries are still searched
+                    error, complete = exc, False
+                    bad_countries.add(country)
+                    break
                 except SearchError as exc:
                     error, complete = exc, False
                     break
@@ -205,7 +217,7 @@ class HimalayasSource:
                 older_only = dated > 0 and in_window == 0
                 if not items or older_only or len(found) >= s.max_results_per_query:
                     break
-            if not complete:
+            if not complete and country not in bad_countries:
                 break
             progress(done + 1, len(searches), len(jobs))
         return AreaResult(jobs=list(jobs.values()), billed=0, complete=complete, error=error)

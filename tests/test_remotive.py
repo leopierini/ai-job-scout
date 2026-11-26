@@ -126,3 +126,19 @@ def test_an_item_that_cannot_be_parsed_is_skipped_alone(respx_mock, monkeypatch)
     respx_mock.get(URL).respond(200, json=FEED)
     res = run(make_source())
     assert [j.job_id for j in res.jobs] == ["3000001"] and res.complete
+
+
+def test_a_job_published_the_day_before_the_window_is_kept(respx_mock):
+    """Remotive lists a job a day after its publication date: a short window must still find it."""
+    item = dict(FEED["jobs"][0], publication_date="2026-11-25T22:00:00")
+    respx_mock.get(URL).respond(200, json={"jobs": [item]})
+    result = run(make_source(), window=7 * 3600)  # read again 6 hours after the last run, plus the overlap
+    assert [j.job_id for j in result.jobs] == [str(item["id"])]
+
+
+def test_not_read_again_within_six_hours(respx_mock):
+    route = respx_mock.get(URL).respond(200, json=FEED)
+    result = run(make_source(), window=5 * 3600)
+    assert route.call_count == 0
+    assert (result.jobs, result.complete) == ([], False)  # the next read's window still covers this gap
+    assert "a few times a day" in str(result.error)

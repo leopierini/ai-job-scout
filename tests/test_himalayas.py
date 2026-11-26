@@ -246,3 +246,23 @@ def test_an_item_that_cannot_be_parsed_is_skipped_alone(respx_mock, monkeypatch)
     respx_mock.get(URL).mock(side_effect=[httpx.Response(200, json=PAGE), httpx.Response(200, json=page([]))])
     res = run(make_source())
     assert len(res.jobs) == 2 and res.complete
+
+
+def test_an_unknown_country_skips_only_that_country(respx_mock):
+    def answer(request):
+        if request.url.params.get("country") == "XX":
+            return httpx.Response(400, json={"ok": False, "errors": "Invalid country"})
+        return httpx.Response(200, json=page([item(1)]) if request.url.params.get("page") == "1" else page([]))
+
+    route = respx_mock.get(URL).mock(side_effect=answer)
+    res = run(make_source(queries=("Product Manager", "APM"), countries=("XX", "IT")))
+    countries = [params(c).get("country") for c in route.calls]
+    assert countries.count("XX") == 1  # tried once, then its other searches are skipped
+    assert "IT" in countries and len(res.jobs) == 1
+    assert res.complete is False and "country XX" in str(res.error)
+
+
+def test_a_400_with_no_country_is_not_blamed_on_a_country(respx_mock):
+    respx_mock.get(URL).respond(400, json={"ok": False, "errors": "Bad page"})
+    res = run(make_source())
+    assert res.complete is False and "country" not in str(res.error)
